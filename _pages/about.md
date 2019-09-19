@@ -1,6 +1,6 @@
 ---
 permalink: /
-title: "Mapoet Niphy,Ph.D. candidate, Astronomical Measurement and Celestial Mechanics"
+title: "Mapoet Niphy, Ph.D. candidate, Astronomical Measurement and Celestial Mechanics"
 excerpt: "About me"
 author_profile: true
 redirect_from: 
