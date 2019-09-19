@@ -8,33 +8,39 @@ redirect_from:
   - /about.html
 ---
 
-- 引入接收机及发射机的DCB误差
+- Introducing the DCBs of receivers and transmitters
 
-由于CODE及一般研究机构基于单层电离层假设获得解算DCB，然而我们知道，在顶部区域电离层电离层受到的磁暴及复杂空间环境影响更大，由此产生的误差主要部分传递到了绝对STEC。为此，以COSMIC产品podTec中GPS/LEO的DCB解算的RMS或CODE/IGS机构的DCB解算的RMS作为DCBs的误差评估，附加到背景场电离层获得STEC误差，进而绝对STEC误差同化过程中便可以通过DCBs误差获得抑制。  
-    
-以下是附加电子密度观测数据的观测方程：
+The Center for Orbit Determination in Europe (CODE) and other research institutes obtain the solution DCB based on the single-layer ionospheric hypothesis; however, the top region of the ionosphere is affected by magnetic storms and possesses a complex spatial environment. The resulting errors are transmitted mainly to the absolute slant total electron content (STEC). The root mean square (RMS) DCBs of GNSS stations solved by the CODE/IGS institutions and the DCBs of the GPS/LEO observations in the podTec data from COSMIC used to estimate the errors of the DCBs were added to the background field of the ionosphere to obtain the STEC error. Accordingly, the STEC error was suppressed during assimilation.
+
+The following observational equation was employed for additional electron density observations:
     
 $\begin{bmatrix}h_{i,j}&\delta^T_i&\delta^R_i \\\ \delta_{k,j}&O&O\end{bmatrix}\begin{bmatrix}{NE}_j \\\ DCB^T \\\ DCB^R\end{bmatrix}=\begin{bmatrix}{STEC}_i \\\ {NE}_k \end{bmatrix}$
 
-其中 $h_{i,j}$为地基/空基观测数据通过射线追踪获得的投影矩阵；$\delta^T_i,\delta^R_i,\delta_{k,j}$为不同观测量发射机、接收机的DCB系数；$NE_j$为第$j$个格网的电子密度；$DCB^T,DCB^R$为发射机及接收机$DCB$；$STEC_j,NE_k$为同化观测数据及电子密度。
+where $h_{i,j}$ is the projection matrix obtained by ray tracing for ground-based/spaceborne observations;
+$\delta^T_i$,$\delta^R_i$ are the DCB coefficients of the transmitters and receivers;
+$\delta_{k,j}$ is the coefficient of the $j$th grid for the $k$th electron density observation data point; $NE_j$ is the electron density of the $j$ grid;
+$\Delta DCB^T, \Delta DCB^R$are the assimilated DCB differences between the DCBs of the transmitters and receivers and the CODE transmitter and receiver DCBs, respectively; and $STEC_j, NE_k$ are the observed STEC values obtained through the CODE/IGS products and the electron densities, respectively.
 
-模型误差可以写成：
+The model error can be written as:
 
 $O_m=\begin{bmatrix}O_{ne_j^b}&O&O \\\ O&O_{DCB_T^b}&O \\\ O&O&O_{DCB_R^b}\end{bmatrix}$
         
- 其中DCBs误差由IGS/CODE的DCBs产品RMS决定：
+The DCBs error was determined by the RMS of the IGS/CODE DCB product:
 
 $O_{DCB_T^b}=(9.52C \times RMS_{DCB_T}10^{-9})^2$
 
 $O_{DCB_R^b}=(9.52C \times RMS_{DCB_R}10^{-9})^2$
         
-如果同化过程中引入电子密度观测数据，则令：
+where $O_{DCB_T^b},O_{DCB_R^b}$ is DCBs error of transmitters and receivers,respectively; $C$ is lightspeed; $RMS_{DCB_T}, RMS_{DCB_R}$ is
+DCBs RMS of transmitters and receivers from CODE DCB product, respectively.
+
+If electron density observation data were introduced during the assimilation process, then:
 
 $O_{ne_k}=\tau^2$
 
-最终我们可以获得包含DCB影响的电离层更新方程：
+where $O_{{ne}^f_k}$ is the error of electron density observation data, and $\tau$ is a fixed value representing the electron density error.
 
-$\begin{bmatrix}\Delta {NE}_j \\\ \Delta DCB^T \\\ \Delta DCB^R\end{bmatrix}=\alpha^2 {\begin{bmatrix}h_{i,j}O_{ne_j^b}\delta^T_i O_{DCB_T^b}&\delta^R_i O_{DCB_R^b} \\\ \delta_{k,j}O_{ne_j^b}&O&O\end{bmatrix}}^T \\\ \left(\alpha^2 \begin{bmatrix}h_{i,j}O_{ne_j^b}{h_{i,j}}^T+\delta^T_i O_{DCB^T_b}{\delta^T_i}^T+\delta^R_i O_{DCB_R^b}{\delta^R_i}^T&h_{i,j}O_{ne_j^b}\delta_{k,j}^T \\\ \delta_{k,j}O_{ne_j^b}h_{i,j}^T&\delta_{k,j}O_{ne_j^b} \delta_{k,j}^T\end{bmatrix} +(1-\alpha^2)\begin{bmatrix}O_{obs_i}&O \\\ O&O_{ne_k}\end{bmatrix}\right)^{-1} \\\ \left(\begin{bmatrix}{STEC}_i \\\ {NE}_k\end{bmatrix}-\begin{bmatrix}h_{i,j}&\delta^T_i&\delta^R_i \\\ \delta_{k,j}&O&O\end{bmatrix}\begin{bmatrix}{NE}_j \\\ DCB^T \\\ DCB^R\end{bmatrix}\right)$
+Finally, we can obtain the ionospheric update equation considering the effects of DCBs.
 
 
 For more info
