@@ -15,8 +15,7 @@ Study on Global Ionospheric Assimilation Model
 
 - Data
 
-In the data, through the observations fusion of multiple types or of multiple constellations, we use the characteristics of detection height, time and spatial resolution of different data to combine with each other to achieve the construction of the accurate ionosphere.
-
+In the data, through the observations fusion of multiple types or of multiple constellations, we use the characteristics of detection height, time and spatial resolution of different data as showed in Figure 1 to combine with each other to achieve the construction of the accurate ionosphere.
 
 ![ Figure 1](/images/NA.png "Multiobserving systems: green line, signal path across bottom region of the ionosphere 800km during occultation; yellow line, signal path across the top region during occultation; orange line, signal path across the ionosphere of ground-based GNSS observation." )
 <span align="center" >Figure 1. Multiobserving systems: green line, signal path across bottom region of the ionosphere 800km during occultation; yellow line, signal path across the top region during occultation; orange line, signal path across the ionosphere of ground-based GNSS observation.</span>
