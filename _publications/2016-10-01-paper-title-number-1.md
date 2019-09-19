@@ -12,4 +12,4 @@ This paper describes the physical mechanisms, processes and basic calculation pr
 
 [Download paper here](http://www.ivypub.org/RSS/download/33584.shtml)
 
-Recommended citation: Fu N. F., Guo P., Wu W.J., etal. Retrieval Processing Technique For LEO-LEO Radio Occultation Atmospheric Data and Error Sources Analysis [J]. <i>>RemoteSensingScience</i>, 2016, 4(2): 51 - 64.
+Recommended citation: Fu N. F., Guo P., Wu W.J., etal. Retrieval Processing Technique For LEO-LEO Radio Occultation Atmospheric Data and Error Sources Analysis [J]. <i>RemoteSensingScience</i>, 2016, 4(2): 51 - 64.
