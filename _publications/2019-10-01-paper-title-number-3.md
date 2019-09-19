@@ -1,7 +1,7 @@
 ---
 title: "Simulating and Assimilating Ionospheric Observations with Multisources."
 collection: publications
-permalink: /publication/2019-10-01-paper-title-number-3.md
+permalink: /publication/2019-10-01-paper-title-number-3
 excerpt: 'With the Nequick model as the initial field of the Kalman-filter(KF) algorithm, the global ionospheric density field was constructed by KF algorithm, and the subsequent works were processed.'
 date: 2019-10-01
 venue: 'Advances in Space Research'
