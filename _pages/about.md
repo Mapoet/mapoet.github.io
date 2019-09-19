@@ -25,6 +25,8 @@ $$O_m=\begin{bmatrix}O_{ne_j^b}&O&O\\O&O_{DCB_T^b}&O\\O&O&O_{DCB_R^b}\end{bmatri
  其中DCBs误差由IGS/CODE的DCBs产品RMS决定：
 
 $$O_{DCB_T^b}=(9.52C \times RMS_{DCB_T}10^{-9})^2$$
+
+
 $$O_{DCB_R^b}=(9.52C \times RMS_{DCB_R}10^{-9})^2$$
         
 如果同化过程中引入电子密度观测数据，则令：
