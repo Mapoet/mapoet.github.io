@@ -1,7 +1,7 @@
 ---
 title: "Retrieval Processing Technique For LEO-LEO Radio Occultation Atmospheric Data and Error Sources Analysis"
 collection: publications
-permalink: /publication/2016-10-01-1
+permalink: /publication/2016-10-01-paper-title-number-1.md
 excerpt: 'By statistics of the retrieval temperature and humidity, we found: the existing satellite clock stability and the LEO satellite orbit determination accuracy meet the needs of the occultation inversion.'
 date: 2016-10-01
 venue: 'RemoteSensingScience'
