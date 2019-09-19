@@ -20,7 +20,7 @@ $$\begin{bmatrix}h_{i,j}&\delta^T_i&\delta^R_i\\ \delta_{k,j}&O&O\end{bmatrix}\b
 
 模型误差可以写成：
 
-$$O_m=\begin{bmatrix}O_{{ne}_j^b}&O&O\\O&O_{{DCB}_T^b}&O\\O&O&O_{{DCB}_R^b}\end{bmatrix}$$
+$$O_m=\begin{bmatrix}O_{ne_j^b}&O&O\\O&O_{{DCB}_T^b}&O\\O&O&O_{{DCB}_R^b}\end{bmatrix}$$
         
  其中DCBs误差由IGS/CODE的DCBs产品RMS决定：
 
@@ -29,11 +29,11 @@ $$O_{{DCB}_R^b}=(9.52C \times RMS_{{DCB}_R}10^{-9})^2$$
         
 如果同化过程中引入电子密度观测数据，则令：
 
-$$O_{{ne}_k}=\tau^2$$
+$$O_{ne_k}=\tau^2$$
 
 最终我们可以获得包含DCB影响的电离层更新方程：
 
-$\begin{bmatrix}\Delta {NE}_j\\\Delta {DCB}^T\\\Delta {DCB}^R\end{bmatrix}=\alpha^2 {\begin{bmatrix}h_{i,j}O_{{ne}_j^b}\delta^T_i O_{{DCB}_T^b}&\delta^R_i O_{{DCB}_R^b}\\\delta_{k,j}O_{{ne}_j^b}&O&O\end{bmatrix}}^T\\\left(\alpha^2 \begin{bmatrix}h_{i,j}O_{{ne}_j^b}{h_{i,j}}^T+\delta^T_i O_{{DCB}^T_b}{\delta^T_i}^T+\delta^R_i O_{{DCB}_R^b}{\delta^R_i}^T&h_{i,j}O_{{ne}_j^b}\delta_{k,j}^T\\\delta_{k,j}O_{{ne}_j^b}h_{i,j}^T&\delta_{k,j}O_{{ne}_j^b} \delta_{k,j}^T\end{bmatrix}+(1-\alpha^2)\begin{bmatrix}O_{{obs}_i}&O\\O&O_{{ne}_k}\end{bmatrix}\right)^{-1}\\\left(\begin{bmatrix}{STEC}_i\\{NE}_k\end{bmatrix}-\begin{bmatrix}h_{i,j}&\delta^T_i&\delta^R_i\\\delta_{k,j}&O&O\end{bmatrix}\begin{bmatrix}{NE}_j\\{DCB}^T\\{DCB}^R\end{bmatrix}\right)$
+$\begin{bmatrix}\Delta {NE}_j\\\Delta {DCB}^T\\\Delta {DCB}^R\end{bmatrix}=\alpha^2 {\begin{bmatrix}h_{i,j}O_{ne_j^b}\delta^T_i O_{{DCB}_T^b}&\delta^R_i O_{{DCB}_R^b}\\\delta_{k,j}O_{ne_j^b}&O&O\end{bmatrix}}^T\\\left(\alpha^2 \begin{bmatrix}h_{i,j}O_{ne_j^b}{h_{i,j}}^T+\delta^T_i O_{{DCB}^T_b}{\delta^T_i}^T+\delta^R_i O_{{DCB}_R^b}{\delta^R_i}^T&h_{i,j}O_{ne_j^b}\delta_{k,j}^T\\\delta_{k,j}O_{ne_j^b}h_{i,j}^T&\delta_{k,j}O_{ne_j^b} \delta_{k,j}^T\end{bmatrix}+(1-\alpha^2)\begin{bmatrix}O_{{obs}_i}&O\\O&O_{ne_k}\end{bmatrix}\right)^{-1}\\\left(\begin{bmatrix}{STEC}_i\\{NE}_k\end{bmatrix}-\begin{bmatrix}h_{i,j}&\delta^T_i&\delta^R_i\\\delta_{k,j}&O&O\end{bmatrix}\begin{bmatrix}{NE}_j\\{DCB}^T\\{DCB}^R\end{bmatrix}\right)$
 
 
 For more info
