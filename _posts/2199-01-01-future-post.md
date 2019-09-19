@@ -1,11 +1,11 @@
 ---
 title: 'Future Blog Post'
 date: 2199-01-01
-permalink: /posts/2012/08/blog-post-4/
+permalink: /posts/2199/01/future-post
 tags:
-  - cool posts
-  - category1
-  - category2
+  - Programing
+  - Visualization
+  - Artificial Intelligence
 ---
 
-This post will show up by default. To disable scheduling of future posts, edit `config.yml` and set `future: false`. 
+For more interesting games or algorithms, check out "[Mapoet's GitHub](https://github.com/Mapoet)" or check out the starred projects...
