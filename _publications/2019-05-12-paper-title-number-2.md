@@ -1,7 +1,7 @@
 ---
 title: "The Two-Parts Step-by-Step Ionospheric Assimilation Based on Ground-Based/Spaceborne Observations and Its Verification."
 collection: publications
-permalink: /publication/2019-05-12-paper-title-number-2.md
+permalink: /publication/2019-05-12-paper-title-number-2
 excerpt: 'This study introduced a Kalman filtering assimilation model that considers the DCB errors of GPS/LEO satellites and GNSS stations. The assimilation results and reliability were verified by various types of data, such as ionMap, ionosonde, ISR, and the EDP of ionPrf from COSMIC.'
 date: 2019-05-12
 venue: 'Remote Sens.'
