@@ -80,15 +80,15 @@ analytics:
 
 # Site Author
 author:
-  name             : "Your Sidebar Name"
+  name             : "Mapoet Niphy"
   avatar           : "profile.png"
-  bio              : "Your biography for the left-hand sidebar"
-  location         : "Location"
+  bio              : "Ph.D. candidate, Astronomical Measurement and Celestial Mechanics, Shanghai Astronomical Observatory, Chinese Academy of Sciences."
+  location         : "Nandan Road #80, Shanghai, China"
   employer         :
-  pubmed           : "https://www.ncbi.nlm.nih.gov/pubmed/?term=john+snow"
-  googlescholar    : "http://yourfullgooglescholarurl.com"
-  email            :
-  researchgate     :  # example: "https://www.researchgate.net/profile/yourprofile"
+  pubmed           : 
+  googlescholar    : 
+  email            : "mapoet.niphy@gmail.com"
+  researchgate     :  
   uri              :
   bitbucket        :
   codepen          :
@@ -96,10 +96,10 @@ author:
   flickr           :
   facebook         :
   foursquare       :
-  github           : "academicpages"
+  github           : "niphy"
   google_plus      :
   keybase          :
-  instagram        :
+  instagram        : "mapoet2"
   impactstory      : #"https://profiles.impactstory.org/u/xxxx-xxxx-xxxx-xxxx"
   lastfm           :
   linkedin         :
@@ -111,7 +111,7 @@ author:
   tumblr           :
   twitter          : "replacethistwitterhandle"
   vine             :
-  weibo            :
+  weibo            : "https://weibo.com/2035075984"
   xing             :
   youtube          :
   wikipedia        :
