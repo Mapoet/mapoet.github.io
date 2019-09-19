@@ -17,6 +17,9 @@ Study on Global Ionospheric Assimilation Model
 
 In the data, through the observations fusion of multiple types or of multiple constellations, we use the characteristics of detection height, time and spatial resolution of different data to combine with each other to achieve the construction of the accurate ionosphere.
 
+
+![ Figure 1](/images/NA.png "Multiobserving systems: green line, signal path across bottom region of the ionosphere 800km during occultation; yellow line, signal path across the top region during occultation; orange line, signal path across the ionosphere of ground-based GNSS observation." )
+<span align="center" >Figure 1. Multiobserving systems: green line, signal path across bottom region of the ionosphere 800km during occultation; yellow line, signal path across the top region during occultation; orange line, signal path across the ionosphere of ground-based GNSS observation.</span>
 - Method
 
 Through ionospheric observations (occultation observations, ground-based GNSS observations, and GNSS-LEO top region observations), we have developed three methods for ionospheric modeling. (1) GIM model data based on a spherical harmonic function assumed by a single layer. (2) The ionPrf data (Electron Density Profiles of the ionosphere) formed based on Abel inversion with local spherical symmetry. (3) The ionospheric assimilation model based on the KF algorithm with the ionospheric empirical model as the background field.
