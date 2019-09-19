@@ -14,13 +14,13 @@ redirect_from:
     
 以下是附加电子密度观测数据的观测方程：
     
-$$\begin{bmatrix}h_{i,j}&\delta^T_i&\delta^R_i \\\ \delta_{k,j}&O&O\end{bmatrix}\begin{bmatrix}{NE}_j \\\ DCB^T \\\ DCB^R\end{bmatrix}=\begin{bmatrix}{STEC}_i \\\ {NE}_k \end{bmatrix} $$
+$\begin{bmatrix}h_{i,j}&\delta^T_i&\delta^R_i \\\ \delta_{k,j}&O&O\end{bmatrix}\begin{bmatrix}{NE}_j \\\ DCB^T \\\ DCB^R\end{bmatrix}=\begin{bmatrix}{STEC}_i \\\ {NE}_k \end{bmatrix} $
 
 其中 $h_{i,j}$为地基/空基观测数据通过射线追踪获得的投影矩阵；$\delta^T_i,\delta^R_i,\delta_{k,j}$为不同观测量发射机、接收机的DCB系数；$NE_j$为第$j$个格网的电子密度；$DCB^T,DCB^R$为发射机及接收机$DCB$；$STEC_j,NE_k$为同化观测数据及电子密度。
 
 模型误差可以写成：
 
-$$O_m=\begin{bmatrix}O_{ne_j^b}&O&O \\\ O&O_{DCB_T^b}&O \\\ O&O&O_{DCB_R^b}\end{bmatrix}$$
+$O_m=\begin{bmatrix}O_{ne_j^b}&O&O \\\ O&O_{DCB_T^b}&O \\\ O&O&O_{DCB_R^b}\end{bmatrix}$
         
  其中DCBs误差由IGS/CODE的DCBs产品RMS决定：
 
@@ -34,9 +34,9 @@ $$O_{ne_k}=\tau^2$$
 
 最终我们可以获得包含DCB影响的电离层更新方程：
 
-$$\begin{bmatrix}\Delta {NE}_j \\\ \Delta DCB^T \\\ \Delta DCB^R\end{bmatrix}=\alpha^2 {\begin{bmatrix}h_{i,j}O_{ne_j^b}\delta^T_i O_{DCB_T^b}&\delta^R_i O_{DCB_R^b} \\\ \delta_{k,j}O_{ne_j^b}&O&O\end{bmatrix}}^T \\\
+$\begin{bmatrix}\Delta {NE}_j \\\ \Delta DCB^T \\\ \Delta DCB^R\end{bmatrix}=\alpha^2 {\begin{bmatrix}h_{i,j}O_{ne_j^b}\delta^T_i O_{DCB_T^b}&\delta^R_i O_{DCB_R^b} \\\ \delta_{k,j}O_{ne_j^b}&O&O\end{bmatrix}}^T \\\
 \left(\alpha^2 \begin{bmatrix}h_{i,j}O_{ne_j^b}{h_{i,j}}^T+\delta^T_i O_{DCB^T_b}{\delta^T_i}^T+\delta^R_i O_{DCB_R^b}{\delta^R_i}^T&h_{i,j}O_{ne_j^b}\delta_{k,j}^T \\\ \delta_{k,j}O_{ne_j^b}h_{i,j}^T&\delta_{k,j}O_{ne_j^b} \delta_{k,j}^T\end{bmatrix} +(1-\alpha^2)\begin{bmatrix}O_{obs_i}&O \\\ O&O_{ne_k}\end{bmatrix}\right)^{-1} \\\
-\left(\begin{bmatrix}{STEC}_i \\\ {NE}_k\end{bmatrix}-\begin{bmatrix}h_{i,j}&\delta^T_i&\delta^R_i \\\ \delta_{k,j}&O&O\end{bmatrix}\begin{bmatrix}{NE}_j \\\ DCB^T \\\ DCB^R\end{bmatrix}\right)$$
+\left(\begin{bmatrix}{STEC}_i \\\ {NE}_k\end{bmatrix}-\begin{bmatrix}h_{i,j}&\delta^T_i&\delta^R_i \\\ \delta_{k,j}&O&O\end{bmatrix}\begin{bmatrix}{NE}_j \\\ DCB^T \\\ DCB^R\end{bmatrix}\right)$
 
 
 For more info
