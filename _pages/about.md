@@ -33,7 +33,7 @@ $$O_{ne_k}=\tau^2$$
 
 最终我们可以获得包含DCB影响的电离层更新方程：
 
-$\begin{bmatrix}\Delta {NE}_j\\\Delta DCB^T\\\Delta DCB^R\end{bmatrix}=\alpha^2 {\begin{bmatrix}h_{i,j}O_{ne_j^b}\delta^T_i O_{DCB_T^b}&\delta^R_i O_{DCB_R^b}\\\delta_{k,j}O_{ne_j^b}&O&O\end{bmatrix}}^T\\\left(\alpha^2 \begin{bmatrix}h_{i,j}O_{ne_j^b}{h_{i,j}}^T+\delta^T_i O_{DCB^T_b}{\delta^T_i}^T+\delta^R_i O_{DCB_R^b}{\delta^R_i}^T&h_{i,j}O_{ne_j^b}\delta_{k,j}^T\\\delta_{k,j}O_{ne_j^b}h_{i,j}^T&\delta_{k,j}O_{ne_j^b} \delta_{k,j}^T\end{bmatrix}+(1-\alpha^2)\begin{bmatrix}O_{obs_i}&O\\O&O_{ne_k}\end{bmatrix}\right)^{-1}\\\left(\begin{bmatrix}{STEC}_i\\{NE}_k\end{bmatrix}-\begin{bmatrix}h_{i,j}&\delta^T_i&\delta^R_i\\\delta_{k,j}&O&O\end{bmatrix}\begin{bmatrix}{NE}_j\\DCB^T\\DCB^R\end{bmatrix}\right)$
+$$\begin{bmatrix}\Delta {NE}_j\\\Delta DCB^T\\\Delta DCB^R\end{bmatrix}=\alpha^2 {\begin{bmatrix}h_{i,j}O_{ne_j^b}\delta^T_i O_{DCB_T^b}&\delta^R_i O_{DCB_R^b}\\\delta_{k,j}O_{ne_j^b}&O&O\end{bmatrix}}^T\\\left(\alpha^2 \begin{bmatrix}h_{i,j}O_{ne_j^b}{h_{i,j}}^T+\delta^T_i O_{DCB^T_b}{\delta^T_i}^T+\delta^R_i O_{DCB_R^b}{\delta^R_i}^T&h_{i,j}O_{ne_j^b}\delta_{k,j}^T\\\delta_{k,j}O_{ne_j^b}h_{i,j}^T&\delta_{k,j}O_{ne_j^b} \delta_{k,j}^T\end{bmatrix}+(1-\alpha^2)\begin{bmatrix}O_{obs_i}&O\\O&O_{ne_k}\end{bmatrix}\right)^{-1}\\\left(\begin{bmatrix}{STEC}_i\\{NE}_k\end{bmatrix}-\begin{bmatrix}h_{i,j}&\delta^T_i&\delta^R_i\\\delta_{k,j}&O&O\end{bmatrix}\begin{bmatrix}{NE}_j\\DCB^T\\DCB^R\end{bmatrix}\right)$$
 
 
 For more info
