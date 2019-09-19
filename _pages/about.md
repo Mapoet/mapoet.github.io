@@ -17,7 +17,7 @@ Study on Global Ionospheric Assimilation Model
 ====
 Ionospheric assimilation is a complex project, from data processing to inversion of results, involving a series of data flows. During my Ph.D., I mainly studied the following aspects of the ionosphere. (1). Data. (2). Method. (3). Errors. (4). The DCBs of receivers and transmitters. which at [Study on Global Ionospheric Assimilation Model](https://niphy.github.io/posts/2017/10/blog-post-3);
 
-The study of the ionosphere is a dynamic direction, for meteorological data assimilation to finite element analysis of fluid mechanics, which has great guidance for ionospheric data assimilation. At the same time, the physical model of the ionosphere is continuously improved, assisting with data assimilation technology, and it is more ideal for the simulation/inversion of the ionosphere in the polar or food extreme environment.
+The study of the ionosphere is a dynamic direction, for the study from meteorological data assimilation to finite element analysis of fluid mechanics, which has great guidance for ionospheric data assimilation. At the same time, the physical model of the ionosphere is continuously improved, assisting with data assimilation technology, and it is more ideal for the simulation/inversion of the ionosphere in the polar or food extreme environment.
 
 Of course, the study of the ionospheric physical model and the ionospheric numerical model is a mutually competitive and mutually reinforcing development process.
 
