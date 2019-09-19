@@ -14,7 +14,7 @@ The Center for Orbit Determination in Europe (CODE) and other research institute
 
 The following observational equation was employed for additional electron density observations:
     
-$\begin{bmatrix}h_{i,j}&\delta^T_i&\delta^R_i \\\ \delta_{k,j}&O&O\end{bmatrix}\begin{bmatrix}{NE}_j \\\ DCB^T \\\ DCB^R\end{bmatrix}=\begin{bmatrix}{STEC}_i \\\ {NE}_k \end{bmatrix}$
+$\begin{bmatrix}h_{i,j}&\delta^T_i&\delta^R_i \\\ \delta_{k,j}&O&O\end{bmatrix}\begin{bmatrix}ne_j \\\ DCB^T \\\ DCB^R\end{bmatrix}=\begin{bmatrix}{STEC}_i \\\ ne_k \end{bmatrix}$
 
 where $h_{i,j}$ is the projection matrix obtained by ray tracing for ground-based/spaceborne observations;
 $\delta^T_i$,$\delta^R_i$ are the DCB coefficients of the transmitters and receivers;
@@ -38,7 +38,7 @@ If electron density observation data were introduced during the assimilation pro
 
 $O_{ne_k}=\tau^2$
 
-where $O_{{ne}^f_k}$ is the error of electron density observation data, and $\tau$ is a fixed value representing the electron density error.
+where $O_{ne^f_k}$ is the error of electron density observation data, and $\tau$ is a fixed value representing the electron density error.
 
 Finally, we can obtain the ionospheric update equation considering the effects of DCBs.
 
