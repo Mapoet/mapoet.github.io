@@ -34,6 +34,6 @@ Whether studying the surveying and mapping profession at the undergraduate level
 Artificial intelligence is the most advanced data processing technology. Especially the successful application of neural network and deep learning algorithm in face recognition, image processing, security control, etc., indicates that weak artificial intelligence has achieved initial maturity. At the same time, data visualization, not only includes the trend display of sequence data/distribution data, the characterization of statistical data, but also the display of data in different coordinate systems and different applications. For example, satellite orbit data has great significance in planetary science, space science, meteorological science, and mapping. It is important to visualize it for satellite satellite characterization (satellite coverage, satellite return visit cycle) to guide these applications.The ionosphere/atmospheric occultation technique, as an interdisciplinary subject between earth science and space science, is essential for efficient computational algorithms and perfect visualization, so I have a deeper understanding of these aspects.
 
 For more info
-------
+====
 More research and directions of interest can be found in [Publications](https://niphy.github.io/publications), [Talks](https://niphy.github.io/talks) and [Blogs](https://niphy.github.io/year-archive/).
 
