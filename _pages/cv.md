@@ -46,10 +46,10 @@ Skills
 |Matlab    | proficient|   
 
 * Certificates
-   * CET4
-   * National Informatization Level 1 Engineer
-   * National Computer Certificate II
-   * Motor Vehicle Driving License (C1) (in the exam)
+  * CET4
+  * National Informatization Level 1 Engineer
+  * National Computer Certificate II
+  * Motor Vehicle Driving License (C1) (in the exam)
   
 * Awards
   * National Graduate Mathematical Modeling Competition Second Prize(2016.12)
