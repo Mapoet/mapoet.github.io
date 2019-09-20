@@ -46,23 +46,23 @@ Skills
 |Matlab    | proficient|   
 
 * Certificates
-  * CET4
-  * 全国信息化工程师
-  * 计算机二级证书
-  * 机动车驾驶证（在考）
+   * CET4
+   * National Informatization Level 1 Engineer
+   * National Computer Certificate II
+   * Motor Vehicle Driving License (C1) (in the exam)
   
 * Awards
-  * 全国研究生数学建模二等奖（2016.12）
-  * 中国科学院学业一等奖学金（2014.10）
-  * 中南大学第五届“徕卡杯”测绘实践创新能力竞赛团体三等奖（2013.6）
-  * 中南大计算机程序设计竞赛三等奖（2013.5）
-  * 中南大学院一等奖学金（2011.11）
-  * 中南大学2010-2011学年国家励志奖学金（2011.10）
-  * 中南大学2011年度数学竞赛三等奖（2011.07）
+  * National Graduate Mathematical Modeling Competition Second Prize(2016.12)
+  * First Class Scholarship of Chinese Academy of Sciences(2014.10)
+  * The third prize of the 5th "Leica Cup" surveying and mapping practice innovation ability competition group of Central South University(2013.06)
+  * The third prize of Central South University Computer Programming Contest(2013.05)
+  * First Class Scholarship of Central South University(2011.11)
+  * National Inspirational Scholarship for the 2010-2011 Academic Year of Central South University(2011.10)
+  * The third prize of the 2011 Mathematical Competition of Central South University(2011.07)
 
 * Writing
-  * 付乃锋,多维空间的构想,科浦青春，2016
-  * 付乃锋，家乡三部曲，勤助之声，2013
+   * Fu Naifeng, the Imagination of multidimensional space, Kepu Youth, 2016
+   * Fu Naifeng, hometown trilogy, voice of diligence, 2013
 
 Publications
 ======
