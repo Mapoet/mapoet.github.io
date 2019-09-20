@@ -61,8 +61,8 @@ Skills
   * The third prize of the 2011 Mathematical Competition of Central South University(2011.07)
 
 * Writing
-   * Fu Naifeng, the Imagination of multidimensional space, Kepu Youth, 2016
-   * Fu Naifeng, hometown trilogy, voice of diligence, 2013
+  * Fu Naifeng, the Imagination of multidimensional space, Kepu Youth, 2016
+  * Fu Naifeng, hometown trilogy, voice of diligence, 2013
 
 Publications
 ======
