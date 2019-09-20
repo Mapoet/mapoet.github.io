@@ -25,11 +25,11 @@ Work experience
   * Shanghai Astronomical Observatory
   * Contents included: Assisting teachers in completing reports and experiments. At the same time, I participated in the teacher project and completed the topic of “The Development of the Occultation Data Simulation and Inversion System Software of China Aerospace 503”, the topic of “Ionospheric Anti-mask Detection Payload Simulation Task Analysis and Simulation System” by Dongfanghong Company and other projects.
 
-* Summer 2014:
+* Summer 2014: Partner
   * Central South University
   * Contents included: The project name is "High-resolution remote sensing imagery based on improved watershed transformation. Urban road extraction - taking Changsha City as an example." Collect data, study the watershed algorithm and implement it, and finally put it into the road extraction in Changsha.
   
-* Summer 2011: 
+* Summer 2011: Partner
   * Central South University
   * Contents included: Going to Yongan Town, Liuyang City to investigate the employment and re-employment of migrant workers is a school-level C. As a member of the team, I successfully completed the research task and submitted the research report.
 
