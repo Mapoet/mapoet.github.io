@@ -11,7 +11,7 @@ redirect_from:
 
 Education
 ======
-* B.S. in School of Earth Sciences and Information Physics Engineering, Central South University, 2010-2014
+* B.S. in School of Earth Sciences and Information Physics Engineering, Central South University, Changsha, 2010-2014
 * M.S. and Ph.D in Astrometry and celestial mechanics, Shanghai Astronomical Observatory,Chinese Academy of Sciences,Shanghai, 2014-2019 (expected)
 
 Work experience
