@@ -7,9 +7,9 @@
 
 # Site Settings
 locale                   : "en-US"
-title                    : "Mapoet Niphy / SHAO"
+title                    : "Naifeng Fu(付乃锋)/ SHAO"
 title_separator          : "-"
-name                     : &name "Mapoet Niphy"
+name                     : &name "Naifeng Fu(付乃锋)"
 description              : &description "Ph.D. candidate, Astromtry and Celestial Mechanics, Shanghai Astronomical Observatory, Chinese Academy of Sciences."
 url                      : https://niphy.github.io # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
@@ -80,8 +80,8 @@ analytics:
 
 # Site Author
 author:
-  name             : "Mapoet Niphy"
-  avatar           : "Me.png"
+  name             : "Naifeng Fu(付乃锋)"
+  avatar           : "95.jpg"
   bio              : "Ph.D. candidate, Astronomy and Celestial Mechanics, Shanghai Astronomical Observatory, Chinese Academy of Sciences."
   location         : "Nandan Road #80, Shanghai, China"
   employer         :
@@ -96,7 +96,7 @@ author:
   flickr           :
   facebook         :
   foursquare       :
-  github           : "niphy"
+  github           : "mapoet"
   google_plus      :
   keybase          :
   instagram        : "mapoet2"
