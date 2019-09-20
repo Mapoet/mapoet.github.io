@@ -8,8 +8,11 @@ redirect_from:
   - /about.html
 ---
 
+Hi, everyone, I am very happy to meet everyone, thank you for your concern. I am currently studying for a doctorate in astronomy at the Shanghai Astronomical Observatory of the Chinese Academy of Sciences.
+
 My Study during Ph.D
 ====
+
 Study on Abel-Retrieved ionPrf with Occultation data
 ---
 Retrieving the refractive index of the atmosphere based on occultation data to obtain its temperature and humidity is an old and long-lasting direction.However, the successful launch of more and more low-orbit satellites has made the ionospheric/atmospheric observations of low-orbit satellites extremely effective in their applications. It is an extremely important project to obtain high-precision ionospheric products through ground-based observation data to assist occult ionospheric observations, or to apply more occultation atmospheric observation data to meteorological data assimilation systems to improve the accuracy of meteorological forecasts.
