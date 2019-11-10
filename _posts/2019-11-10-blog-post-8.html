@@ -1,0 +1,121 @@
+---
+title: "关于GNSS技术"
+date: 2019-11-10
+permalink: /posts/2019/11/blog-post-8
+excerpt: '这里主要分析一下GNSS技术的研究，以及多种方面的用途'
+tags:
+    - GNSS
+    - Ionosphere
+    - GR
+    - Atmosphere
+    - PPP
+---
+
+简介
+====
+
+位置服务，是GNSS项目的主要任务；然而经过多年的发展，GNSS技术已经广泛应用到了空间科学与地球科学的多个方面。
+
+原理
+====
+
+进而，GPS在电离层传播过程中，$\delta_{iono}$有以下关系
+
+<span id="pgtec"></span>
+
+$${\delta_{iono}}_{j,k}^{P,i}=\int_{\Delta t}\nu_gdt-\rho_{j,k}=C \Delta t-\rho_{j,k}-\frac{40.28}{{f^i}^2}\int_{\Delta t} n_e dt=n^P-\frac{40.28}{{f^i}^2}\int_{\Delta t} n_e dt$$
+
+$${\delta_{iono}}_{j,k}^{\phi,i}=\int_{\Delta t}\nu_pdt-\rho_{j,k}=C \Delta t-\rho_{j,k}+\frac{40.28}{{f^i}^2}\int_{\Delta t} n_e dt=n^\phi+\frac{40.28}{{f^i}^2}\int_{\Delta t} n_e dt$$
+
+令
+
+<span id="tec"></span>
+
+$$TEC_{j,k}=\int^{X_j}_{X_k} n_e ds$$
+
+则由[电离层对载波及相位的影响](#pgtec)通过观察[电离层误差方程](#modelobs)，可以通过双频线性组合的方式获得：
+
+<span id="tec"></span>
+
+$$TEC^P_{j,k}=\frac{{f^1}^2{f^2}^2}{40.28({f^1}^2-{f^2}^2)}[n^{P,2}_{j,k}-n^{P,1}_{j,k} + C \delta d_j - C \delta d_k - \delta m_{j,k} -\delta \varepsilon_{j,k} ]$$
+
+$$TEC^\phi_{j,k}=\frac{{f^1}^2{f^2}^2}{40.28({f^1}^2-{f^2}^2)}[\phi^1(N^{\phi,1}_{j,k}+n^{\phi,1}_{j,k})-\phi^2(N^{\phi,2}_{j,k}-n^{\phi,2}_{j,k}) - C \delta d_j + C \delta d_k + \delta m_{j,k} + \delta \varepsilon_{j,k}]$$
+
+$$\delta d_j=d^1_j-d^2_j$$
+
+$$\delta d_k=d^1_k-d^2_k$$
+
+$$\delta m_{j,k}=m^1_{j,k}-m^2_{j,k}$$
+
+$$\delta \varepsilon_{j,k}=\varepsilon^1_{j,k}-\varepsilon^2_{j,k}$$
+
+即
+
+$$TEC^P_{j,k}=\frac{{f^1}^2{f^2}^2}{40.28({f^1}^2-{f^2}^2)}[P^2_{j,k}-P^2_{j,k} + C \delta d_j - C \delta d_k - \delta m_{j,k} -\delta \varepsilon_{j,k} ]$$
+
+$$TEC^\phi_{j,k}=\frac{{f^1}^2{f^2}^2}{40.28({f^1}^2-{f^2}^2)}[\phi^1 L^1_{j,k}-\phi^2 L^2_{j,k} -D^{\phi}_{j,k} - C \delta d_j + C \delta d_k + \delta m_{j,k} + \delta \varepsilon_{j,k}]$$
+
+其中$D^{\phi}_{j,k}=\phi^1 N^{\phi,1}_{j,k}-\phi^2 N^{\phi,2}_{j,k}$。一般，$\delta d_j, \delta d_k$分别称为接收机及卫星硬件偏差；$\delta m_{j,k}$称为多路径效应残差，可通过半天球模型降低；$\varepsilon_{j,k}$为观测误差及其他误差。
+
+由于相位只能获得相对TEC，但是精度高（百分之几的TECU）；而伪距可以获得绝对TEC，但是精度差。通过两者联合求解，可以得到高精度的绝对TEC。具体方法如下：
+- 计算一次连续弧段中伪距与相位TEC的偏差为：
+
+$$B_{j,k}=\sum_{i=1}^N\frac{1}{\delta_i^2}(TEC^P_{j,k}-TEC^\phi_{j,k})/\sum_{i=1}^N\frac{1}{\delta_i^2}$$
+
+- 校正相位TEC：
+
+$$TEC_{j,k}=TEC^\phi_{j,k}+B_{j,k}$$
+
+## 电离层建模
+
+### Abel TEC反掩技术
+
+### 电离层层析技术
+
+### 电离层同化技术
+
+## 修正方式
+
+# 钟差及卫星坐标
+
+# 对流层
+
+## 大气反掩技术
+
+### Abel 反掩
+
+### 同化技术
+
+## 修正方式
+
+# 其他误差
+
+## 相对论效应
+地面钟由于地球自转会产生钟频变化$\delta f_R=-\frac{V^2_R}{2c^2}\times f$。由于$\delta f_R$极小，所以可以把地球当做半径为$R$的球：$V_R=V_0\cdot cos \phi， V_0=464m/s$ 。$\delta f_{R_0} \approx 0.012(f\cdot 10^{-10})$ ，其结果极小。
+
+而引力延迟引起的误差$\Delta D_g$为$\frac{2\nu}{c^2}ln \frac{\rho_j+\rho_k+\rho_{j,k}}{\rho_j+\rho_k-\rho_{j,k}}$，其中$\rho_j=\sqrt{X_j^2+Y_j^2+Z_j^2},\rho_k=\sqrt{X_k^2+Y_k^2+Z_k^2}$。当站间距离达到1000~3000km时，引力延迟误差在1.3～3.6mm之间。
+
+## 地球自转
+
+
+## 固体潮
+
+由于地球非刚体，在日月引力作用下，地球会产生周期性的形变，可能使地面店在垂直方向产生80km的变化。
+
+设日月二阶引潮位为$V_2$；$h$为第一勒夫数，0.6090；$l$为第二勒夫数，0.0852，则固体潮对测站($R, \theta, \lambda$，分别是向径、余纬及经度)产生的变化为：
+
+$$\begin{cases}\delta R=h\frac{V_2}{g}=\frac{h}{2g}r\frac{V_2}{\alpha R}\\\delta \theta=\frac{l}{g}\frac{\alpha V_2}{\alpha \theta}\\\delta \lambda=\frac{l}{g}\frac{\alpha V_2}{sin \theta \alpha \lambda}\end{cases}$$
+
+即
+
+$$u=\begin{bmatrix}\delta R\\\delta \theta \\\delta \lambda\end{bmatrix}=\frac{m_j}{M}\frac{\rho_k^4}{\rho_j^3}\{3l(\rho_j^0\cdot \rho_k^0)\rho_j^0+[3(\frac{h}{2}-l)(\rho_j^0\cdot \rho_k^0)^2-\frac{h}{2}]\rho_k^0\}$$
+
+其中$\rho_j^0$为地面站到地心单位矢矩，$\rho_k^0$为卫星到地心单位矢矩。
+## 卫星及接收机天线相位偏差
+
+卫星天线相位偏差会影响到卫星钟差的解算。如果已知偏差向量$\Delta$，若星固坐标为$(e_x, e_y, e_z)$，则偏差向量为$\Delta_{协}=\rho^0_{j,k} \cdot \Delta_{协}=\frac{r_s-R}{|r_s-R|}\Delta_{协}$。
+
+而接收机天线相位中心变化一般通过改正实现，由于GNSS接收机天线的平均相位中心与天线的几何中心一般不重合，其偏差向量在高精度单点定位是需要采用归心改正。而接收机的瞬时相位中心与平均相位中心间的偏差，随着卫星高度角变化，主要影响高程。
+
+应用
+===
