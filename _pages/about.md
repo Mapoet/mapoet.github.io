@@ -1,6 +1,6 @@
 ---
 permalink: /
-title: "Naifeng Fu, Ph.D. candidate,  Astromtry and Celestial Mechanics"
+title: "Naifeng Fu, Ph.D.,  Astromtry and Celestial Mechanics"
 excerpt: "About me"
 author_profile: true
 redirect_from: 
