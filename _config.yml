@@ -83,13 +83,13 @@ author:
   name             : "Naifeng Fu"
   avatar           : "Me.png"
   bio              : "Ph.D, Astronomy and Celestial Mechanics, Shanghai Astronomical Observatory, Chinese Academy of Sciences."
-  location         : "Nandan Road #80,\nShanghai, China"
+  location         : "Nankai Road #92,\nTianjin, China"
   employer         :
   pubmed           : 
   googlescholar    : 
   email            : "mapoet.niphy@gmail.com"
   researchgate     :  
-  uri              :
+  uri              : "https://gnss-x.ac.cn"
   bitbucket        :
   codepen          :
   dribbble         :
@@ -103,7 +103,7 @@ author:
   impactstory      : #"https://profiles.impactstory.org/u/xxxx-xxxx-xxxx-xxxx"
   lastfm           :
   linkedin         :
-  orcid            : "http://orcid.org/0000-0002-7989-7521"
+  orcid            : "0000-0002-7989-7521"
   pinterest        :
   soundcloud       :
   stackoverflow    : # http://stackoverflow.com/users/123456/username
@@ -111,7 +111,7 @@ author:
   tumblr           :
   twitter          : "replacethistwitterhandle"
   vine             :
-  weibo            : "https://weibo.com/2035075984"
+  weibo            : "2035075984"
   xing             :
   youtube          :
   wikipedia        :
