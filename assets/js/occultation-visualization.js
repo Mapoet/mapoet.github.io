@@ -133,20 +133,26 @@ function initVisualization() {
     console.log('开始初始化可视化...');
     
     if (!checkDOM()) {
+        console.log('DOM检查失败');
         return;
     }
     
     const depsResult = checkDependencies();
+    console.log('依赖检查结果:', depsResult);
+    
     if (depsResult === false) {
+        console.log('依赖检查失败');
         return;
     }
     
     if (depsResult === 'use_threejs') {
+        console.log('切换到Three.js备选方案');
         // 使用Three.js备选方案
         loadDataForThreeJS();
         return;
     }
     
+    console.log('使用ECharts GL方案');
     // 使用ECharts GL
     try {
         const testChart = echarts.init(document.getElementById('main'));
@@ -186,14 +192,16 @@ function initVisualization() {
 }
 
 function loadDataForThreeJS() {
+    console.log('开始加载数据用于Three.js...');
     d3.json(eventFile)
         .then(function(data) {
+            console.log('Three.js数据加载成功:', data.length, '个事件');
             showStatus(`数据加载成功，共 ${data.length} 个事件`);
             createThreeJSVisualization(data);
         })
         .catch(function(error) {
+            console.error('Three.js数据加载失败:', error);
             showStatus(`数据加载失败: ${error.message}`);
-            console.error('数据加载错误:', error);
         });
 }
 
