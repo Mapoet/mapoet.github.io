@@ -25,9 +25,9 @@ function checkDependencies() {
     console.log('ECharts对象:', echarts);
     
     if (typeof echarts.gl === 'undefined') {
-        showStatus('错误：ECharts GL 扩展未正确加载');
+        showStatus('警告：ECharts GL 扩展未正确加载，尝试使用Three.js备选方案');
         console.log('echarts.gl:', echarts.gl);
-        return false;
+        return 'use_threejs';
     }
     
     console.log('ECharts GL已加载:', echarts.gl);
@@ -58,6 +58,76 @@ function checkDOM() {
     return true;
 }
 
+// 使用Three.js创建3D地球
+function createThreeJSVisualization(data) {
+    showStatus('使用Three.js创建3D地球可视化...');
+    
+    // 检查Three.js是否可用
+    if (typeof THREE === 'undefined') {
+        showStatus('错误：Three.js 库未加载，请添加Three.js CDN');
+        return;
+    }
+    
+    const container = document.getElementById('main');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setClearColor(0x000000);
+    container.innerHTML = '';
+    container.appendChild(renderer.domElement);
+    
+    // 创建地球
+    const earthGeometry = new THREE.SphereGeometry(5, 32, 32);
+    const earthMaterial = new THREE.MeshBasicMaterial({ 
+        color: 0x0066cc,
+        transparent: true,
+        opacity: 0.8
+    });
+    const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+    scene.add(earth);
+    
+    // 添加轨迹线
+    const testData = data.slice(0, 5);
+    testData.forEach((event, index) => {
+        if (!event.points || event.points.length < 2) return;
+        
+        const points = event.points.map(p => {
+            const lon = (parseFloat(p.lon) || 0) * Math.PI / 180;
+            const lat = (parseFloat(p.lat) || 0) * Math.PI / 180;
+            const alt = parseFloat(p.alt) || 0;
+            const radius = 5 + alt / 100; // 地球半径 + 高度
+            
+            const x = radius * Math.cos(lat) * Math.cos(lon);
+            const y = radius * Math.sin(lat);
+            const z = radius * Math.cos(lat) * Math.sin(lon);
+            
+            return new THREE.Vector3(x, y, z);
+        });
+        
+        const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+        const lineMaterial = new THREE.LineBasicMaterial({ 
+            color: getColor(event.type),
+            linewidth: 2
+        });
+        const line = new THREE.Line(lineGeometry, lineMaterial);
+        scene.add(line);
+    });
+    
+    camera.position.z = 15;
+    
+    // 动画循环
+    function animate() {
+        requestAnimationFrame(animate);
+        earth.rotation.y += 0.005;
+        renderer.render(scene, camera);
+    }
+    
+    animate();
+    showStatus(`Three.js渲染完成！显示 ${testData.length} 条轨迹`);
+}
+
 // 主函数
 function initVisualization() {
     console.log('开始初始化可视化...');
@@ -66,11 +136,18 @@ function initVisualization() {
         return;
     }
     
-    if (!checkDependencies()) {
+    const depsResult = checkDependencies();
+    if (depsResult === false) {
         return;
     }
     
-    // 先尝试创建一个简单的测试图表
+    if (depsResult === 'use_threejs') {
+        // 使用Three.js备选方案
+        loadDataForThreeJS();
+        return;
+    }
+    
+    // 使用ECharts GL
     try {
         const testChart = echarts.init(document.getElementById('main'));
         const testOption = {
@@ -106,6 +183,18 @@ function initVisualization() {
         showStatus(`ECharts初始化失败: ${error.message}`);
         console.error('ECharts初始化错误:', error);
     }
+}
+
+function loadDataForThreeJS() {
+    d3.json(eventFile)
+        .then(function(data) {
+            showStatus(`数据加载成功，共 ${data.length} 个事件`);
+            createThreeJSVisualization(data);
+        })
+        .catch(function(error) {
+            showStatus(`数据加载失败: ${error.message}`);
+            console.error('数据加载错误:', error);
+        });
 }
 
 function loadData(chart) {
