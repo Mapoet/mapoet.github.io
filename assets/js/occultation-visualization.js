@@ -1,7 +1,7 @@
 const eventFile = '/assets/data/occultation_events.json';
 const statusDiv = document.getElementById('status');
 
-// 设置Cesium Ion访问令牌（使用默认令牌）
+// 设置Cesium Ion访问令牌
 Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NTc3MzMsImlhdCI6MTYyMjg0NjQ5NH0.XcKpgANiY19MC4bdFUXMVEBToBmqS8kuYpUlxJHYZxY';
 
 function getColor(type) {
@@ -70,35 +70,39 @@ function initCesiumViewer() {
         targetFrameRate: 60 // 目标帧率
     });
     
-    // 强制设置地球图层
-    try {
-        // 移除默认图层
-        viewer.scene.globe.imageryLayers.removeAll();
+    // 检查并确保地球图层正确加载
+    setTimeout(() => {
+        const imageryLayers = viewer.scene.globe.imageryLayers;
+        console.log('当前图层数量:', imageryLayers.length);
         
-        // 添加Bing Maps图层
-        const bingProvider = new Cesium.BingMapsImageryProvider({
-            url: 'https://dev.virtualearth.net',
-            key: 'AuGz4Kzoq3JIIx7hdNh1u65d0u0fxXtTMdUrvBxCEZRO3z9EnOW5m8rp5nKvAecJ',
-            mapStyle: Cesium.BingMapsStyle.AERIAL_WITH_LABELS
-        });
-        
-        viewer.scene.globe.imageryLayers.addImageryProvider(bingProvider);
-        console.log('Bing Maps图层添加成功');
-        
-    } catch (error) {
-        console.error('Bing Maps图层添加失败:', error);
-        
-        // 备选方案：使用OpenStreetMap
-        try {
-            const osmProvider = new Cesium.OpenStreetMapImageryProvider({
-                url: 'https://a.tile.openstreetmap.org/'
-            });
-            viewer.scene.globe.imageryLayers.addImageryProvider(osmProvider);
-            console.log('OpenStreetMap图层添加成功');
-        } catch (osmError) {
-            console.error('OpenStreetMap图层也失败:', osmError);
+        if (imageryLayers.length === 0) {
+            console.log('没有默认图层，添加OpenStreetMap...');
+            try {
+                const osmProvider = new Cesium.OpenStreetMapImageryProvider({
+                    url: 'https://a.tile.openstreetmap.org/'
+                });
+                imageryLayers.addImageryProvider(osmProvider);
+                console.log('OpenStreetMap图层添加成功');
+            } catch (error) {
+                console.error('OpenStreetMap添加失败:', error);
+                
+                // 备选方案：使用简单颜色地球
+                try {
+                    viewer.scene.globe.material = Cesium.Material.fromType('Color', {
+                        color: new Cesium.Color(0.2, 0.5, 0.8, 1.0) // 蓝色地球
+                    });
+                    console.log('使用简单颜色地球');
+                } catch (materialError) {
+                    console.error('颜色地球也失败:', materialError);
+                }
+            }
+        } else {
+            console.log('默认图层已存在，图层类型:', imageryLayers.get(0).imageryProvider.constructor.name);
         }
-    }
+        
+        // 强制渲染
+        viewer.scene.requestRender();
+    }, 1000); // 等待1秒让默认图层加载
     
     // 配置场景
     const scene = viewer.scene;
@@ -114,9 +118,6 @@ function initCesiumViewer() {
             roll: 0.0
         }
     });
-    
-    // 强制渲染
-    scene.requestRender();
     
     console.log('Cesium Viewer初始化完成');
     return viewer;
