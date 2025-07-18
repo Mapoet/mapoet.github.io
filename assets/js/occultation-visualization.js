@@ -105,8 +105,25 @@ function initCesiumViewer() {
     
     // 配置场景
     const scene = viewer.scene;
-    scene.globe.enableLighting = false; // 暂时关闭光照
-    scene.globe.atmosphereLighting = false; // 暂时关闭大气光照
+    scene.globe.enableLighting = true; // 启用光照
+    scene.globe.atmosphereLighting = true; // 启用大气光照
+    scene.globe.atmosphereLightingIntensity = 5.0; // 大气光照强度
+    scene.globe.atmosphereHueShift = 0.1; // 大气色调偏移
+    scene.globe.atmosphereSaturationShift = 0.1; // 大气饱和度偏移
+    scene.globe.atmosphereBrightnessShift = 1.0; // 大气亮度偏移
+    
+    // 启用地形
+    try {
+        const worldTerrain = Cesium.createWorldTerrain();
+        viewer.terrainProvider = worldTerrain;
+        console.log('世界地形添加成功');
+    } catch (terrainError) {
+        console.error('地形添加失败:', terrainError);
+    }
+    
+    // 启用阴影
+    scene.shadowMap.enabled = true;
+    scene.shadowMap.size = 2048; // 阴影贴图大小
     
     // 设置相机初始位置
     viewer.camera.setView({
@@ -168,10 +185,11 @@ function addOccultationTrajectories(viewer, data) {
             name: `${event.type} 掩星轨迹 ${index + 1}`,
             polyline: {
                 positions: positions,
-                width: 2,
+                width: 3, // 增加线宽
                 material: lineMaterial,
                 clampToGround: false,
-                zIndex: 1000
+                zIndex: 1000,
+                shadows: Cesium.ShadowMode.ENABLED // 启用阴影
             }
         });
         
@@ -269,7 +287,7 @@ function addLegend(viewer, stats) {
             操作: 鼠标拖拽旋转 | 滚轮缩放 | 双击定位 | 点击轨迹显示编号
         </div>
         <div style="font-size: 9px; margin-top: 4px; opacity: 0.7; text-align: center;">
-            地球纹理: Cesium World Imagery
+            地球纹理: Cesium World Imagery | 地形: 世界地形 | 光照: 启用
         </div>
     `;
     
