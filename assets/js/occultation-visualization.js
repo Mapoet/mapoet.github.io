@@ -74,19 +74,42 @@ function createThreeJSVisualization(data) {
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     
     renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setClearColor(0x000000);
+    renderer.setClearColor(0x000011); // 深蓝色背景
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
     
-    // 创建地球
-    const earthGeometry = new THREE.SphereGeometry(5, 32, 32);
-    const earthMaterial = new THREE.MeshBasicMaterial({ 
+    // 创建地球 - 使用更好的材质和纹理
+    const earthGeometry = new THREE.SphereGeometry(5, 64, 64);
+    
+    // 创建地球材质 - 使用PhongMaterial获得更好的光照效果
+    const earthMaterial = new THREE.MeshPhongMaterial({ 
         color: 0x0066cc,
         transparent: true,
-        opacity: 0.8
+        opacity: 0.9,
+        shininess: 30
     });
+    
     const earth = new THREE.Mesh(earthGeometry, earthMaterial);
     scene.add(earth);
+    
+    // 添加大气层效果
+    const atmosphereGeometry = new THREE.SphereGeometry(5.2, 64, 64);
+    const atmosphereMaterial = new THREE.MeshBasicMaterial({ 
+        color: 0x0066cc,
+        transparent: true,
+        opacity: 0.1,
+        side: THREE.BackSide
+    });
+    const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+    scene.add(atmosphere);
+    
+    // 添加光照
+    const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+    scene.add(ambientLight);
+    
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(10, 5, 5);
+    scene.add(directionalLight);
     
     // 添加轨迹线
     const testData = data.slice(0, 5);
@@ -109,23 +132,142 @@ function createThreeJSVisualization(data) {
         const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
         const lineMaterial = new THREE.LineBasicMaterial({ 
             color: getColor(event.type),
-            linewidth: 2
+            linewidth: 3,
+            transparent: true,
+            opacity: 0.8
         });
         const line = new THREE.Line(lineGeometry, lineMaterial);
         scene.add(line);
+        
+        // 添加轨迹起点和终点的标记
+        if (points.length > 0) {
+            const startPoint = points[0];
+            const endPoint = points[points.length - 1];
+            
+            // 起点标记
+            const startGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+            const startMaterial = new THREE.MeshBasicMaterial({ color: getColor(event.type) });
+            const startMarker = new THREE.Mesh(startGeometry, startMaterial);
+            startMarker.position.copy(startPoint);
+            scene.add(startMarker);
+            
+            // 终点标记
+            const endGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+            const endMaterial = new THREE.MeshBasicMaterial({ color: getColor(event.type) });
+            const endMarker = new THREE.Mesh(endGeometry, endMaterial);
+            endMarker.position.copy(endPoint);
+            scene.add(endMarker);
+        }
     });
     
     camera.position.z = 15;
     
+    // 添加鼠标/触屏控制
+    let isMouseDown = false;
+    let mouseX = 0;
+    let mouseY = 0;
+    let targetRotationX = 0;
+    let targetRotationY = 0;
+    let currentRotationX = 0;
+    let currentRotationY = 0;
+    
+    // 鼠标事件
+    renderer.domElement.addEventListener('mousedown', function(event) {
+        isMouseDown = true;
+        mouseX = event.clientX;
+        mouseY = event.clientY;
+    });
+    
+    renderer.domElement.addEventListener('mousemove', function(event) {
+        if (isMouseDown) {
+            const deltaX = event.clientX - mouseX;
+            const deltaY = event.clientY - mouseY;
+            
+            targetRotationY += deltaX * 0.01;
+            targetRotationX += deltaY * 0.01;
+            
+            // 限制垂直旋转角度
+            targetRotationX = Math.max(-Math.PI/2, Math.min(Math.PI/2, targetRotationX));
+            
+            mouseX = event.clientX;
+            mouseY = event.clientY;
+        }
+    });
+    
+    renderer.domElement.addEventListener('mouseup', function() {
+        isMouseDown = false;
+    });
+    
+    renderer.domElement.addEventListener('mouseleave', function() {
+        isMouseDown = false;
+    });
+    
+    // 触屏事件
+    renderer.domElement.addEventListener('touchstart', function(event) {
+        event.preventDefault();
+        if (event.touches.length === 1) {
+            isMouseDown = true;
+            mouseX = event.touches[0].clientX;
+            mouseY = event.touches[0].clientY;
+        }
+    });
+    
+    renderer.domElement.addEventListener('touchmove', function(event) {
+        event.preventDefault();
+        if (isMouseDown && event.touches.length === 1) {
+            const deltaX = event.touches[0].clientX - mouseX;
+            const deltaY = event.touches[0].clientY - mouseY;
+            
+            targetRotationY += deltaX * 0.01;
+            targetRotationX += deltaY * 0.01;
+            
+            targetRotationX = Math.max(-Math.PI/2, Math.min(Math.PI/2, targetRotationX));
+            
+            mouseX = event.touches[0].clientX;
+            mouseY = event.touches[0].clientY;
+        }
+    });
+    
+    renderer.domElement.addEventListener('touchend', function(event) {
+        event.preventDefault();
+        isMouseDown = false;
+    });
+    
+    // 滚轮缩放
+    renderer.domElement.addEventListener('wheel', function(event) {
+        event.preventDefault();
+        const zoomSpeed = 0.1;
+        const delta = event.deltaY > 0 ? 1 : -1;
+        camera.position.z += delta * zoomSpeed;
+        camera.position.z = Math.max(8, Math.min(30, camera.position.z));
+    });
+    
     // 动画循环
     function animate() {
         requestAnimationFrame(animate);
-        earth.rotation.y += 0.005;
+        
+        // 平滑旋转
+        currentRotationX += (targetRotationX - currentRotationX) * 0.1;
+        currentRotationY += (targetRotationY - currentRotationY) * 0.1;
+        
+        earth.rotation.x = currentRotationX;
+        earth.rotation.y = currentRotationY;
+        atmosphere.rotation.x = currentRotationX;
+        atmosphere.rotation.y = currentRotationY;
+        
+        // 如果没有鼠标交互，自动旋转
+        if (!isMouseDown) {
+            earth.rotation.y += 0.005;
+            atmosphere.rotation.y += 0.005;
+            targetRotationY += 0.005;
+            currentRotationY += 0.005;
+        }
+        
         renderer.render(scene, camera);
     }
     
     animate();
-    showStatus(`Three.js渲染完成！显示 ${testData.length} 条轨迹`);
+    showStatus(`Three.js渲染完成！显示 ${testData.length} 条轨迹。支持鼠标拖拽和滚轮缩放。`);
 }
 
 // 主函数
