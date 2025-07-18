@@ -52,44 +52,58 @@ function checkDOM() {
 function initCesiumViewer() {
     console.log('初始化Cesium Viewer...');
     
-    // 创建Cesium Viewer - 使用简化配置避免兼容性问题
+    // 创建Cesium Viewer - 使用最简配置确保地球显示
     const viewer = new Cesium.Viewer('cesiumContainer', {
-        baseLayerPicker: true, // 图层选择器
-        geocoder: true, // 地理编码器
-        homeButton: true, // 主页按钮
-        sceneModePicker: true, // 场景模式选择器
-        navigationHelpButton: true, // 导航帮助按钮
+        baseLayerPicker: false, // 暂时关闭图层选择器
+        geocoder: false, // 暂时关闭地理编码器
+        homeButton: false, // 暂时关闭主页按钮
+        sceneModePicker: false, // 暂时关闭场景模式选择器
+        navigationHelpButton: false, // 暂时关闭导航帮助按钮
         animation: false, // 动画控件
         timeline: false, // 时间轴
-        fullscreenButton: true, // 全屏按钮
-        infoBox: true, // 信息框
-        selectionIndicator: true, // 选择指示器
-        shadows: false, // 关闭阴影避免兼容性问题
+        fullscreenButton: false, // 暂时关闭全屏按钮
+        infoBox: false, // 暂时关闭信息框
+        selectionIndicator: false, // 暂时关闭选择指示器
+        shadows: false, // 关闭阴影
         shouldAnimate: true, // 动画
-        requestRenderMode: true, // 请求渲染模式
-        maximumRenderTimeChange: Infinity, // 最大渲染时间变化
+        requestRenderMode: false, // 关闭请求渲染模式
         targetFrameRate: 60 // 目标帧率
     });
     
-    // 确保地球图层正确加载
-    const imageryLayers = viewer.scene.globe.imageryLayers;
-    if (imageryLayers.length === 0) {
-        // 如果没有图层，添加默认的Bing Maps图层
-        imageryLayers.addImageryProvider(new Cesium.BingMapsImageryProvider({
+    // 强制设置地球图层
+    try {
+        // 移除默认图层
+        viewer.scene.globe.imageryLayers.removeAll();
+        
+        // 添加Bing Maps图层
+        const bingProvider = new Cesium.BingMapsImageryProvider({
             url: 'https://dev.virtualearth.net',
             key: 'AuGz4Kzoq3JIIx7hdNh1u65d0u0fxXtTMdUrvBxCEZRO3z9EnOW5m8rp5nKvAecJ',
             mapStyle: Cesium.BingMapsStyle.AERIAL_WITH_LABELS
-        }));
+        });
+        
+        viewer.scene.globe.imageryLayers.addImageryProvider(bingProvider);
+        console.log('Bing Maps图层添加成功');
+        
+    } catch (error) {
+        console.error('Bing Maps图层添加失败:', error);
+        
+        // 备选方案：使用OpenStreetMap
+        try {
+            const osmProvider = new Cesium.OpenStreetMapImageryProvider({
+                url: 'https://a.tile.openstreetmap.org/'
+            });
+            viewer.scene.globe.imageryLayers.addImageryProvider(osmProvider);
+            console.log('OpenStreetMap图层添加成功');
+        } catch (osmError) {
+            console.error('OpenStreetMap图层也失败:', osmError);
+        }
     }
     
     // 配置场景
     const scene = viewer.scene;
-    scene.globe.enableLighting = true; // 启用光照
-    scene.globe.atmosphereLighting = true; // 大气光照
-    scene.globe.atmosphereLightingIntensity = 5.0; // 大气光照强度
-    scene.globe.atmosphereHueShift = 0.1; // 大气色调偏移
-    scene.globe.atmosphereSaturationShift = 0.1; // 大气饱和度偏移
-    scene.globe.atmosphereBrightnessShift = 1.0; // 大气亮度偏移
+    scene.globe.enableLighting = false; // 暂时关闭光照
+    scene.globe.atmosphereLighting = false; // 暂时关闭大气光照
     
     // 设置相机初始位置
     viewer.camera.setView({
@@ -101,9 +115,10 @@ function initCesiumViewer() {
         }
     });
     
-    // 启用深度测试
-    scene.globe.depthTestAgainstTerrain = true;
+    // 强制渲染
+    scene.requestRender();
     
+    console.log('Cesium Viewer初始化完成');
     return viewer;
 }
 
