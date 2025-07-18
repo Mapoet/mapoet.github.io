@@ -154,7 +154,7 @@ function addOccultationTrajectories(viewer, data) {
         }
         
         // 添加轨迹线
-        viewer.entities.add({
+        const polyline = viewer.entities.add({
             name: `${event.type} 掩星轨迹 ${index + 1}`,
             polyline: {
                 positions: positions,
@@ -165,55 +165,58 @@ function addOccultationTrajectories(viewer, data) {
             }
         });
         
-        // 添加起点标记（始终显示）
-        if (positions.length > 0) {
-            viewer.entities.add({
-                name: `起点 ${index + 1} (${event.type})`,
-                position: positions[0],
-                point: {
-                    pixelSize: 6,
-                    color: lineColor,
-                    outlineColor: Cesium.Color.WHITE,
-                    outlineWidth: 1,
-                    heightReference: Cesium.HeightReference.NONE
-                },
-                label: {
-                    text: `${event.type === 'iono' ? 'I' : 'A'}${index + 1}`,
-                    font: '10pt sans-serif',
-                    fillColor: Cesium.Color.WHITE,
-                    outlineColor: Cesium.Color.BLACK,
-                    outlineWidth: 1,
-                    style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                    pixelOffset: new Cesium.Cartesian2(0, -15),
-                    heightReference: Cesium.HeightReference.NONE,
-                    show: true // 始终显示标签
-                }
-            });
-            
-            // 添加终点标记（始终显示）
-            viewer.entities.add({
-                name: `终点 ${index + 1} (${event.type})`,
-                position: positions[positions.length - 1],
-                point: {
-                    pixelSize: 6,
-                    color: lineColor,
-                    outlineColor: Cesium.Color.WHITE,
-                    outlineWidth: 1,
-                    heightReference: Cesium.HeightReference.NONE
-                },
-                label: {
-                    text: `${event.type === 'iono' ? 'I' : 'A'}${index + 1}`,
-                    font: '10pt sans-serif',
-                    fillColor: Cesium.Color.WHITE,
-                    outlineColor: Cesium.Color.BLACK,
-                    outlineWidth: 1,
-                    style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                    pixelOffset: new Cesium.Cartesian2(0, -15),
-                    heightReference: Cesium.HeightReference.NONE,
-                    show: true // 始终显示标签
-                }
-            });
-        }
+        // 添加起点标记和标签
+        const startPoint = viewer.entities.add({
+            position: Cesium.Cartesian3.fromDegrees(positions[0].x, positions[0].y, positions[0].z),
+            point: {
+                pixelSize: 6,
+                color: lineColor,
+                outlineColor: Cesium.Color.WHITE,
+                outlineWidth: 1,
+                heightReference: Cesium.HeightReference.NONE
+            },
+            label: {
+                text: `${event.type === 'iono' ? 'I' : 'A'}${index + 1}`,
+                font: '10pt sans-serif',
+                fillColor: Cesium.Color.WHITE,
+                outlineColor: Cesium.Color.BLACK,
+                outlineWidth: 1,
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                pixelOffset: new Cesium.Cartesian2(0, -15),
+                heightReference: Cesium.HeightReference.NONE,
+                show: false // 默认隐藏标签
+            }
+        });
+        
+        // 添加终点标记和标签
+        const endPoint = viewer.entities.add({
+            position: Cesium.Cartesian3.fromDegrees(positions[positions.length - 1].x, positions[positions.length - 1].y, positions[positions.length - 1].z),
+            point: {
+                pixelSize: 6,
+                color: lineColor,
+                outlineColor: Cesium.Color.WHITE,
+                outlineWidth: 1,
+                heightReference: Cesium.HeightReference.NONE
+            },
+            label: {
+                text: `${event.type === 'iono' ? 'I' : 'A'}${index + 1}`,
+                font: '10pt sans-serif',
+                fillColor: Cesium.Color.WHITE,
+                outlineColor: Cesium.Color.BLACK,
+                outlineWidth: 1,
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                pixelOffset: new Cesium.Cartesian2(0, -15),
+                heightReference: Cesium.HeightReference.NONE,
+                show: false // 默认隐藏标签
+            }
+        });
+        
+        // 添加点击事件处理
+        startPoint.point.id = `event_${index}`;
+        endPoint.point.id = `event_${index}`;
+        
+        // 为轨迹线也添加点击事件
+        polyline.id = `event_${index}`;
         
         validEvents++;
     });
@@ -306,7 +309,41 @@ function loadDataForCesium(viewer) {
             const stats = addOccultationTrajectories(viewer, data);
             addLegend(viewer, stats);
             
-            showStatus(`Cesium渲染完成！显示 ${stats.total} 条轨迹。支持鼠标拖拽、滚轮缩放、双击定位。`);
+            // 添加点击事件处理
+            viewer.screenSpaceEventHandler.setInputAction(function(click) {
+                const pickedObject = viewer.scene.pick(click.position);
+                if (Cesium.defined(pickedObject)) {
+                    const entity = pickedObject.id;
+                    if (entity && entity.id && entity.id.startsWith('event_')) {
+                        // 隐藏所有标签
+                        viewer.entities.values.forEach(function(e) {
+                            if (e.label) {
+                                e.label.show = false;
+                            }
+                        });
+                        
+                        // 显示选中事件的标签
+                        const eventIndex = entity.id.split('_')[1];
+                        viewer.entities.values.forEach(function(e) {
+                            if (e.id === `event_${eventIndex}` && e.label) {
+                                e.label.show = true;
+                            }
+                        });
+                        
+                        console.log(`选中掩星事件 ${parseInt(eventIndex) + 1}`);
+                    }
+                } else {
+                    // 点击空白区域，隐藏所有标签
+                    viewer.entities.values.forEach(function(e) {
+                        if (e.label) {
+                            e.label.show = false;
+                        }
+                    });
+                }
+            }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+            
+            console.log(`Cesium渲染完成!显示${validEvents}条轨迹。支持鼠标拖拽、滚轮缩放、双击定位。`);
+            showStatus(`Cesium渲染完成!显示${validEvents}条轨迹。支持鼠标拖拽、滚轮缩放、双击定位。`);
         })
         .catch(error => {
             console.error('Cesium数据加载失败:', error);
