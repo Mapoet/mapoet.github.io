@@ -82,13 +82,33 @@ function initCesiumViewer() {
             viewer.scene.globe.imageryLayers.addImageryProvider(worldImagery);
             console.log('Cesium World Imagery高质量地球纹理添加成功');
             
-            // 添加夜间纹理图层
-            const nightImagery = new Cesium.IonImageryProvider({
-                assetId: 3845 // Cesium World Imagery Night
-            });
-            const nightLayer = viewer.scene.globe.imageryLayers.addImageryProvider(nightImagery);
-            nightLayer.alpha = 0.0; // 初始透明
-            console.log('夜间纹理图层添加成功');
+            // 添加夜间纹理图层 - 使用更可靠的方式
+            try {
+                const nightImagery = new Cesium.IonImageryProvider({
+                    assetId: 3845 // Cesium World Imagery Night
+                });
+                const nightLayer = viewer.scene.globe.imageryLayers.addImageryProvider(nightImagery);
+                nightLayer.alpha = 0.0; // 初始透明
+                console.log('夜间纹理图层添加成功');
+                
+                // 存储夜间图层引用
+                viewer.nightLayer = nightLayer;
+            } catch (nightError) {
+                console.error('夜间纹理加载失败:', nightError);
+                // 尝试使用备选夜间纹理
+                try {
+                    const nightImagery2 = new Cesium.IonImageryProvider({
+                        assetId: 3845,
+                        accessToken: Cesium.Ion.defaultAccessToken
+                    });
+                    const nightLayer2 = viewer.scene.globe.imageryLayers.addImageryProvider(nightImagery2);
+                    nightLayer2.alpha = 0.0;
+                    viewer.nightLayer = nightLayer2;
+                    console.log('备选夜间纹理图层添加成功');
+                } catch (nightError2) {
+                    console.error('备选夜间纹理也失败:', nightError2);
+                }
+            }
             
         } catch (worldError) {
             console.error('Cesium World Imagery失败:', worldError);
@@ -147,7 +167,7 @@ function initCesiumViewer() {
         const hour = date.getUTCHours();
         
         // 获取夜间图层
-        const nightLayer = viewer.scene.globe.imageryLayers.get(1);
+        const nightLayer = viewer.nightLayer;
         if (nightLayer) {
             // 根据时间计算夜间纹理的透明度
             let alpha = 0.0;
@@ -155,15 +175,20 @@ function initCesiumViewer() {
                 // 夜间 (18:00-06:00)
                 alpha = 1.0;
             } else if (hour >= 6 && hour < 8) {
-                // 日出过渡 (06:00-08:00)
-                alpha = 1.0 - (hour - 6) / 2;
+                // 日出过渡 (06:00-08:00) - 更平滑的过渡
+                alpha = 1.0 - (hour - 6 + date.getUTCMinutes() / 60) / 2;
             } else if (hour >= 16 && hour < 18) {
-                // 日落过渡 (16:00-18:00)
-                alpha = (hour - 16) / 2;
+                // 日落过渡 (16:00-18:00) - 更平滑的过渡
+                alpha = (hour - 16 + date.getUTCMinutes() / 60) / 2;
             }
             
+            // 确保alpha值在0-1范围内
+            alpha = Math.max(0.0, Math.min(1.0, alpha));
+            
             nightLayer.alpha = alpha;
-            console.log(`时间: ${hour}:00, 夜间纹理透明度: ${alpha.toFixed(2)}`);
+            console.log(`时间: ${hour}:${date.getUTCMinutes().toString().padStart(2, '0')}, 夜间纹理透明度: ${alpha.toFixed(2)}`);
+        } else {
+            console.log('夜间图层未找到，无法进行昼夜切换');
         }
     }
     
@@ -282,6 +307,21 @@ function initCesiumViewer() {
                 } else {
                     message = '未找到图例元素';
                     console.log('未找到图例元素');
+                }
+                break;
+                
+            case 'd':
+                // D键：测试昼夜切换
+                event.preventDefault();
+                const nightLayer = viewer.nightLayer;
+                if (nightLayer) {
+                    const currentAlpha = nightLayer.alpha;
+                    nightLayer.alpha = currentAlpha > 0.5 ? 0.0 : 1.0;
+                    message = `昼夜切换测试: ${nightLayer.alpha > 0.5 ? '夜间' : '白天'}`;
+                    console.log('昼夜切换测试:', nightLayer.alpha);
+                } else {
+                    message = '夜间图层未找到';
+                    console.log('夜间图层未找到');
                 }
                 break;
                 
@@ -486,7 +526,7 @@ function addLegend(viewer, stats) {
             <div>F = 全屏切换 | H = 主页视角 | R = 重置相机</div>
             <div>T = 地形大气 | L = 光照切换 | S = 阴影切换</div>
             <div>1 = 显示标签 | 0 = 隐藏标签 | K = 图例切换</div>
-            <div>ESC = 退出全屏</div>
+            <div>D = 昼夜测试 | ESC = 退出全屏</div>
         </div>
     `;
     
