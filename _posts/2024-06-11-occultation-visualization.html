@@ -21,7 +21,7 @@ tags:
 <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.9/dist/echarts-gl.min.js"></script>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script>
-const eventFile = '/assets/data/occultation_events.json'; // 修正为正确路径
+const eventFile = '/assets/data/occultation_events.json';
 const statusDiv = document.getElementById('status');
 
 function getColor(type) {
@@ -47,10 +47,14 @@ d3.json(eventFile)
         showStatus(`数据加载成功，共 ${data.length} 个事件`);
         console.log('数据预览:', data.slice(0, 2));
         
+        // 只取前10个事件进行测试
+        const testData = data.slice(0, 10);
+        showStatus(`测试模式：只显示前 ${testData.length} 个事件`);
+        
         const series = [];
         let validEvents = 0;
         
-        data.forEach((event, index) => {
+        testData.forEach((event, index) => {
             if (!event.points || event.points.length < 2) {
                 console.log(`事件 ${index} 点数不足:`, event.points?.length);
                 return;
@@ -62,6 +66,9 @@ d3.json(eventFile)
                 const alt = parseFloat(p.alt) || 0;
                 return [lon, lat, alt * 100]; // ECharts GL高度单位为km*100
             });
+            
+            console.log(`事件 ${index} (${event.type}): ${coords.length} 个点`);
+            console.log(`坐标范围: lon[${Math.min(...coords.map(c=>c[0]))}, ${Math.max(...coords.map(c=>c[0]))}], lat[${Math.min(...coords.map(c=>c[1]))}, ${Math.max(...coords.map(c=>c[1]))}], alt[${Math.min(...coords.map(c=>c[2]))}, ${Math.max(...coords.map(c=>c[2]))}]`);
             
             series.push({
                 type: 'lines3D',
@@ -78,12 +85,13 @@ d3.json(eventFile)
                     color: getColor(event.type),
                     opacity: 0.8
                 },
-                data: [{ coords }]
+                data: coords
             });
             validEvents++;
         });
         
-        showStatus(`有效事件: ${validEvents}/${data.length}，正在渲染...`);
+        showStatus(`有效事件: ${validEvents}/${testData.length}，正在渲染...`);
+        console.log('Series配置:', series);
         
         const chart = echarts.init(document.getElementById('main'));
         const option = {
@@ -107,6 +115,7 @@ d3.json(eventFile)
             series: series
         };
         
+        console.log('ECharts配置:', option);
         chart.setOption(option);
         showStatus(`渲染完成！共显示 ${validEvents} 条轨迹`);
     })
