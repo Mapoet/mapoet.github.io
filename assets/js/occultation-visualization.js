@@ -120,7 +120,7 @@ function createThreeJSVisualization(data) {
             const lon = (parseFloat(p.lon) || 0) * Math.PI / 180;
             const lat = (parseFloat(p.lat) || 0) * Math.PI / 180;
             const alt = parseFloat(p.alt) || 0;
-            const radius = 5 + alt / 100; // 地球半径 + 高度
+            const radius = (6378.137 + alt / 100) * 1000; // 地球半径 + 高度
             
             const x = radius * Math.cos(lat) * Math.cos(lon);
             const y = radius * Math.sin(lat);
