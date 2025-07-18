@@ -35,7 +35,7 @@ COSMIC: 4篇
 IRI: 4篇
 GNSS: 3篇
 电离层: 1篇
-大气: 1篇
+大气: 2篇
 
 📅 最新论文 (最近5年)
 ----------------------------------------
@@ -72,82 +72,66 @@ GNSS: 3篇
 
 2024 - Journal of Geophysical Research: Space Physics
 标题: Dynamic Characterization of Equatorial Plasma Bubble Based on Triangle Network-Joint Slope Approach
-👤 第一作者/通讯作者
 ----------------------------------------
 
 2023 - 测绘科学
 标题: GPS/PWV与第五代大气再分析数据的短时强降水分析
-👤 第一作者/通讯作者
 ----------------------------------------
 
 2023 - Radio Science
 标题: The Ionospheric Exploration Based on TJU#01 Meteorological Microsatellite Mission: Initial Results
-👤 第一作者/通讯作者
 ----------------------------------------
 
 2022 - Sensors
 标题: Assessment of ZTD Derived from COSMIC Occultation Data with ECWMF, Radiosondes, and GNSS
-👤 第一作者/通讯作者
 ----------------------------------------
 
 2022 - Advances in Space Research
 标题: Vertical characterization on global ionospheric variations during the magnetic storm in September 2017 with hierarchical subtraction method
-👤 第一作者/通讯作者
 ----------------------------------------
 
 2022 - IEEE Transactions on Geoscience and Remote Sensing
 标题: Sea Surface Wind Speed Retrieval Based on Empirical Orthogonal Function Analysis Using 2019–2020 CYGNSS Data
-👤 第一作者/通讯作者
 ----------------------------------------
 
 2020 - 天文学进展
 标题: 基于多源GNSS观测数据的三维电离层研究现状及发展
-👤 第一作者/通讯作者
 ----------------------------------------
 
 2020 - Remote Sensing.
 标题: Mountain Top-Based Atmospheric Radio Occultation Observations with Open/Closed Loop Tracking: Experiment and Validation
-👤 第一作者/通讯作者
 ----------------------------------------
 
 2020 - Journal of Geophysical Research: Space Physics
 标题: New Vary-Chap Scale Height Profile Retrieved From COSMIC Radio Occultation Data
-👤 第一作者/通讯作者
 ----------------------------------------
 
 2020 - IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing
 标题: Sea Surface Height Estimation by Ground-Based BDS GEO Satellite Reflectometry
-👤 第一作者/通讯作者
 ----------------------------------------
 
 2020 - Journal of Atmospheric and Solar-Terrestrial Physics
 标题: The analysis of assumptions’ error sources on assimilating ground-based/spaceborne ionospheric observations
-👤 第一作者/通讯作者
 ----------------------------------------
 
 2019 - Journal of Geophysical Research: Space Physics
 标题: Evaluation of Abel Inversion Method Assisted By an Improved IRI Model
-👤 第一作者/通讯作者
 ----------------------------------------
 
 2019 - Remote Sensing
 标题: The two-parts step-by-step ionospheric assimilation based on ground-based/spaceborne observations and its verification
-👤 第一作者/通讯作者
 ----------------------------------------
 
 2018 - Journal of Geophysical Research: Space Physics
 标题: Improvement of the IRI Model Using F2 Layer Parameters Derived From GPS/COSMIC Radio Occultation Observations
-👤 第一作者/通讯作者
 ----------------------------------------
 
 2016 - Remote Sensing Science
 标题: Retrieval Processing Technique For LEO-LEO Radio Occultation Atmospheric Data and Error Sources Analysis
-👤 第一作者/通讯作者
 ----------------------------------------
 
 2016 - Journal of Geophysical Research: Space Physics
 标题: Topside correction of IRI by global modeling of ionospheric scale height using COSMIC radio occultation data
-👤 第一作者/通讯作者
 ----------------------------------------
 
 🎯 总结
