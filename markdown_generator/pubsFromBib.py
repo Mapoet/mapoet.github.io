@@ -143,7 +143,7 @@ for pubsource in publist:
             if "abstract" in b.keys() and len(str(b["abstract"])) > 0:
                 md += "\n## 摘要\n\n" + b["abstract"] + "\n"
             if url:
-                md += "\n[Access paper here](" + b["url"] + "){\:target=\"_blank\"}\n" 
+                md += "\n[Access paper here](" + b["url"] + ")\n" 
             else:
                 md += "\nUse [Google Scholar](https://scholar.google.com/scholar?q="+html.escape(clean_title.replace("-","+"))+"){:target=\"_blank\"} for full citation"
             md_filename = os.path.basename(md_filename)

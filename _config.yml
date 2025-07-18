@@ -84,8 +84,8 @@ author:
   name             : "付乃锋 (Naifeng Fu)"
   avatar           : "Me.png"
   bio              : "理学博士，天津大学博士后，GNSS-R/-RO技术设备研制及数据应用专家。研究方向：数值优化，GNSS掩星，电离层建模及同化，大气反演，机器学习，计算机可视化。"
-  location         : "天津市南开区卫津路92号,\n天津大学，中国"
-  employer         : "天津大学"
+  location         : "卫津路92号,\n天津大学"
+  employer         : "天津大学，中国"
   pubmed           : 
   googlescholar    : 
   email            : "funaifeng@163.com"
