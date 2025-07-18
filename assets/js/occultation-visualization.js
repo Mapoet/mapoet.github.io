@@ -59,8 +59,8 @@ function initCesiumViewer() {
         homeButton: false, // 暂时关闭主页按钮
         sceneModePicker: false, // 暂时关闭场景模式选择器
         navigationHelpButton: false, // 暂时关闭导航帮助按钮
-        animation: false, // 动画控件
-        timeline: false, // 时间轴
+        animation: true, // 启用动画控件
+        timeline: true, // 启用时间轴
         fullscreenButton: false, // 暂时关闭全屏按钮
         infoBox: false, // 暂时关闭信息框
         selectionIndicator: false, // 暂时关闭选择指示器
@@ -81,6 +81,15 @@ function initCesiumViewer() {
             const worldImagery = Cesium.createWorldImagery();
             viewer.scene.globe.imageryLayers.addImageryProvider(worldImagery);
             console.log('Cesium World Imagery高质量地球纹理添加成功');
+            
+            // 添加夜间纹理图层
+            const nightImagery = new Cesium.IonImageryProvider({
+                assetId: 3845 // Cesium World Imagery Night
+            });
+            const nightLayer = viewer.scene.globe.imageryLayers.addImageryProvider(nightImagery);
+            nightLayer.alpha = 0.0; // 初始透明
+            console.log('夜间纹理图层添加成功');
+            
         } catch (worldError) {
             console.error('Cesium World Imagery失败:', worldError);
             
@@ -111,6 +120,58 @@ function initCesiumViewer() {
     scene.globe.atmosphereHueShift = 0.1; // 大气色调偏移
     scene.globe.atmosphereSaturationShift = 0.1; // 大气饱和度偏移
     scene.globe.atmosphereBrightnessShift = 1.0; // 大气亮度偏移
+    
+    // 启用太阳光照
+    scene.globe.enableLighting = true;
+    scene.sun = new Cesium.Sun();
+    scene.moon = new Cesium.Moon();
+    scene.skyBox = new Cesium.SkyBox({
+        sources: {
+            positiveX: 'https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Assets/Textures/SkyBox/tycho2t3_80_px.jpg',
+            negativeX: 'https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Assets/Textures/SkyBox/tycho2t3_80_mx.jpg',
+            positiveY: 'https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Assets/Textures/SkyBox/tycho2t3_80_py.jpg',
+            negativeY: 'https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Assets/Textures/SkyBox/tycho2t3_80_my.jpg',
+            positiveZ: 'https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Assets/Textures/SkyBox/tycho2t3_80_pz.jpg',
+            negativeZ: 'https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Assets/Textures/SkyBox/tycho2t3_80_mz.jpg'
+        }
+    });
+    
+    // 设置当前时间为真实时间
+    viewer.clock.currentTime = Cesium.JulianDate.fromDate(new Date());
+    viewer.clock.shouldAnimate = true;
+    
+    // 昼夜纹理切换函数
+    function updateDayNightTexture() {
+        const time = viewer.clock.currentTime;
+        const date = Cesium.JulianDate.toDate(time);
+        const hour = date.getUTCHours();
+        
+        // 获取夜间图层
+        const nightLayer = viewer.scene.globe.imageryLayers.get(1);
+        if (nightLayer) {
+            // 根据时间计算夜间纹理的透明度
+            let alpha = 0.0;
+            if (hour >= 18 || hour < 6) {
+                // 夜间 (18:00-06:00)
+                alpha = 1.0;
+            } else if (hour >= 6 && hour < 8) {
+                // 日出过渡 (06:00-08:00)
+                alpha = 1.0 - (hour - 6) / 2;
+            } else if (hour >= 16 && hour < 18) {
+                // 日落过渡 (16:00-18:00)
+                alpha = (hour - 16) / 2;
+            }
+            
+            nightLayer.alpha = alpha;
+            console.log(`时间: ${hour}:00, 夜间纹理透明度: ${alpha.toFixed(2)}`);
+        }
+    }
+    
+    // 监听时间变化
+    viewer.clock.onTick.addEventListener(updateDayNightTexture);
+    
+    // 初始更新
+    updateDayNightTexture();
     
     // 启用地形
     try {
@@ -287,7 +348,7 @@ function addLegend(viewer, stats) {
             操作: 鼠标拖拽旋转 | 滚轮缩放 | 双击定位 | 点击轨迹显示编号
         </div>
         <div style="font-size: 9px; margin-top: 4px; opacity: 0.7; text-align: center;">
-            地球纹理: Cesium World Imagery | 地形: 世界地形 | 光照: 启用
+            地球纹理: 昼夜切换 | 地形: 世界地形 | 光照: 太阳光照
         </div>
     `;
     
