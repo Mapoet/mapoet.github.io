@@ -76,50 +76,8 @@ function initCesiumViewer() {
         viewer.scene.globe.imageryLayers.removeAll();
         console.log('已移除所有默认图层');
         
-        // 方案1：使用Cesium World Imagery（高质量，需要token）
-        try {
-            const worldImagery = Cesium.createWorldImagery();
-            viewer.scene.globe.imageryLayers.addImageryProvider(worldImagery);
-            console.log('Cesium World Imagery高质量地球纹理添加成功');
-            
-            // 添加夜间纹理图层 - 使用更可靠的方式
-            try {
-                const nightImagery = new Cesium.IonImageryProvider({
-                    assetId: 3845 // Cesium World Imagery Night
-                });
-                const nightLayer = viewer.scene.globe.imageryLayers.addImageryProvider(nightImagery);
-                nightLayer.alpha = 0.0; // 初始透明
-                console.log('夜间纹理图层添加成功');
-                
-                // 存储夜间图层引用
-                viewer.nightLayer = nightLayer;
-            } catch (nightError) {
-                console.error('夜间纹理加载失败:', nightError);
-                // 尝试使用备选夜间纹理
-                try {
-                    const nightImagery2 = new Cesium.IonImageryProvider({
-                        assetId: 3845,
-                        accessToken: Cesium.Ion.defaultAccessToken
-                    });
-                    const nightLayer2 = viewer.scene.globe.imageryLayers.addImageryProvider(nightImagery2);
-                    nightLayer2.alpha = 0.0;
-                    viewer.nightLayer = nightLayer2;
-                    console.log('备选夜间纹理图层添加成功');
-                } catch (nightError2) {
-                    console.error('备选夜间纹理也失败:', nightError2);
-                }
-            }
-            
-        } catch (worldError) {
-            console.error('Cesium World Imagery失败:', worldError);
-            
-            // 方案2：使用OpenStreetMap（免费，无需API密钥）
-            const osmProvider = new Cesium.OpenStreetMapImageryProvider({
-                url: 'https://a.tile.openstreetmap.org/'
-            });
-            viewer.scene.globe.imageryLayers.addImageryProvider(osmProvider);
-            console.log('OpenStreetMap地球纹理添加成功');
-        }
+        // 使用OpenStreetMap实现昼夜交替
+        updateLighting(viewer);
         
     } catch (error) {
         console.error('所有纹理添加失败:', error);
@@ -159,44 +117,6 @@ function initCesiumViewer() {
     // 设置当前时间为真实时间
     viewer.clock.currentTime = Cesium.JulianDate.fromDate(new Date());
     viewer.clock.shouldAnimate = true;
-    
-    // 昼夜纹理切换函数
-    function updateDayNightTexture() {
-        const time = viewer.clock.currentTime;
-        const date = Cesium.JulianDate.toDate(time);
-        const hour = date.getUTCHours();
-        
-        // 获取夜间图层
-        const nightLayer = viewer.nightLayer;
-        if (nightLayer) {
-            // 根据时间计算夜间纹理的透明度
-            let alpha = 0.0;
-            if (hour >= 18 || hour < 6) {
-                // 夜间 (18:00-06:00)
-                alpha = 1.0;
-            } else if (hour >= 6 && hour < 8) {
-                // 日出过渡 (06:00-08:00) - 更平滑的过渡
-                alpha = 1.0 - (hour - 6 + date.getUTCMinutes() / 60) / 2;
-            } else if (hour >= 16 && hour < 18) {
-                // 日落过渡 (16:00-18:00) - 更平滑的过渡
-                alpha = (hour - 16 + date.getUTCMinutes() / 60) / 2;
-            }
-            
-            // 确保alpha值在0-1范围内
-            alpha = Math.max(0.0, Math.min(1.0, alpha));
-            
-            nightLayer.alpha = alpha;
-            console.log(`时间: ${hour}:${date.getUTCMinutes().toString().padStart(2, '0')}, 夜间纹理透明度: ${alpha.toFixed(2)}`);
-        } else {
-            console.log('夜间图层未找到，无法进行昼夜切换');
-        }
-    }
-    
-    // 监听时间变化
-    viewer.clock.onTick.addEventListener(updateDayNightTexture);
-    
-    // 初始更新
-    updateDayNightTexture();
     
     // 添加键盘快捷键支持
     document.addEventListener('keydown', function(event) {
@@ -374,6 +294,90 @@ function initCesiumViewer() {
     return viewer;
 }
 
+/**
+ * @description: 昼夜交替效果
+ * @param {*} _viewer
+ * @return {*}
+ */
+function updateLighting(_viewer) {
+    // OSM标准风格地图（白天）
+    const dayLayer = _viewer.scene.globe.imageryLayers.addImageryProvider(
+        new Cesium.UrlTemplateImageryProvider({
+            url: 'https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+            subdomains: ["a", "b", "c", "d"],
+        })
+    );
+
+    // OSM暗色系地图（夜间）
+    const nightLayer = _viewer.scene.globe.imageryLayers.addImageryProvider(
+        new Cesium.UrlTemplateImageryProvider({
+            url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+            subdomains: ["a", "b", "c", "d"],
+        })
+    );
+    
+    // 启用光照
+    _viewer.scene.globe.enableLighting = true;
+    _viewer.clock.shouldAnimate = true;
+    _viewer.clock.multiplier = 5000; // 时间加速
+    
+    // 设置夜间图层初始透明度
+    nightLayer.alpha = 0.0;
+    
+    // 存储图层引用
+    _viewer.dayLayer = dayLayer;
+    _viewer.nightLayer = nightLayer;
+    
+    console.log('OpenStreetMap昼夜交替图层添加成功');
+    
+    // 启动昼夜交替
+    startDayNightCycle(_viewer);
+}
+
+/**
+ * @description: 启动昼夜循环
+ * @param {*} _viewer
+ */
+function startDayNightCycle(_viewer) {
+    // 昼夜纹理切换函数
+    function updateDayNightTexture() {
+        const time = _viewer.clock.currentTime;
+        const date = Cesium.JulianDate.toDate(time);
+        const hour = date.getUTCHours();
+        
+        // 获取夜间图层
+        const nightLayer = _viewer.nightLayer;
+        if (nightLayer) {
+            // 根据时间计算夜间纹理的透明度
+            let alpha = 0.0;
+            if (hour >= 18 || hour < 6) {
+                // 夜间 (18:00-06:00)
+                alpha = 1.0;
+            } else if (hour >= 6 && hour < 8) {
+                // 日出过渡 (06:00-08:00) - 更平滑的过渡
+                alpha = 1.0 - (hour - 6 + date.getUTCMinutes() / 60) / 2;
+            } else if (hour >= 16 && hour < 18) {
+                // 日落过渡 (16:00-18:00) - 更平滑的过渡
+                alpha = (hour - 16 + date.getUTCMinutes() / 60) / 2;
+            }
+            
+            // 确保alpha值在0-1范围内
+            alpha = Math.max(0.0, Math.min(1.0, alpha));
+            
+            nightLayer.alpha = alpha;
+            console.log(`时间: ${hour}:${date.getUTCMinutes().toString().padStart(2, '0')}, 夜间纹理透明度: ${alpha.toFixed(2)}`);
+        } else {
+            console.log('夜间图层未找到，无法进行昼夜切换');
+        }
+    }
+    
+    // 监听时间变化
+    _viewer.clock.onTick.addEventListener(updateDayNightTexture);
+    
+    // 初始更新
+    updateDayNightTexture();
+}
+
 // 添加掩星轨迹到Cesium
 function addOccultationTrajectories(viewer, data) {
     console.log('添加掩星轨迹到Cesium...');
@@ -519,7 +523,7 @@ function addLegend(viewer, stats) {
             操作: 鼠标拖拽旋转 | 滚轮缩放 | 双击定位 | 点击轨迹显示编号
         </div>
         <div style="font-size: 9px; margin-top: 4px; opacity: 0.7; text-align: center;">
-            地球纹理: 昼夜切换 | 地形: 世界地形 | 光照: 太阳光照
+            地球纹理: OSM昼夜切换 | 地形: 世界地形 | 光照: 太阳光照
         </div>
         <div style="border-top: 1px solid #555; margin: 8px 0; padding-top: 6px; font-size: 9px; opacity: 0.8;">
             <div style="font-weight: bold; margin-bottom: 4px;">快捷键:</div>
