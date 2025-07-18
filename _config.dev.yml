@@ -1,13 +1,27 @@
-# Develop override settings
+# Development environment overrides
+# This file is loaded when running Jekyll in development mode
 
-url: http://localhost:4000
+# Override site settings for development
+url: "http://localhost:4000"
+baseurl: ""
 
+# Enable development features
+future: true
+drafts: true
+show_excerpts: true
+
+# Disable analytics in development
 analytics:
   provider: false
 
-comments:
-  disqus:
-    shortname            : "mmistakes-dev"
+# Enable more verbose output
+verbose: true
 
-sass:
-  style: expanded
+# Development-specific plugins
+plugins:
+  - jekyll-paginate
+  - jekyll-sitemap
+  - jekyll-gist
+  - jekyll-feed
+  - jekyll-redirect-from
+  - jekyll-include-cache

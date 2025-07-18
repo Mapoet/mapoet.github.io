@@ -1,6 +1,6 @@
 ---
 layout: archive
-title: "CV"
+title: "简历"
 permalink: /cv/
 author_profile: true
 redirect_from:
@@ -9,60 +9,86 @@ redirect_from:
 
 {% include base_path %}
 
-Education
+教育背景
 ======
-* B.S. in School of Earth Sciences and Information Physics Engineering, Central South University, Changsha, 2010-2014
-* M.S. and Ph.D in Astrometry and celestial mechanics, Shanghai Astronomical Observatory,Chinese Academy of Sciences,Shanghai, 2014-2019 (expected)
+* 理学博士，天体测量与天体力学，中国科学院上海天文台，上海，2014-2020
+  * 博士论文：《基于地基与空基 GNSS 电离层观测数据融合》
+* 工科学士，测绘工程，中南大学，长沙，2010-2014
+  * 学士论文：《惠州市坐标转换系统》
 
-Work experience
-======
-
-* Spring 2017: Assistant Teacher
-  * Shanghai Astronomical Observatory
-  * Contents included: In the Shanghai Youth Science Innovation Practice, I assisted Li Ligang, a researcher to complete the project “Light Speed Measurement Based on Io eclipse”. At work, I surveyed the materials, planned and instructed students to conduct Io eclipse observations,  and taught the project to the high school students and assisted them to complete the project reports and papers.
-  
-* Fall 2015 : Research Assistant
-  * Shanghai Astronomical Observatory
-  * Contents included: Assisting teachers in completing reports and experiments. At the same time, I participated in the teacher project and completed the topic of “The Development of the Occultation Data Simulation and Inversion System Software of China Aerospace 503”, the topic of “Ionospheric Detection Payload Simulation Task Analysis and Simulation System” by Dongfanghong Company and other projects.
-
-* Summer 2014: Partner
-  * Central South University
-  * Contents included: The project name is "High-resolution remote sensing imagery based on improved watershed transformation. Urban road extraction - taking Changsha City as an example." Collect data, study the watershed algorithm and implement it, and finally put it into the road extraction in Changsha.
-  
-* Summer 2011: Partner
-  * Central South University
-  * Contents included: Going to Yongan Town, Liuyang City to investigate the employment and re-employment of migrant workers is a school-level C. As a member of the team, I successfully completed the research task and submitted the research report.
-
-Skills
+工作经历
 ======
 
-* Program Laguanges
+* 2021年2月至今：博士后
+  * 天津大学，天津
+  * 研究内容：GNSS-R/-RO技术设备研制及数据应用
+  * 主要工作：1. 论证卫星轨道建设卫星分布，覆盖范围及对应的电离层及大气掩星分布与时空分辨率; 2. 一体化GNSS-RO载荷研制及掩星数据反演; 3. GNSS-R载荷研制及数据反演; 4. 大气及电离层掩星数据与多源数据融合。
 
-|Laguanges|Level|
+* 2020年至今：算法研究员（兼职）
+  * 天津云遥宇航科技公司，天津
+  * 主要工作：1. 大气及电离层掩星数据论证及模拟（卫星轨道设计及其时空分辨率分析）; 2. 与硬件研发合作验证接收机性能与指标（钟差，信噪比，信号连续性等）; 3. 实现掩星开环跟踪及反掩算法，并进行山基及信号源数据测试。
+
+* 2016年9月至2020年7月：博士研究生
+  * 中国科学院上海天文台
+  * 研究内容：电离层同化算法误差分析，及多源数据在电离层建模中的使用。主要研究方向是电离层多源数据处理及电离层建模。通过研读文献，在获得电离层地基，空基及掩星数据之后，依照数据特征进行综合建模与利用，获得高精度电离层4D产品。在研究期间，参与了多项国家级、省部级及横向项目，重点研究了电离层同化中的误差源、同化方式，完成了6-7篇相关论文（其中4篇一作，2篇SCI），并完成了博士论文。
+
+* 2015年6月至2016年9月：博士研究生
+  * 中国科学院上海天文台
+  * 项目承接于东方红公司。针对卫星信标电离层探测载荷任务分析与指标分解的任务，模拟发生信标电离层探测弧段的情况、模拟无线电信号在卫星-地面站之间电离层的传播过程和传播误差；基于上述仿真数据提取卫星信标电离层的相对TEC；模拟分析不同观测几何构型、输入模型条件、网格划分、台站布设情况下，对卫星路径以下的电离层剖面层析探测；对模拟数据与模型数据进行分析和比较，为三频信标探测数据处理的业务化提供一个比较成熟的平台。在该项目中，主要负责核心模块（以fortran语言实现）调试，接口一致性修改实现软件界面开发及批处理功能（shell，C/C++），以及软件交付材料准备及软件验收。
+
+* 2013年6月至2014年8月：核心功能研发人员
+  * 中南大学
+  * 项目名称"惠州现代测绘基准服务平台"，该项目承接于惠州市国土局，希望达建立坐标基准转换综合平台，实现各部门各县区基于转换工具的坐标成果、高程成果的转换；需要实现城市数据框架平台内，基于坐标转换插件的各种数据格式的图件及数据成果的相互转换。在此次项目中，完成了以下任务：通过C++及COM技术，完成了支持多种符合测绘精度标准的多种坐标系转化算法，实现了对基于C#开发的C/S平台与JS开发的B/S平台的支持；通过SQL Server，设计了项目中使用的各种坐标数据及转化参数的数据库，并集成到了C/S及B/S平台；参与并配合软件界面设计，完成各个模块的功能测试。
+
+* 2014年3月至2014年6月：算法实现者
+  * 中南大学
+  * 基于matlab自主研究SVM及ANN：1.基于词袋数思路，通过对标准图像库图片进行Sift特征提取与描述，然后使用聚类算法生成视觉词汇表，最后训练分类器（SVM）并进行分类检测。2.通过对ORL标准人脸库使用SVD进行特征提取，并通过神经网络进行训练与人脸识别;在研究中分析了对灰度图形是否进行傅利叶变换以及神经网络的参数（层数，神经元数目，核函数等）对人脸识别准确性的影响。
+
+技能
+======
+
+* 编程语言
+
+|语言|熟练程度|
 |---|---|
-|C++       | qualified|
-|Shell     | qualified|
-|Fortran   | qualified|
-|Matlab    | proficient|   
+|C/C++       | 娴熟|
+|Python      | 娴熟|
+|Fortran     | 娴熟|
+|MATLAB      | 精通|
+|SQL         | 娴熟|
+|Shell       | 精通|
+|LaTeX       | 娴熟|
 
-* Certificates
+* 研究方向
+  * 数值优化，GNSS掩星, 电离层建模及同化, 大气反演, 机器学习, 计算机可视化
+
+* 语言能力
+  * 母语为汉语，熟练使用英语听说读写及论文发表与算法实现
+
+* 证书
   * CET4
-  * National Informatization Level 1 Engineer
-  * National Computer Certificate II
-  * Motor Vehicle Driving License (C1) (in the exam)
-  
-* Awards
-  * National Graduate Mathematical Modeling Competition Second Prize(2016.12)
-  * First Class Scholarship of Chinese Academy of Sciences(2014.10)
-  * The third prize of the 5th "Leica Cup" surveying and mapping practice innovation ability competition group of Central South University(2013.06)
-  * The third prize of Central South University Computer Programming Contest(2013.05)
-  * First Class Scholarship of Central South University(2011.11)
-  * National Inspirational Scholarship for the 2010-2011 Academic Year of Central South University(2011.10)
-  * The third prize of the 2011 Mathematical Competition of Central South University(2011.07)
+  * 国家信息化工程师一级
+  * 全国计算机等级证书二级
+  * 机动车驾驶证（C1）
 
-* Writing
-  * Fu Naifeng, the Imagination of multidimensional space, Kepu Youth, 2016
-  * Fu Naifeng, hometown trilogy, voice of diligence, 2013
+* 荣誉与奖励
+  * 2023年：中国气象服务协会科学技术奖-气象科技创新奖，一等奖（第三完成人）
+  * 2022年：全国互联网+创新创业大赛，金奖（第一指导老师）
+  * 2022年：第八届"创青春"中国青年创新创业大赛(互联网专项)，一等奖（第一完成人）
+  * 2021年：全国创新创业优秀博士后
+  * 2021年：全国博士后创新创业大赛创业组，银奖（第一完成人）
+  * 2020年：全国互联网+创新创业大赛，一等奖
+  * 2016年12月：全国研究生数学建模竞赛二等奖
+  * 2014年10月：中国科学院一等奖学金
+  * 2013年6月：中南大学第五届"徕卡杯"测绘实践创新能力竞赛团体三等奖
+  * 2013年5月：中南大学计算机程序设计竞赛三等奖
+  * 2011年11月：中南大学一等奖学金
+  * 2011年10月：中南大学2010-2011学年国家励志奖学金
+  * 2011年7月：中南大学2011年数学竞赛三等奖
+
+* 写作
+  * 付乃锋，多维空间的想象，科普青年，2016
+  * 付乃锋，家乡三部曲，勤学之声，2013
 
 Publications
 ======

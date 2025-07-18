@@ -1,39 +1,102 @@
 ---
 permalink: /
-title: "Naifeng Fu, Ph.D.,  Astromtry and Celestial Mechanics"
-excerpt: "About me"
+title: "付乃锋 (Naifeng Fu), 理学博士, 天津大学博士后"
+excerpt: "关于我"
 author_profile: true
 redirect_from: 
   - /about/
   - /about.html
 ---
 
-Hi, everyone, I am very happy to meet everyone, thank you for your concern. I am currently studying for a doctorate in astronomy at the Shanghai Astronomical Observatory of the Chinese Academy of Sciences.
+您好！我是付乃锋，很高兴与您相遇。我目前是天津大学博士后，专注于GNSS-R/-RO技术设备研制及数据应用研究。
 
-My Study during Ph.D
-====
+## 教育背景
 
-Study on Abel-Retrieved ionPrf with Occultation data
+**理学博士** (2014-2020)
+- 中国科学院上海天文台，天体测量与天体力学
+- 博士论文：《基于地基与空基 GNSS 电离层观测数据融合》
+
+**工科学士** (2010-2014)
+- 中南大学，测绘工程
+- 学士论文：《惠州市坐标转换系统》
+
+## 当前研究
+
+### GNSS-R/-RO技术设备研制及数据应用
 ---
-Retrieving the refractive index of the atmosphere based on occultation data to obtain its temperature and humidity is an old and long-lasting direction.However, the successful launch of more and more low-orbit satellites has made the ionospheric/atmospheric observations of low-orbit satellites extremely effective in their applications. It is an extremely important project to obtain high-precision ionospheric products through ground-based observation data to assist occult ionospheric observations, or to apply more occultation atmospheric observation data to meteorological data assimilation systems to improve the accuracy of meteorological forecasts.
+作为天津大学博士后，我的主要研究方向包括：
 
-Study on Global Ionospheric Assimilation Model
----
-Ionospheric assimilation is a complex project, from data processing to inversion of results, involving a series of data flows. During my Ph.D., I mainly studied the following aspects of the ionosphere, such as its datas, methods, errors, and the DCBs of receivers and transmitters, which could be found at [Study on Global Ionospheric Assimilation Model](https://niphy.github.io/posts/2017/10/blog-post-3);
+1. **卫星轨道建设与分布分析**
+   - 论证卫星轨道建设卫星分布
+   - 覆盖范围及对应的电离层及大气掩星分布与时空分辨率分析
 
-The study of the ionosphere is a dynamic direction, for the studies from meteorological data assimilation to finite element analysis of fluid mechanics have great guidance for ionospheric data assimilation. At the same time, the physical model of the ionosphere is continuously improved, assisting with data assimilation technology, and it is more ideal for the simulation/inversion of the ionosphere in the polar or complex environment.
+2. **一体化GNSS-RO载荷研制及掩星数据反演**
+   - 参与GNSS-RO载荷研制
+   - 掩星数据反演算法开发
 
-Of course, the study of the ionospheric physical model and the ionospheric numerical model is a mutually competitive and mutually reinforcing development process.
+3. **GNSS-R载荷研制及数据反演**
+   - GNSS-R载荷技术研究
+   - 数据反演算法实现
 
+4. **多源数据融合**
+   - 大气及电离层掩星数据与多源数据融合
+   - 数据同化技术应用
 
-My Interests on Artificial Intelligence, Computer Visualization, and etc..
-===
+## 技术专长
 
-Whether studying the surveying and mapping profession at the undergraduate level or studying astronomy at the master's level, there is a high demand for the use of computers. From data acquisition, data cleaning, to data processing and data visualization, the use of computers is very strict for these two branches of science which are extremely concerned about coordinates and position: large data processing, data quality control, high-precision model building, calculation time and space optimization, visualization of observations/model results in a variety of ways, and more.
+### 编程语言
+- **C/C++** (娴熟) - 核心算法实现
+- **Python** (娴熟) - 数据处理与分析
+- **Fortran** (娴熟) - 科学计算
+- **MATLAB** (精通) - 数值计算与可视化
+- **SQL** (娴熟) - 数据库管理
+- **Shell** (精通) - 系统脚本
+- **LaTeX** (娴熟) - 学术文档编写
 
-Artificial intelligence is the most advanced data processing technology. Especially the successful application of neural network and deep learning algorithm in face recognition, image processing, security control, etc., indicates that weak artificial intelligence has achieved initial maturity. At the same time, data visualization, not only includes the trend display of sequence data/distribution data, the characterization of statistical data, but also the display of data in different coordinate systems and different applications. For example, satellite orbit data has great significance in planetary science, space science, meteorological science, and mapping. It is important to visualize it for satellite satellite characterization (satellite coverage, satellite return visit cycle) to guide these applications.The ionosphere/atmospheric occultation technique, as an interdisciplinary subject between earth science and space science, is essential for efficient computational algorithms and perfect visualization, so I have a deeper understanding of these aspects.
+### 研究方向
+- **数值优化** - 算法优化与性能提升
+- **GNSS掩星** - 掩星数据处理与分析
+- **电离层建模及同化** - 电离层物理建模与数据同化
+- **大气反演** - 大气参数反演算法
+- **机器学习** - AI技术在空间科学中的应用
+- **计算机可视化** - 科学数据可视化
 
-For more info
-====
-More research and directions of interest can be found in [Publications](https://niphy.github.io/publications), [Talks](https://niphy.github.io/talks) and [Blogs](https://niphy.github.io/year-archive/).
+## 工作经历
+
+### 天津大学博士后 (2021年2月至今)
+- 研究内容：GNSS-R/-RO技术设备研制及数据应用
+- 参与多项国家级科研项目
+- 指导学生参与创新创业大赛
+
+### 天津云遥宇航科技公司算法研究员 (2020年至今，兼职)
+- 大气及电离层掩星数据论证及模拟
+- 卫星轨道设计及其时空分辨率分析
+- 掩星开环跟踪及反掩算法实现
+- 硬件研发合作验证接收机性能与指标
+
+### 中国科学院上海天文台博士研究生 (2016-2020)
+- 电离层同化算法误差分析
+- 多源数据在电离层建模中的应用
+- 完成6-7篇相关论文（其中4篇一作，2篇SCI）
+
+## 荣誉与奖励
+
+- **2023年** 中国气象服务协会科学技术奖-气象科技创新奖，一等奖（第三完成人）
+- **2022年** 全国互联网+创新创业大赛，金奖（第一指导老师）
+- **2022年** 第八届"创青春"中国青年创新创业大赛(互联网专项)，一等奖（第一完成人）
+- **2021年** 全国创新创业优秀博士后
+- **2021年** 全国博士后创新创业大赛创业组，银奖（第一完成人）
+- **2020年** 全国互联网+创新创业大赛，一等奖
+
+## 研究兴趣
+
+我对人工智能、计算机可视化等领域有浓厚兴趣。从本科测绘专业到研究生天文学，计算机应用贯穿始终。从数据获取、清洗、处理到可视化，这些科学分支对计算机使用要求极高。
+
+人工智能作为最先进的数据处理技术，特别是神经网络和深度学习算法在图像处理、安全控制等领域的成功应用，表明弱人工智能已达到初步成熟。同时，数据可视化不仅包括序列数据/分布数据的趋势显示、统计数据的表征，还包括不同坐标系和不同应用中数据的展示。
+
+作为地球科学与空间科学之间的交叉学科，电离层/大气掩星技术需要高效的计算算法和完美的可视化，因此我对这些方面有更深入的理解。
+
+## 更多信息
+
+更多研究内容和感兴趣的方向可以在 [Publications](https://mapoet.github.io/publications)、[Talks](https://mapoet.github.io/talks) 和 [Blogs](https://mapoet.github.io/year-archive/) 中找到。
 
