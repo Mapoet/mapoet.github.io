@@ -24,6 +24,7 @@ tags:
     <div id="windspeed-chart"></div>
     <div id="pressure-chart"></div>
   </div>
+  {% raw %}
   <script src="https://cdn.jsdelivr.net/npm/d3@4.13.0/build/d3.min.js"></script>
   <script>
     // 温度转换函数
@@ -318,5 +319,5 @@ tags:
       document.getElementById('weatherBtn').addEventListener('click', getWeather);
     });
   </script>
-
+{% endraw %}
 
