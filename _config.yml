@@ -6,11 +6,11 @@
 # `jekyll serve`. If you change this file, please restart the server process.
 
 # Site Settings
-locale                   : "en-US"
-title                    : "Naifeng Fu/SHAO"
+locale                   : "zh-CN"
+title                    : "付乃锋 - 天津大学"
 title_separator          : "-"
-name                     : &name "Naifeng Fu"
-description              : &description "Ph.D., Astromtry and Celestial Mechanics, Shanghai Astronomical Observatory, Chinese Academy of Sciences."
+name                     : &name "付乃锋 (Naifeng Fu)"
+description              : &description "理学博士，天津大学博士后，GNSS-R/-RO技术设备研制及数据应用专家"
 url                      : https://mapoet.github.io # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
 repository               : "mapoet/mapoet.github.io"
@@ -80,16 +80,16 @@ analytics:
 
 # Site Author
 author:
-  name             : "Naifeng Fu"
+  name             : "付乃锋 (Naifeng Fu)"
   avatar           : "Me.png"
-  bio              : "Ph.D, Astronomy and Celestial Mechanics, Shanghai Astronomical Observatory, Chinese Academy of Sciences."
-  location         : "Nankai Road #92,\nTianjin, China"
-  employer         :
+  bio              : "理学博士，天津大学博士后，GNSS-R/-RO技术设备研制及数据应用专家。研究方向：数值优化，GNSS掩星，电离层建模及同化，大气反演，机器学习，计算机可视化。"
+  location         : "天津市南开区卫津路92号,\n天津大学，中国"
+  employer         : "天津大学"
   pubmed           : 
   googlescholar    : 
-  email            : "mapoet.niphy@gmail.com"
+  email            : "funaifeng@163.com"
   researchgate     :  
-  uri              : "https://gnss-x.ac.cn"
+  uri              : "https://mapoet.github.io"
   bitbucket        :
   codepen          :
   dribbble         :
