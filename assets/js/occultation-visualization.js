@@ -49,9 +49,8 @@ function checkDOM() {
 function initCesiumViewer() {
     console.log('初始化Cesium Viewer...');
     
-    // 创建Cesium Viewer
+    // 创建Cesium Viewer - 使用简化配置避免兼容性问题
     const viewer = new Cesium.Viewer('cesiumContainer', {
-        terrainProvider: Cesium.createWorldTerrain(), // 真实地形
         baseLayerPicker: true, // 图层选择器
         geocoder: true, // 地理编码器
         homeButton: true, // 主页按钮
@@ -62,7 +61,7 @@ function initCesiumViewer() {
         fullscreenButton: true, // 全屏按钮
         infoBox: true, // 信息框
         selectionIndicator: true, // 选择指示器
-        shadows: true, // 阴影
+        shadows: false, // 关闭阴影避免兼容性问题
         shouldAnimate: true, // 动画
         requestRenderMode: true, // 请求渲染模式
         maximumRenderTimeChange: Infinity, // 最大渲染时间变化
