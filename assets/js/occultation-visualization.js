@@ -114,6 +114,8 @@ function addOccultationTrajectories(viewer, data) {
     // const testData = data.slice(0, 10); // 显示前10个事件
     const testData = data; // 显示所有事件
     let validEvents = 0;
+    let ionoCount = 0;
+    let atmCount = 0;
     
     testData.forEach((event, index) => {
         if (!event.points || event.points.length < 2) {
@@ -133,62 +135,79 @@ function addOccultationTrajectories(viewer, data) {
         
         console.log(`事件 ${index} (${event.type}): ${positions.length} 个点`);
         
+        // 根据类型选择颜色和材质
+        let lineColor, lineMaterial;
+        if (event.type === 'iono') {
+            lineColor = Cesium.Color.CYAN;
+            lineMaterial = Cesium.Color.CYAN.withAlpha(0.8);
+            ionoCount++;
+        } else if (event.type === 'atm') {
+            lineColor = Cesium.Color.ORANGE;
+            lineMaterial = Cesium.Color.ORANGE.withAlpha(0.8);
+            atmCount++;
+        } else {
+            lineColor = Cesium.Color.GRAY;
+            lineMaterial = Cesium.Color.GRAY.withAlpha(0.8);
+        }
+        
         // 添加轨迹线
         viewer.entities.add({
             name: `${event.type} 掩星轨迹 ${index + 1}`,
             polyline: {
                 positions: positions,
-                width: 3,
-                material: getColor(event.type),
+                width: 2,
+                material: lineMaterial,
                 clampToGround: false,
                 zIndex: 1000
             }
         });
         
-        // 添加起点标记
+        // 添加起点标记（始终显示）
         if (positions.length > 0) {
             viewer.entities.add({
-                name: `起点 ${index + 1}`,
+                name: `起点 ${index + 1} (${event.type})`,
                 position: positions[0],
                 point: {
-                    pixelSize: 8,
-                    color: getColor(event.type),
+                    pixelSize: 6,
+                    color: lineColor,
                     outlineColor: Cesium.Color.WHITE,
-                    outlineWidth: 2,
+                    outlineWidth: 1,
                     heightReference: Cesium.HeightReference.NONE
                 },
                 label: {
-                    text: `S${index + 1}`,
-                    font: '12pt sans-serif',
+                    text: `${event.type === 'iono' ? 'I' : 'A'}${index + 1}`,
+                    font: '10pt sans-serif',
                     fillColor: Cesium.Color.WHITE,
                     outlineColor: Cesium.Color.BLACK,
-                    outlineWidth: 2,
+                    outlineWidth: 1,
                     style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                    pixelOffset: new Cesium.Cartesian2(0, -20),
-                    heightReference: Cesium.HeightReference.NONE
+                    pixelOffset: new Cesium.Cartesian2(0, -15),
+                    heightReference: Cesium.HeightReference.NONE,
+                    show: true // 始终显示标签
                 }
             });
             
-            // 添加终点标记
+            // 添加终点标记（始终显示）
             viewer.entities.add({
-                name: `终点 ${index + 1}`,
+                name: `终点 ${index + 1} (${event.type})`,
                 position: positions[positions.length - 1],
                 point: {
-                    pixelSize: 8,
-                    color: getColor(event.type),
+                    pixelSize: 6,
+                    color: lineColor,
                     outlineColor: Cesium.Color.WHITE,
-                    outlineWidth: 2,
+                    outlineWidth: 1,
                     heightReference: Cesium.HeightReference.NONE
                 },
                 label: {
-                    text: `E${index + 1}`,
-                    font: '12pt sans-serif',
+                    text: `${event.type === 'iono' ? 'I' : 'A'}${index + 1}`,
+                    font: '10pt sans-serif',
                     fillColor: Cesium.Color.WHITE,
                     outlineColor: Cesium.Color.BLACK,
-                    outlineWidth: 2,
+                    outlineWidth: 1,
                     style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                    pixelOffset: new Cesium.Cartesian2(0, -20),
-                    heightReference: Cesium.HeightReference.NONE
+                    pixelOffset: new Cesium.Cartesian2(0, -15),
+                    heightReference: Cesium.HeightReference.NONE,
+                    show: true // 始终显示标签
                 }
             });
         }
@@ -196,34 +215,41 @@ function addOccultationTrajectories(viewer, data) {
         validEvents++;
     });
     
-    return validEvents;
+    console.log(`统计: 电离层掩星 ${ionoCount} 条, 大气掩星 ${atmCount} 条`);
+    return { total: validEvents, iono: ionoCount, atm: atmCount };
 }
 
 // 添加图例
-function addLegend(viewer, validEvents) {
+function addLegend(viewer, stats) {
     const legend = document.createElement('div');
     legend.style.position = 'absolute';
     legend.style.top = '10px';
     legend.style.right = '10px';
-    legend.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    legend.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
     legend.style.color = 'white';
-    legend.style.padding = '10px';
-    legend.style.borderRadius = '5px';
+    legend.style.padding = '12px';
+    legend.style.borderRadius = '6px';
     legend.style.fontSize = '12px';
     legend.style.fontFamily = 'Arial, sans-serif';
     legend.style.zIndex = '1000';
+    legend.style.minWidth = '200px';
     
     legend.innerHTML = `
-        <div style="margin-bottom: 5px;"><strong>掩星轨迹图例</strong></div>
-        <div style="display: flex; align-items: center; margin-bottom: 3px;">
-            <div style="width: 20px; height: 3px; background-color: cyan; margin-right: 5px;"></div>
-            <span>电离层掩星 (${validEvents}条)</span>
+        <div style="margin-bottom: 8px; font-weight: bold; text-align: center;">掩星轨迹图例</div>
+        <div style="display: flex; align-items: center; margin-bottom: 6px;">
+            <div style="width: 20px; height: 3px; background-color: cyan; margin-right: 8px;"></div>
+            <span>电离层掩星 (${stats.iono}条)</span>
         </div>
-        <div style="display: flex; align-items: center; margin-bottom: 3px;">
-            <div style="width: 20px; height: 3px; background-color: orange; margin-right: 5px;"></div>
-            <span>大气掩星</span>
+        <div style="display: flex; align-items: center; margin-bottom: 6px;">
+            <div style="width: 20px; height: 3px; background-color: orange; margin-right: 8px;"></div>
+            <span>大气掩星 (${stats.atm}条)</span>
         </div>
-        <div style="font-size: 10px; margin-top: 5px; opacity: 0.8;">
+        <div style="border-top: 1px solid #555; margin: 8px 0; padding-top: 6px; font-size: 10px; opacity: 0.9;">
+            <div>标记说明:</div>
+            <div>I = 电离层掩星起点/终点</div>
+            <div>A = 大气掩星起点/终点</div>
+        </div>
+        <div style="font-size: 10px; margin-top: 6px; opacity: 0.8; text-align: center;">
             操作: 鼠标拖拽旋转 | 滚轮缩放 | 双击定位
         </div>
     `;
@@ -274,10 +300,10 @@ function loadDataForCesium(viewer) {
             console.log('Cesium数据加载成功:', data.length, '个事件');
             showStatus(`数据加载成功，共 ${data.length} 个事件`);
             
-            const validEvents = addOccultationTrajectories(viewer, data);
-            addLegend(viewer, validEvents);
+            const stats = addOccultationTrajectories(viewer, data);
+            addLegend(viewer, stats);
             
-            showStatus(`Cesium渲染完成！显示 ${validEvents} 条轨迹。支持鼠标拖拽、滚轮缩放、双击定位。`);
+            showStatus(`Cesium渲染完成！显示 ${stats.total} 条轨迹。支持鼠标拖拽、滚轮缩放、双击定位。`);
         })
         .catch(error => {
             console.error('Cesium数据加载失败:', error);
