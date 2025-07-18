@@ -2,9 +2,9 @@ const eventFile = '/assets/data/occultation_events.json';
 const statusDiv = document.getElementById('status');
 
 function getColor(type) {
-    if (type === 'iono') return '#00ffff';
-    if (type === 'atm') return '#ff8800';
-    return '#cccccc';
+    if (type === 'iono') return Cesium.Color.CYAN;
+    if (type === 'atm') return Cesium.Color.ORANGE;
+    return Cesium.Color.GRAY;
 }
 
 function showStatus(message) {
@@ -12,40 +12,27 @@ function showStatus(message) {
     console.log(message);
 }
 
-// 详细检查所有依赖库
-function checkDependencies() {
-    showStatus('检查依赖库...');
+// 检查Cesium是否可用
+function checkCesium() {
+    showStatus('检查Cesium库...');
     
-    if (typeof echarts === 'undefined') {
-        showStatus('错误：ECharts 库未正确加载');
+    if (typeof Cesium === 'undefined') {
+        showStatus('错误：Cesium 库未正确加载');
         return false;
     }
     
-    console.log('ECharts版本:', echarts.version);
-    console.log('ECharts对象:', echarts);
+    console.log('Cesium版本:', Cesium.VERSION);
+    console.log('Cesium对象:', Cesium);
     
-    if (typeof echarts.gl === 'undefined') {
-        showStatus('警告：ECharts GL 扩展未正确加载，尝试使用Three.js备选方案');
-        console.log('echarts.gl:', echarts.gl);
-        return 'use_threejs';
-    }
-    
-    console.log('ECharts GL已加载:', echarts.gl);
-    
-    if (typeof d3 === 'undefined') {
-        showStatus('错误：D3.js 库未正确加载');
-        return false;
-    }
-    
-    showStatus('所有依赖库已加载，正在获取数据...');
+    showStatus('Cesium库已加载，正在初始化地球...');
     return true;
 }
 
 // 检查DOM元素
 function checkDOM() {
-    const mainDiv = document.getElementById('main');
-    if (!mainDiv) {
-        showStatus('错误：找不到 #main 元素');
+    const container = document.getElementById('cesiumContainer');
+    if (!container) {
+        showStatus('错误：找不到 #cesiumContainer 元素');
         return false;
     }
     
@@ -58,404 +45,229 @@ function checkDOM() {
     return true;
 }
 
-// 使用Three.js创建3D地球
-function createThreeJSVisualization(data) {
-    showStatus('使用Three.js创建3D地球可视化...');
+// 初始化Cesium地球
+function initCesiumViewer() {
+    console.log('初始化Cesium Viewer...');
     
-    // 检查Three.js是否可用
-    if (typeof THREE === 'undefined') {
-        showStatus('错误：Three.js 库未加载，请添加Three.js CDN');
-        return;
-    }
-    
-    const container = document.getElementById('main');
-    
-    // 确保容器有正确的样式
-    container.style.position = 'relative';
-    container.style.width = '100%';
-    container.style.height = '600px';
-    container.style.overflow = 'hidden';
-    
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setClearColor(0x000011); // 深蓝色背景
-    renderer.setPixelRatio(window.devicePixelRatio); // 支持高DPI屏幕
-    container.innerHTML = '';
-    container.appendChild(renderer.domElement);
-    
-    // 设置canvas样式
-    renderer.domElement.style.width = '100%';
-    renderer.domElement.style.height = '100%';
-    renderer.domElement.style.display = 'block';
-    
-    // 创建地球 - 使用更好的材质和纹理
-    const earthGeometry = new THREE.SphereGeometry(5, 64, 64);
-    
-    // 创建地球材质 - 使用PhongMaterial获得更好的光照效果
-    const earthMaterial = new THREE.MeshPhongMaterial({ 
-        color: 0x0066cc,
-        transparent: true,
-        opacity: 0.9,
-        shininess: 30
+    // 创建Cesium Viewer
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+        terrainProvider: Cesium.createWorldTerrain(), // 真实地形
+        baseLayerPicker: true, // 图层选择器
+        geocoder: true, // 地理编码器
+        homeButton: true, // 主页按钮
+        sceneModePicker: true, // 场景模式选择器
+        navigationHelpButton: true, // 导航帮助按钮
+        animation: false, // 动画控件
+        timeline: false, // 时间轴
+        fullscreenButton: true, // 全屏按钮
+        infoBox: true, // 信息框
+        selectionIndicator: true, // 选择指示器
+        shadows: true, // 阴影
+        shouldAnimate: true, // 动画
+        requestRenderMode: true, // 请求渲染模式
+        maximumRenderTimeChange: Infinity, // 最大渲染时间变化
+        targetFrameRate: 60 // 目标帧率
     });
     
-    const earth = new THREE.Mesh(earthGeometry, earthMaterial);
-    scene.add(earth);
+    // 配置场景
+    const scene = viewer.scene;
+    scene.globe.enableLighting = true; // 启用光照
+    scene.globe.atmosphereLighting = true; // 大气光照
+    scene.globe.atmosphereLightingIntensity = 5.0; // 大气光照强度
+    scene.globe.atmosphereHueShift = 0.1; // 大气色调偏移
+    scene.globe.atmosphereSaturationShift = 0.1; // 大气饱和度偏移
+    scene.globe.atmosphereBrightnessShift = 1.0; // 大气亮度偏移
     
-    // 添加大气层效果
-    const atmosphereGeometry = new THREE.SphereGeometry(5.2, 64, 64);
-    const atmosphereMaterial = new THREE.MeshBasicMaterial({ 
-        color: 0x0066cc,
-        transparent: true,
-        opacity: 0.1,
-        side: THREE.BackSide
+    // 设置相机初始位置
+    viewer.camera.setView({
+        destination: Cesium.Cartesian3.fromDegrees(0, 0, 20000000), // 从赤道上方看地球
+        orientation: {
+            heading: 0.0,
+            pitch: -Cesium.Math.PI_OVER_TWO,
+            roll: 0.0
+        }
     });
-    const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
-    scene.add(atmosphere);
     
-    // 添加光照
-    const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
-    scene.add(ambientLight);
+    // 启用深度测试
+    scene.globe.depthTestAgainstTerrain = true;
     
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(10, 5, 5);
-    scene.add(directionalLight);
+    return viewer;
+}
+
+// 添加掩星轨迹到Cesium
+function addOccultationTrajectories(viewer, data) {
+    console.log('添加掩星轨迹到Cesium...');
     
-    // 添加轨迹线
-    const testData = data.slice(0, 5);
+    const testData = data.slice(0, 10); // 显示前10个事件
+    let validEvents = 0;
+    
     testData.forEach((event, index) => {
-        if (!event.points || event.points.length < 2) return;
+        if (!event.points || event.points.length < 2) {
+            console.log(`事件 ${index} 点数不足:`, event.points?.length);
+            return;
+        }
         
-        const points = event.points.map(p => {
-            const lon = (parseFloat(p.lon) || 0) * Math.PI / 180;
-            const lat = (parseFloat(p.lat) || 0) * Math.PI / 180;
+        // 创建轨迹点数组
+        const positions = event.points.map(p => {
+            const lon = parseFloat(p.lon) || 0;
+            const lat = parseFloat(p.lat) || 0;
             const alt = parseFloat(p.alt) || 0;
-            const radius = 5 + alt / 100; // 地球半径 + 高度（保持相对比例）
             
-            const x = radius * Math.cos(lat) * Math.cos(lon);
-            const y = radius * Math.sin(lat);
-            const z = radius * Math.cos(lat) * Math.sin(lon);
-            
-            return new THREE.Vector3(x, y, z);
+            // 转换为Cesium坐标（高度单位为米）
+            return Cesium.Cartesian3.fromDegrees(lon, lat, alt * 1000);
         });
         
-        const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
-        const lineMaterial = new THREE.LineBasicMaterial({ 
-            color: getColor(event.type),
-            linewidth: 3,
-            transparent: true,
-            opacity: 0.8
+        console.log(`事件 ${index} (${event.type}): ${positions.length} 个点`);
+        
+        // 添加轨迹线
+        viewer.entities.add({
+            name: `${event.type} 掩星轨迹 ${index + 1}`,
+            polyline: {
+                positions: positions,
+                width: 3,
+                material: getColor(event.type),
+                clampToGround: false,
+                zIndex: 1000
+            }
         });
-        const line = new THREE.Line(lineGeometry, lineMaterial);
-        scene.add(line);
         
-        // 添加轨迹起点和终点的标记
-        if (points.length > 0) {
-            const startPoint = points[0];
-            const endPoint = points[points.length - 1];
+        // 添加起点标记
+        if (positions.length > 0) {
+            viewer.entities.add({
+                name: `起点 ${index + 1}`,
+                position: positions[0],
+                point: {
+                    pixelSize: 8,
+                    color: getColor(event.type),
+                    outlineColor: Cesium.Color.WHITE,
+                    outlineWidth: 2,
+                    heightReference: Cesium.HeightReference.NONE
+                },
+                label: {
+                    text: `S${index + 1}`,
+                    font: '12pt sans-serif',
+                    fillColor: Cesium.Color.WHITE,
+                    outlineColor: Cesium.Color.BLACK,
+                    outlineWidth: 2,
+                    style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                    pixelOffset: new Cesium.Cartesian2(0, -20),
+                    heightReference: Cesium.HeightReference.NONE
+                }
+            });
             
-            // 起点标记
-            const startGeometry = new THREE.SphereGeometry(0.1, 8, 8);
-            const startMaterial = new THREE.MeshBasicMaterial({ color: getColor(event.type) });
-            const startMarker = new THREE.Mesh(startGeometry, startMaterial);
-            startMarker.position.copy(startPoint);
-            scene.add(startMarker);
-            
-            // 终点标记
-            const endGeometry = new THREE.SphereGeometry(0.1, 8, 8);
-            const endMaterial = new THREE.MeshBasicMaterial({ color: getColor(event.type) });
-            const endMarker = new THREE.Mesh(endGeometry, endMaterial);
-            endMarker.position.copy(endPoint);
-            scene.add(endMarker);
-        }
-    });
-    
-    camera.position.z = 15;
-    
-    // 添加鼠标/触屏控制
-    let isMouseDown = false;
-    let mouseX = 0;
-    let mouseY = 0;
-    let targetRotationX = 0;
-    let targetRotationY = 0;
-    let currentRotationX = 0;
-    let currentRotationY = 0;
-    
-    // 鼠标事件
-    renderer.domElement.addEventListener('mousedown', function(event) {
-        isMouseDown = true;
-        mouseX = event.clientX;
-        mouseY = event.clientY;
-    });
-    
-    renderer.domElement.addEventListener('mousemove', function(event) {
-        if (isMouseDown) {
-            const deltaX = event.clientX - mouseX;
-            const deltaY = event.clientY - mouseY;
-            
-            targetRotationY += deltaX * 0.01;
-            targetRotationX += deltaY * 0.01;
-            
-            // 限制垂直旋转角度
-            targetRotationX = Math.max(-Math.PI/2, Math.min(Math.PI/2, targetRotationX));
-            
-            mouseX = event.clientX;
-            mouseY = event.clientY;
-        }
-    });
-    
-    renderer.domElement.addEventListener('mouseup', function() {
-        isMouseDown = false;
-    });
-    
-    renderer.domElement.addEventListener('mouseleave', function() {
-        isMouseDown = false;
-    });
-    
-    // 触屏事件
-    renderer.domElement.addEventListener('touchstart', function(event) {
-        event.preventDefault();
-        if (event.touches.length === 1) {
-            isMouseDown = true;
-            mouseX = event.touches[0].clientX;
-            mouseY = event.touches[0].clientY;
-        }
-    });
-    
-    renderer.domElement.addEventListener('touchmove', function(event) {
-        event.preventDefault();
-        if (isMouseDown && event.touches.length === 1) {
-            const deltaX = event.touches[0].clientX - mouseX;
-            const deltaY = event.touches[0].clientY - mouseY;
-            
-            targetRotationY += deltaX * 0.01;
-            targetRotationX += deltaY * 0.01;
-            
-            targetRotationX = Math.max(-Math.PI/2, Math.min(Math.PI/2, targetRotationX));
-            
-            mouseX = event.touches[0].clientX;
-            mouseY = event.touches[0].clientY;
-        }
-    });
-    
-    renderer.domElement.addEventListener('touchend', function(event) {
-        event.preventDefault();
-        isMouseDown = false;
-    });
-    
-    // 滚轮缩放
-    renderer.domElement.addEventListener('wheel', function(event) {
-        event.preventDefault();
-        const zoomSpeed = 0.1;
-        const delta = event.deltaY > 0 ? 1 : -1;
-        camera.position.z += delta * zoomSpeed;
-        camera.position.z = Math.max(8, Math.min(30, camera.position.z));
-    });
-    
-    // 窗口大小变化处理
-    function onWindowResize() {
-        const width = container.clientWidth;
-        const height = container.clientHeight;
-        
-        camera.aspect = width / height;
-        camera.updateProjectionMatrix();
-        
-        renderer.setSize(width, height);
-    }
-    
-    // 监听窗口大小变化
-    window.addEventListener('resize', onWindowResize);
-    
-    // 动画循环
-    function animate() {
-        requestAnimationFrame(animate);
-        
-        // 平滑旋转
-        currentRotationX += (targetRotationX - currentRotationX) * 0.1;
-        currentRotationY += (targetRotationY - currentRotationY) * 0.1;
-        
-        earth.rotation.x = currentRotationX;
-        earth.rotation.y = currentRotationY;
-        atmosphere.rotation.x = currentRotationX;
-        atmosphere.rotation.y = currentRotationY;
-        
-        // 如果没有鼠标交互，自动旋转
-        if (!isMouseDown) {
-            earth.rotation.y += 0.005;
-            atmosphere.rotation.y += 0.005;
-            targetRotationY += 0.005;
-            currentRotationY += 0.005;
+            // 添加终点标记
+            viewer.entities.add({
+                name: `终点 ${index + 1}`,
+                position: positions[positions.length - 1],
+                point: {
+                    pixelSize: 8,
+                    color: getColor(event.type),
+                    outlineColor: Cesium.Color.WHITE,
+                    outlineWidth: 2,
+                    heightReference: Cesium.HeightReference.NONE
+                },
+                label: {
+                    text: `E${index + 1}`,
+                    font: '12pt sans-serif',
+                    fillColor: Cesium.Color.WHITE,
+                    outlineColor: Cesium.Color.BLACK,
+                    outlineWidth: 2,
+                    style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                    pixelOffset: new Cesium.Cartesian2(0, -20),
+                    heightReference: Cesium.HeightReference.NONE
+                }
+            });
         }
         
-        renderer.render(scene, camera);
-    }
+        validEvents++;
+    });
     
-    animate();
-    showStatus(`Three.js渲染完成！显示 ${testData.length} 条轨迹。支持鼠标拖拽和滚轮缩放。`);
+    return validEvents;
+}
+
+// 添加图例
+function addLegend(viewer, validEvents) {
+    const legend = document.createElement('div');
+    legend.style.position = 'absolute';
+    legend.style.top = '10px';
+    legend.style.right = '10px';
+    legend.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    legend.style.color = 'white';
+    legend.style.padding = '10px';
+    legend.style.borderRadius = '5px';
+    legend.style.fontSize = '12px';
+    legend.style.fontFamily = 'Arial, sans-serif';
+    legend.style.zIndex = '1000';
+    
+    legend.innerHTML = `
+        <div style="margin-bottom: 5px;"><strong>掩星轨迹图例</strong></div>
+        <div style="display: flex; align-items: center; margin-bottom: 3px;">
+            <div style="width: 20px; height: 3px; background-color: cyan; margin-right: 5px;"></div>
+            <span>电离层掩星 (${validEvents}条)</span>
+        </div>
+        <div style="display: flex; align-items: center; margin-bottom: 3px;">
+            <div style="width: 20px; height: 3px; background-color: orange; margin-right: 5px;"></div>
+            <span>大气掩星</span>
+        </div>
+        <div style="font-size: 10px; margin-top: 5px; opacity: 0.8;">
+            操作: 鼠标拖拽旋转 | 滚轮缩放 | 双击定位
+        </div>
+    `;
+    
+    document.getElementById('cesiumContainer').appendChild(legend);
 }
 
 // 主函数
 function initVisualization() {
-    console.log('开始初始化可视化...');
+    console.log('开始初始化Cesium可视化...');
     
     if (!checkDOM()) {
         console.log('DOM检查失败');
         return;
     }
     
-    const depsResult = checkDependencies();
-    console.log('依赖检查结果:', depsResult);
-    
-    if (depsResult === false) {
-        console.log('依赖检查失败');
+    if (!checkCesium()) {
+        console.log('Cesium检查失败');
         return;
     }
     
-    if (depsResult === 'use_threejs') {
-        console.log('切换到Three.js备选方案');
-        // 使用Three.js备选方案
-        loadDataForThreeJS();
-        return;
-    }
-    
-    console.log('使用ECharts GL方案');
-    // 使用ECharts GL
     try {
-        const testChart = echarts.init(document.getElementById('main'));
-        const testOption = {
-            backgroundColor: '#000',
-            globe: {
-                // 使用简化的地球配置，避免CORS问题
-                baseTexture: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', // 1x1透明图片
-                heightTexture: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', // 1x1透明图片
-                shading: 'color',
-                environment: '#222',
-                globeOuterRadius: 100,
-                viewControl: {
-                    autoRotate: true,
-                    autoRotateAfterStill: 5,
-                    distance: 200
-                },
-                light: {
-                    main: { intensity: 1.2 },
-                    ambient: { intensity: 0.5 }
-                }
-            },
-            series: []
-        };
-        
-        testChart.setOption(testOption);
-        showStatus('基础地球渲染成功，正在加载数据...');
-        console.log('基础地球渲染成功');
+        // 初始化Cesium Viewer
+        const viewer = initCesiumViewer();
+        console.log('Cesium Viewer初始化成功');
         
         // 加载数据
-        loadData(testChart);
+        loadDataForCesium(viewer);
         
     } catch (error) {
-        showStatus(`ECharts初始化失败: ${error.message}`);
-        console.error('ECharts初始化错误:', error);
+        showStatus(`Cesium初始化失败: ${error.message}`);
+        console.error('Cesium初始化错误:', error);
     }
 }
 
-function loadDataForThreeJS() {
-    console.log('开始加载数据用于Three.js...');
-    d3.json(eventFile)
-        .then(function(data) {
-            console.log('Three.js数据加载成功:', data.length, '个事件');
-            showStatus(`数据加载成功，共 ${data.length} 个事件`);
-            createThreeJSVisualization(data);
+function loadDataForCesium(viewer) {
+    console.log('开始加载数据用于Cesium...');
+    
+    // 使用fetch API加载数据
+    fetch(eventFile)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
         })
-        .catch(function(error) {
-            console.error('Three.js数据加载失败:', error);
-            showStatus(`数据加载失败: ${error.message}`);
-        });
-}
-
-function loadData(chart) {
-    d3.json(eventFile)
-        .then(function(data) {
+        .then(data => {
+            console.log('Cesium数据加载成功:', data.length, '个事件');
             showStatus(`数据加载成功，共 ${data.length} 个事件`);
-            console.log('数据预览:', data.slice(0, 2));
             
-            // 只取前5个事件进行测试
-            const testData = data.slice(0, 5);
-            showStatus(`测试模式：只显示前 ${testData.length} 个事件`);
+            const validEvents = addOccultationTrajectories(viewer, data);
+            addLegend(viewer, validEvents);
             
-            const series = [];
-            let validEvents = 0;
-            
-            testData.forEach((event, index) => {
-                if (!event.points || event.points.length < 2) {
-                    console.log(`事件 ${index} 点数不足:`, event.points?.length);
-                    return;
-                }
-                
-                const coords = event.points.map(p => {
-                    const lon = parseFloat(p.lon) || 0;
-                    const lat = parseFloat(p.lat) || 0;
-                    const alt = parseFloat(p.alt) || 0;
-                    return [lon, lat, alt * 100]; // ECharts GL高度单位为km*100
-                });
-                
-                console.log(`事件 ${index} (${event.type}): ${coords.length} 个点`);
-                console.log(`坐标范围: lon[${Math.min(...coords.map(c=>c[0]))}, ${Math.max(...coords.map(c=>c[0]))}], lat[${Math.min(...coords.map(c=>c[1]))}, ${Math.max(...coords.map(c=>c[1]))}], alt[${Math.min(...coords.map(c=>c[2]))}, ${Math.max(...coords.map(c=>c[2]))}]`);
-                
-                series.push({
-                    type: 'lines3D',
-                    coordinateSystem: 'globe',
-                    effect: {
-                        show: true,
-                        trailWidth: 2,
-                        trailLength: 0.2,
-                        trailOpacity: 0.7,
-                        trailColor: getColor(event.type)
-                    },
-                    lineStyle: {
-                        width: 2,
-                        color: getColor(event.type),
-                        opacity: 0.8
-                    },
-                    data: coords
-                });
-                validEvents++;
-            });
-            
-            showStatus(`有效事件: ${validEvents}/${testData.length}，正在渲染轨迹...`);
-            console.log('Series配置:', series);
-            
-            // 更新图表
-            const option = {
-                backgroundColor: '#000',
-                globe: {
-                    // 使用简化的地球配置，避免CORS问题
-                    baseTexture: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', // 1x1透明图片
-                    heightTexture: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', // 1x1透明图片
-                    shading: 'color',
-                    environment: '#222',
-                    globeOuterRadius: 100,
-                    viewControl: {
-                        autoRotate: true,
-                        autoRotateAfterStill: 5,
-                        distance: 200
-                    },
-                    light: {
-                        main: { intensity: 1.2 },
-                        ambient: { intensity: 0.5 }
-                    }
-                },
-                series: series
-            };
-            
-            console.log('ECharts配置:', option);
-            chart.setOption(option, true); // 第二个参数为true表示完全替换
-            showStatus(`渲染完成！共显示 ${validEvents} 条轨迹`);
+            showStatus(`Cesium渲染完成！显示 ${validEvents} 条轨迹。支持鼠标拖拽、滚轮缩放、双击定位。`);
         })
-        .catch(function(error) {
+        .catch(error => {
+            console.error('Cesium数据加载失败:', error);
             showStatus(`数据加载失败: ${error.message}`);
-            console.error('数据加载错误:', error);
         });
 }
 
