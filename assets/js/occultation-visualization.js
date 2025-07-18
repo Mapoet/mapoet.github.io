@@ -111,8 +111,8 @@ function initCesiumViewer() {
 function addOccultationTrajectories(viewer, data) {
     console.log('添加掩星轨迹到Cesium...');
     
-    // const testData = data.slice(0, 10); // 显示前10个事件
-    const testData = data; // 显示所有事件
+    const testData = data.slice(0, 10); // 显示前10个事件
+    //const testData = data; // 显示所有事件
     let validEvents = 0;
     let ionoCount = 0;
     let atmCount = 0;
