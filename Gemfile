@@ -25,3 +25,6 @@ group :jekyll_plugins do
   gem 'jekyll-sitemap'
   gem 'hawkins'
 end
+
+# Minimal Mistakes Jekyll Theme
+gem "minimal-mistakes-jekyll"
