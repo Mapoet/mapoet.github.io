@@ -8,6 +8,7 @@
 # Site Settings
 locale                   : "zh-CN"
 title                    : "付乃锋 - 天津大学"
+theme                    : "minimal-mistakes-jekyll"
 title_separator          : "-"
 name                     : &name "付乃锋 (Naifeng Fu)"
 description              : &description "理学博士，天津大学博士后，GNSS-R/-RO技术设备研制及数据应用专家"
