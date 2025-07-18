@@ -17,7 +17,30 @@ tags:
   <div id="status" style="margin-top:10px;color:#666;"></div>
 </div>
 <link rel="stylesheet" href="/assets/css/weather.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts-gl/2.0.9/echarts-gl.min.js"></script>
+<script src="https://unpkg.com/echarts@5.4.3/dist/echarts.min.js"></script>
+<script src="https://unpkg.com/echarts-gl@2.0.9/dist/echarts-gl.min.js"></script>
 <script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://unpkg.com/three@0.157.0/build/three.min.js"></script>
+<script>
+// 检查ECharts GL是否正确加载
+window.addEventListener('load', function() {
+    console.log('页面加载完成，检查ECharts GL...');
+    if (typeof echarts !== 'undefined') {
+        console.log('ECharts已加载，版本:', echarts.version);
+        if (typeof echarts.gl !== 'undefined') {
+            console.log('ECharts GL已加载:', echarts.gl);
+        } else {
+            console.error('ECharts GL未加载！');
+        }
+    } else {
+        console.error('ECharts未加载！');
+    }
+    
+    if (typeof THREE !== 'undefined') {
+        console.log('Three.js已加载，版本:', THREE.REVISION);
+    } else {
+        console.error('Three.js未加载！');
+    }
+});
+</script>
 <script src="/assets/js/occultation-visualization.js"></script> 
