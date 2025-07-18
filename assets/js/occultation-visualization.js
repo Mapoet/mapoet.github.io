@@ -21,10 +21,16 @@ function checkDependencies() {
         return false;
     }
     
+    console.log('ECharts版本:', echarts.version);
+    console.log('ECharts对象:', echarts);
+    
     if (typeof echarts.gl === 'undefined') {
         showStatus('错误：ECharts GL 扩展未正确加载');
+        console.log('echarts.gl:', echarts.gl);
         return false;
     }
+    
+    console.log('ECharts GL已加载:', echarts.gl);
     
     if (typeof d3 === 'undefined') {
         showStatus('错误：D3.js 库未正确加载');
