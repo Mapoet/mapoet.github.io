@@ -1,8 +1,8 @@
 const eventFile = '/assets/data/occultation_events.json';
 const statusDiv = document.getElementById('status');
 
-// 设置Cesium Ion访问令牌 - 使用空令牌避免认证问题
-Cesium.Ion.defaultAccessToken = '';
+// 设置Cesium Ion访问令牌 - 使用用户申请的token
+Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIzOTZhYjUxMy0yM2RhLTQzYTQtYjVmNy1hNTI1NjZiNGI5NDgiLCJpZCI6MzIyODkzLCJpYXQiOjE3NTI4ODExMTd9.ZW3143EaO-0r7H7Tr9Q0rfboNl2FjBWUzm2JgcEKj5g';
 
 function getColor(type) {
     if (type === 'iono') return Cesium.Color.CYAN;
@@ -76,43 +76,31 @@ function initCesiumViewer() {
         viewer.scene.globe.imageryLayers.removeAll();
         console.log('已移除所有默认图层');
         
-        // 方案1：使用OpenStreetMap（免费，无需API密钥）
-        const osmProvider = new Cesium.OpenStreetMapImageryProvider({
-            url: 'https://a.tile.openstreetmap.org/'
-        });
-        
-        viewer.scene.globe.imageryLayers.addImageryProvider(osmProvider);
-        console.log('OpenStreetMap真实地球纹理添加成功');
+        // 方案1：使用Cesium World Imagery（高质量，需要token）
+        try {
+            const worldImagery = Cesium.createWorldImagery();
+            viewer.scene.globe.imageryLayers.addImageryProvider(worldImagery);
+            console.log('Cesium World Imagery高质量地球纹理添加成功');
+        } catch (worldError) {
+            console.error('Cesium World Imagery失败:', worldError);
+            
+            // 方案2：使用OpenStreetMap（免费，无需API密钥）
+            const osmProvider = new Cesium.OpenStreetMapImageryProvider({
+                url: 'https://a.tile.openstreetmap.org/'
+            });
+            viewer.scene.globe.imageryLayers.addImageryProvider(osmProvider);
+            console.log('OpenStreetMap地球纹理添加成功');
+        }
         
     } catch (error) {
-        console.error('OpenStreetMap添加失败:', error);
+        console.error('所有纹理添加失败:', error);
         
-        // 方案2：尝试使用CartoDB
-        try {
-            const cartoProvider = new Cesium.CartoDBImageryProvider({
-                map: 'light_all'
-            });
-            viewer.scene.globe.imageryLayers.addImageryProvider(cartoProvider);
-            console.log('CartoDB真实地球纹理添加成功');
-        } catch (cartoError) {
-            console.error('CartoDB也失败:', cartoError);
-            
-            // 方案3：使用默认的Cesium World Imagery
-            try {
-                const worldImagery = Cesium.createWorldImagery();
-                viewer.scene.globe.imageryLayers.addImageryProvider(worldImagery);
-                console.log('Cesium World Imagery真实地球纹理添加成功');
-            } catch (worldError) {
-                console.error('所有真实纹理都失败，使用颜色地球:', worldError);
-                
-                // 最后方案：创建蓝色地球材质
-                const earthMaterial = Cesium.Material.fromType('Color', {
-                    color: new Cesium.Color(0.2, 0.5, 0.8, 1.0) // 蓝色地球
-                });
-                viewer.scene.globe.material = earthMaterial;
-                console.log('使用蓝色地球作为备选方案');
-            }
-        }
+        // 最后方案：创建蓝色地球材质
+        const earthMaterial = Cesium.Material.fromType('Color', {
+            color: new Cesium.Color(0.2, 0.5, 0.8, 1.0) // 蓝色地球
+        });
+        viewer.scene.globe.material = earthMaterial;
+        console.log('使用蓝色地球作为备选方案');
     }
     
     // 配置场景
@@ -279,6 +267,9 @@ function addLegend(viewer, stats) {
         </div>
         <div style="font-size: 10px; margin-top: 6px; opacity: 0.8; text-align: center;">
             操作: 鼠标拖拽旋转 | 滚轮缩放 | 双击定位 | 点击轨迹显示编号
+        </div>
+        <div style="font-size: 9px; margin-top: 4px; opacity: 0.7; text-align: center;">
+            地球纹理: Cesium World Imagery
         </div>
     `;
     
