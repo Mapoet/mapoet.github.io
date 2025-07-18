@@ -50,3 +50,19 @@
 .weather-card #temp-chart {
   margin: 0 auto 12px auto;
 } 
+
+.occultation-card {
+  background: #181c24;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  padding: 32px 24px 24px 24px;
+  margin: 32px auto;
+  max-width: 1100px;
+  color: #fff;
+}
+.occultation-card h1 {
+  margin-top: 0;
+  font-size: 2em;
+  color: #00ffff;
+  letter-spacing: 2px;
+}
