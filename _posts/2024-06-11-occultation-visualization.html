@@ -37,6 +37,7 @@ tags:
     overflow: hidden;
     position: relative;
     margin-bottom: 15px;
+    background: #000011; /* 深蓝色背景 */
 }
 
 #status {
@@ -66,16 +67,17 @@ tags:
 </div>
 
 <!-- Cesium CSS -->
-<link href="https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+<link href="https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
 
 <!-- Cesium JavaScript -->
-<script src="https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Cesium.js"></script>
+<script src="https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Cesium.js"></script>
 
 <script>
 window.addEventListener('load', function() {
     console.log('页面加载完成，检查Cesium...');
     if (typeof Cesium !== 'undefined') {
         console.log('Cesium已加载，版本:', Cesium.VERSION);
+        console.log('Cesium Ion令牌:', Cesium.Ion.defaultAccessToken);
     } else {
         console.error('Cesium未加载！');
     }
