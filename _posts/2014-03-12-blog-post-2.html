@@ -2,128 +2,23 @@
 <!-- saved from url=(0039)https://gnss-x.ac.cn/posts/weather.html -->
 <html lang="zh"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <script src="./全球天气查询与可视化_files/d3.v4.min.js.download"></script>
-  <style>
-    /* 页面整体背景及排版 */
-    /* 局部化样式，只影响本页面主内容 */
-    .container {
-      background: linear-gradient(45deg, #74ebd5, #ACB6E5);
-      min-height: 100vh;
-      font-family: 'Roboto', sans-serif;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    }
-    /* 中心卡片容器 */
-    .container {
-      background-color: rgba(255, 255, 255, 0.95);
-      padding: 30px 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-      text-align: center;
-      width: 420px;
-    }
-    h1 {
-      margin-bottom: 20px;
-      font-size: 2em;
-      color: #333;
-    }
-    /* 输入区域 */
-    .input-group {
-      margin-bottom: 20px;
-    }
-    input {
-      width: 65%;
-      padding: 10px;
-      font-size: 1em;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      outline: none;
-    }
-    button {
-      padding: 10px 16px;
-      font-size: 1em;
-      border: none;
-      background-color: #4CAF50;
-      color: white;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-left: 5px;
-      transition: background-color 0.3s ease;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
-    /* 温度显示区域 */
-    .temp-container {
-      margin: 15px 0;
-    }
-    .temp-text {
-      font-size: 1.2em;
-      margin: 5px 0;
-      color: #555;
-    }
-    /* 温度计图形 */
-    .temp-chart {
-      margin: 10px auto;
-      position: relative;
-      width: 60px;
-      height: 300px;
-      background: #eee;
-      border: 1px solid #ccc;
-      border-radius: 30px;
-      overflow: hidden;
-    }
-    /* 图表区域（其他指标） */
-    .charts {
-      margin-top: 30px;
-    }
-    .chart {
-      margin: 20px auto;
-      text-align: center;
-    }
-    .chart svg {
-      display: block;
-      margin: 0 auto;
-    }
-    .chart-label {
-      margin-top: 8px;
-      font-size: 1em;
-      color: #333;
-    }
-  </style>
 </head>
 <body>
-  <div class="container">
+  <div>
     <h1>全球天气查询</h1>
-    <div class="input-group">
+    <div>
       <input type="text" id="locationInput" placeholder="请输入地点">
       <button onclick="getWeather()">查询</button>
     </div>
-    <!-- 查询地点展示 -->
     <p id="locationName"></p>
-    <!-- 温度文本信息 -->
-    <div class="temp-container">
-      <div id="temp-c" class="temp-text"></div>
-      <div id="temp-f" class="temp-text"></div>
-      <!-- 温度计图形展示 -->
-      <div id="temp-chart" class="temp-chart"></div>
+    <div>
+      <div id="temp-c"></div>
+      <div id="temp-f"></div>
+      <div id="temp-chart"></div>
     </div>
-    <!-- 其他数据图形展示 -->
-    <div class="charts">
-      <div class="chart" id="humidity-chart">
-        <!-- 湿度：圆形刻度盘 -->
-      </div>
-      <div class="chart" id="windspeed-chart">
-        <!-- 风速：水平进度条 -->
-      </div>
-      <div class="chart" id="pressure-chart">
-        <!-- 气压：水平进度条 -->
-      </div>
-    </div>
+    <div id="humidity-chart"></div>
+    <div id="windspeed-chart"></div>
+    <div id="pressure-chart"></div>
   </div>
   
   <script>
