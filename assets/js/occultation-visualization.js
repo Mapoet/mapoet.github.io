@@ -141,7 +141,7 @@ function initCesiumViewer() {
 function addOccultationTrajectories(viewer, data) {
     console.log('添加掩星轨迹到Cesium...');
     
-    const testData = data.slice(0, 100); // 显示前10个事件
+    const testData = data.slice(0, 100); // 显示前100个事件
     //const testData = data; // 显示所有事件
     let validEvents = 0;
     let ionoCount = 0;
@@ -149,23 +149,18 @@ function addOccultationTrajectories(viewer, data) {
     
     testData.forEach((event, index) => {
         if (!event.points || event.points.length < 2) {
-            console.log(`事件 ${index} 点数不足:`, event.points?.length);
+            console.log(`事件 ${index} 点数不足，跳过`);
             return;
         }
         
-        // 创建轨迹点数组
-        const positions = event.points.map(p => {
-            const lon = parseFloat(p.lon) || 0;
-            const lat = parseFloat(p.lat) || 0;
-            const alt = parseFloat(p.alt) || 0;
-            
-            // 转换为Cesium坐标（高度单位为米）
-            return Cesium.Cartesian3.fromDegrees(lon, lat, alt * 1000);
-        });
+        console.log(`事件 ${index} (${event.type}): ${event.points.length}个点`);
         
-        console.log(`事件 ${index} (${event.type}): ${positions.length} 个点`);
+        // 转换坐标
+        const positions = event.points.map(point => 
+            Cesium.Cartesian3.fromDegrees(point.lon, point.lat, point.alt * 1000)
+        );
         
-        // 根据类型选择颜色和材质
+        // 根据事件类型设置颜色
         let lineColor, lineMaterial;
         if (event.type === 'iono') {
             lineColor = Cesium.Color.CYAN;
@@ -369,8 +364,8 @@ function loadDataForCesium(viewer) {
                 }
             }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
             
-            console.log(`Cesium渲染完成!显示${validEvents}条轨迹。支持鼠标拖拽、滚轮缩放、双击定位。`);
-            showStatus(`Cesium渲染完成!显示${validEvents}条轨迹。支持鼠标拖拽、滚轮缩放、双击定位。`);
+            console.log(`Cesium渲染完成!显示${stats.total}条轨迹。支持鼠标拖拽、滚轮缩放、双击定位。`);
+            showStatus(`Cesium渲染完成!显示${stats.total}条轨迹。支持鼠标拖拽、滚轮缩放、双击定位。`);
         })
         .catch(error => {
             console.error('Cesium数据加载失败:', error);
