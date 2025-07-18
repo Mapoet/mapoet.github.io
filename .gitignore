@@ -193,7 +193,7 @@ venv.bak/
 .mypy_cache/
 .dmypy.json
 dmypy.json
-
+data/
 # OS generated files
 .DS_Store
 .DS_Store?
