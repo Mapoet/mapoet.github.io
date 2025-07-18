@@ -1,6 +1,9 @@
 const eventFile = '/assets/data/occultation_events.json';
 const statusDiv = document.getElementById('status');
 
+// 设置Cesium Ion访问令牌（使用默认令牌）
+Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NTc3MzMsImlhdCI6MTYyMjg0NjQ5NH0.XcKpgANiY19MC4bdFUXMVEBToBmqS8kuYpUlxJHYZxY';
+
 function getColor(type) {
     if (type === 'iono') return Cesium.Color.CYAN;
     if (type === 'atm') return Cesium.Color.ORANGE;
@@ -67,6 +70,17 @@ function initCesiumViewer() {
         maximumRenderTimeChange: Infinity, // 最大渲染时间变化
         targetFrameRate: 60 // 目标帧率
     });
+    
+    // 确保地球图层正确加载
+    const imageryLayers = viewer.scene.globe.imageryLayers;
+    if (imageryLayers.length === 0) {
+        // 如果没有图层，添加默认的Bing Maps图层
+        imageryLayers.addImageryProvider(new Cesium.BingMapsImageryProvider({
+            url: 'https://dev.virtualearth.net',
+            key: 'AuGz4Kzoq3JIIx7hdNh1u65d0u0fxXtTMdUrvBxCEZRO3z9EnOW5m8rp5nKvAecJ',
+            mapStyle: Cesium.BingMapsStyle.AERIAL_WITH_LABELS
+        }));
+    }
     
     // 配置场景
     const scene = viewer.scene;
