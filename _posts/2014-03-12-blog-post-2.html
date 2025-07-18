@@ -1,22 +1,420 @@
 <!DOCTYPE html>
-<html>
-<head>
-<script>
-function copyText()
-{
-document.getElementById("field2").value=document.getElementById("field1").value;
-alert("hello!");
-}
-</script>
+<!-- saved from url=(0039)https://gnss-x.ac.cn/posts/weather.html -->
+<html lang="zh"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <title>全球天气查询与可视化</title>
+  <script src="./全球天气查询与可视化_files/d3.v4.min.js.download"></script>
+  <style>
+    /* 页面整体背景及排版 */
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(45deg, #74ebd5, #ACB6E5);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* 中心卡片容器 */
+    .container {
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: 30px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      width: 420px;
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 2em;
+      color: #333;
+    }
+    /* 输入区域 */
+    .input-group {
+      margin-bottom: 20px;
+    }
+    input {
+      width: 65%;
+      padding: 10px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      outline: none;
+    }
+    button {
+      padding: 10px 16px;
+      font-size: 1em;
+      border: none;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 5px;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    /* 温度显示区域 */
+    .temp-container {
+      margin: 15px 0;
+    }
+    .temp-text {
+      font-size: 1.2em;
+      margin: 5px 0;
+      color: #555;
+    }
+    /* 温度计图形 */
+    .temp-chart {
+      margin: 10px auto;
+      position: relative;
+      width: 60px;
+      height: 300px;
+      background: #eee;
+      border: 1px solid #ccc;
+      border-radius: 30px;
+      overflow: hidden;
+    }
+    /* 图表区域（其他指标） */
+    .charts {
+      margin-top: 30px;
+    }
+    .chart {
+      margin: 20px auto;
+      text-align: center;
+    }
+    .chart svg {
+      display: block;
+      margin: 0 auto;
+    }
+    .chart-label {
+      margin-top: 8px;
+      font-size: 1em;
+      color: #333;
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h1>全球天气查询</h1>
+    <div class="input-group">
+      <input type="text" id="locationInput" placeholder="请输入地点">
+      <button onclick="getWeather()">查询</button>
+    </div>
+    <!-- 查询地点展示 -->
+    <p id="locationName"></p>
+    <!-- 温度文本信息 -->
+    <div class="temp-container">
+      <div id="temp-c" class="temp-text"></div>
+      <div id="temp-f" class="temp-text"></div>
+      <!-- 温度计图形展示 -->
+      <div id="temp-chart" class="temp-chart"></div>
+    </div>
+    <!-- 其他数据图形展示 -->
+    <div class="charts">
+      <div class="chart" id="humidity-chart">
+        <!-- 湿度：圆形刻度盘 -->
+      </div>
+      <div class="chart" id="windspeed-chart">
+        <!-- 风速：水平进度条 -->
+      </div>
+      <div class="chart" id="pressure-chart">
+        <!-- 气压：水平进度条 -->
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // 温度转换函数
+    function toCelsius(kelvin) { 
+      return kelvin - 273.15; 
+    }
+    function toFahrenheit(kelvin) { 
+      return toCelsius(kelvin) * 9/5 + 32; 
+    }
+    // 风速转换：m/s 转 km/h
+    function mpsToKmph(mps) {
+      return mps * 3.6;
+    }
+    
+    // 新增城市映射，包含中国所有知名城市（各省会及宝鸡类型及以上）
+    function translateAndDetect(location, callback) {
+      const mapping = {
+        // 各省会和重点城市（中国）
+        "北京": "Beijing, CN",
+        "天津": "Tianjin, CN",
+        "上海": "Shanghai, CN",
+        "重庆": "Chongqing, CN",
+        "哈尔滨": "Harbin, CN",
+        "长春": "Changchun, CN",
+        "沈阳": "Shenyang, CN",
+        "呼和浩特": "Hohhot, CN",
+        "石家庄": "Shijiazhuang, CN",
+        "太原": "Taiyuan, CN",
+        "西安": "Xi'an, CN",
+        "济南": "Jinan, CN",
+        "郑州": "Zhengzhou, CN",
+        "南京": "Nanjing, CN",
+        "合肥": "Hefei, CN",
+        "杭州": "Hangzhou, CN",
+        "福州": "Fuzhou, CN",
+        "南昌": "Nanchang, CN",
+        "武汉": "Wuhan, CN",
+        "长沙": "Changsha, CN",
+        "广州": "Guangzhou, CN",
+        "南宁": "Nanning, CN",
+        "海口": "Haikou, CN",
+        "成都": "Chengdu, CN",
+        "贵阳": "Guiyang, CN",
+        "昆明": "Kunming, CN",
+        "拉萨": "Lhasa, CN",
+        "西宁": "Xining, CN",
+        // 其他较知名城市
+        "宝鸡": "Baoji, CN",
+        "苏州": "Suzhou, CN",
+        "温州": "Wenzhou, CN",
+        "宁波": "Ningbo, CN",
+        "徐州": "Xuzhou, CN",
+        "常州": "Changzhou, CN",
+        "无锡": "Wuxi, CN",
+        "郑州": "Zhengzhou, CN",
+        // 国际城市
+        "纽约": "New York, US",
+        "洛杉矶": "Los Angeles, US",
+        "芝加哥": "Chicago, US",
+        "伦敦": "London, UK",
+        "巴黎": "Paris, FR",
+        "罗马": "Rome, IT",
+        "东京": "Tokyo, JP",
+        "首尔": "Seoul, KR",
+        "悉尼": "Sydney, AU",
+        "新加坡": "Singapore, SG"
+      };
+      if (mapping[location]) {
+        callback(mapping[location]);
+      } else {
+        // 默认认为用户输入为英文或其它合适格式
+        callback(location);
+      }
+    }
+    
+    // 清空已有图形，防止重复绘制
+    function clearCharts() {
+      d3.select("#humidity-chart").selectAll("*").remove();
+      d3.select("#windspeed-chart").selectAll("*").remove();
+      d3.select("#pressure-chart").selectAll("*").remove();
+      d3.select("#temp-chart").selectAll("*").remove();
+    }
+    
+    // 绘制温度计图形（以摄氏温度为基础显示）
+    // 设定范围 -20°C ~ 50°C，共70度范围，使用垂直条展示实际温度
+    function drawTemperatureGauge(celsius) {
+      const width = 60, height = 300;
+      const minTemp = -50, maxTemp = 60;
+      const tempRange = maxTemp - minTemp;
+      const svg = d3.select("#temp-chart")
+                    .append("svg")
+                    .attr("width", width)
+                    .attr("height", height);
+      
+      // 绘制背景色（温度计外部背景）
+      svg.append("rect")
+         .attr("x", width/4)
+         .attr("y", 0)
+         .attr("width", width/2)
+         .attr("height", height)
+         .attr("fill", "#ddd")
+         .attr("rx", width/4);
+      
+      // 计算实际填充比例（clamp在温度范围内）
+      var clamped = Math.max(minTemp, Math.min(celsius, maxTemp));
+      var fillPercent = (clamped - minTemp) / tempRange;
+      var fillHeight = height * fillPercent;
+      
+      // 使用渐变色显示温度，红色越深代表温度越高
+      var gradient = svg.append("defs")
+                        .append("linearGradient")
+                        .attr("id", "temp-gradient")
+                        .attr("x1", "0%")
+                        .attr("x2", "0%")
+                        .attr("y1", "100%")
+                        .attr("y2", "0%");
+      gradient.append("stop")
+              .attr("offset", "0%")
+              .attr("stop-color", "#2196F3"); // 冷色调蓝色
+      gradient.append("stop")
+              .attr("offset", "100%")
+              .attr("stop-color", "#FF5722"); // 暖色调橙红
+      
+      // 绘制温度填充条，从底部向上填充
+      svg.append("rect")
+         .attr("x", width/4)
+         .attr("y", height - fillHeight)
+         .attr("width", width/2)
+         .attr("height", fillHeight)
+         .attr("fill", "url(#temp-gradient)")
+         .attr("rx", width/4);
+      
+      // 在温度计旁边显示具体温度值
+      svg.append("text")
+         .attr("x", width/2)
+         .attr("y", height - fillHeight - 10)
+         .attr("text-anchor", "middle")
+         .attr("fill", "#333")
+         .style("font-size", "14px")
+         .text(celsius + "°C");
+    }
+    
+    // 绘制湿度圆盘（显示 0～100% 的湿度，每个刻度代表1%）
+    function drawHumidityGauge(humidity) {
+      const width = 200, height = 200;
+      const outerRadius = Math.min(width, height) / 2;
+      const innerRadius = outerRadius - 15;
+      const numTicks = 100;
+      
+      const svg = d3.select("#humidity-chart")
+                    .append("svg")
+                    .attr("width", width)
+                    .attr("height", height)
+                    .append("g")
+                    .attr("transform", `translate(${width/2},${height/2})`);
+      
+      const tickAngle = 2 * Math.PI / numTicks;
+      
+      for (let i = 0; i < numTicks; i++) {
+        svg.append("path")
+          .attr("d", d3.arc()
+              .innerRadius(innerRadius)
+              .outerRadius(outerRadius)
+              .startAngle(i * tickAngle)
+              .endAngle((i + 1) * tickAngle))
+          .attr("fill", i < humidity ? "#4CAF50" : "#ddd");
+      }
+      
+      svg.append("text")
+         .attr("text-anchor", "middle")
+         .attr("dy", "0.3em")
+         .style("font-size", "1.5em")
+         .text(humidity + "%");
+      
+      d3.select("#humidity-chart")
+        .append("div")
+        .attr("class", "chart-label")
+        .text("相对湿度");
+    }
+    
+    // 绘制风速进度条（转换为 km/h，假设最大 100 km/h）
+    function drawWindSpeedGauge(windSpeedKmph) {
+      const width = 300, height = 20;
+      const maxWind = 100;
+      
+      const svg = d3.select("#windspeed-chart")
+                    .append("svg")
+                    .attr("width", width)
+                    .attr("height", height);
+      
+      svg.append("rect")
+         .attr("x", 0)
+         .attr("y", 0)
+         .attr("width", width)
+         .attr("height", height)
+         .attr("fill", "#ddd")
+         .attr("rx", 10);
+      
+      svg.append("rect")
+         .attr("x", 0)
+         .attr("y", 0)
+         .attr("width", Math.min(width, width * windSpeedKmph / maxWind))
+         .attr("height", height)
+         .attr("fill", "#2196F3")
+         .attr("rx", 10);
+      
+      d3.select("#windspeed-chart")
+         .append("div")
+         .attr("class", "chart-label")
+         .text("风速：" + windSpeedKmph.toFixed(2) + " km/h");
+    }
+    
+    // 绘制气压进度条（假设范围 900～1100 hPa）
+    function drawPressureGauge(pressure) {
+      const width = 300, height = 20;
+      const minPressure = 900, maxPressure = 1100;
+      
+      const svg = d3.select("#pressure-chart")
+                    .append("svg")
+                    .attr("width", width)
+                    .attr("height", height);
+      
+      svg.append("rect")
+         .attr("x", 0)
+         .attr("y", 0)
+         .attr("width", width)
+         .attr("height", height)
+         .attr("fill", "#ddd")
+         .attr("rx", 10);
+      
+      const clamped = Math.max(minPressure, Math.min(pressure, maxPressure));
+      const widthPressure = width * ((clamped - minPressure) / (maxPressure - minPressure));
+      
+      svg.append("rect")
+         .attr("x", 0)
+         .attr("y", 0)
+         .attr("width", widthPressure)
+         .attr("height", height)
+         .attr("fill", "#FF9800")
+         .attr("rx", 10);
+      
+      d3.select("#pressure-chart")
+         .append("div")
+         .attr("class", "chart-label")
+         .text("气压：" + pressure + " hPa");
+    }
+    
+    // 主函数：请求天气数据并更新页面显示
+    function getWeather(){
+      var userInput = document.getElementById("locationInput").value.trim();
+      if (!userInput){
+        alert("请输入地点！");
+        return;
+      }
+      clearCharts();
+      translateAndDetect(userInput, function(locationEnglish){
+        document.getElementById("locationName").innerText = "查询地点：" + locationEnglish;
+        var url = "https://api.openweathermap.org/data/2.5/weather?q="
+                  + encodeURIComponent(locationEnglish)
+                  + "&appid=a3d9b50b2022aaff3f6b7eb24288e5c8";
+        d3.json(url, function(error, data) {
+          if (error || !data || data.cod !== 200) {
+            document.getElementById("temp-c").innerText = "";
+            document.getElementById("temp-f").innerText = "";
+            alert("无法获取天气数据，请检查地点是否正确。");
+            return;
+          }
+          // 温度数据处理
+          var kelvin = data.main.temp;
+          var celsius = toCelsius(kelvin).toFixed(2);
+          var fahrenheit = toFahrenheit(kelvin).toFixed(2);
+          document.getElementById("temp-c").innerText = "摄氏温度：" + celsius + " °C";
+          document.getElementById("temp-f").innerText = "华氏温度：" + fahrenheit + " °F";
+          
+          // 绘制温度计图形
+          drawTemperatureGauge(parseFloat(celsius));
+          
+          // 其他气象要素
+          var humidity = data.main.humidity;    // 相对湿度
+          var windSpeed = data.wind.speed;        // m/s
+          var windSpeedKmph = mpsToKmph(windSpeed); // km/h
+          var pressure = data.main.pressure;      // hPa
+          
+          drawHumidityGauge(humidity);
+          drawWindSpeedGauge(windSpeedKmph);
+          drawPressureGauge(pressure);
+        });
+      });
+    }
+  </script>
 
-Field1: <input type="text" id="field1" value="Hello World!"><br>
-Field2: <input type="text" id="field2"><br><br>
 
-<button onclick="copyText()">复制文本</button>
 
-<p>当按钮被单击时触发函数。此函数把文本从 Field1 复制到 Field2 中。</p>
-
-</body>
-</html>
+</body></html>
