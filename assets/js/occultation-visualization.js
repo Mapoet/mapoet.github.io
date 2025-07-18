@@ -263,6 +263,28 @@ function initCesiumViewer() {
                 console.log('隐藏所有标签');
                 break;
                 
+            case 'k':
+                // K键：切换图例显示
+                event.preventDefault();
+                // 查找图例元素（通过多个选择器确保找到）
+                let legend = document.querySelector('#cesiumContainer > div[style*="position: absolute"][style*="top: 10px"][style*="right: 10px"]');
+                if (!legend) {
+                    legend = document.querySelector('#cesiumContainer > div[style*="background-color: rgba(0, 0, 0, 0.8)"]');
+                }
+                if (!legend) {
+                    legend = document.querySelector('#cesiumContainer > div:last-child');
+                }
+                
+                if (legend && legend.innerHTML.includes('掩星轨迹图例')) {
+                    legend.style.display = legend.style.display === 'none' ? 'block' : 'none';
+                    message = `图例显示: ${legend.style.display === 'none' ? '关闭' : '开启'}`;
+                    console.log('图例显示切换:', legend.style.display);
+                } else {
+                    message = '未找到图例元素';
+                    console.log('未找到图例元素');
+                }
+                break;
+                
             case 'escape':
                 // ESC键：退出全屏
                 if (document.fullscreenElement) {
@@ -463,7 +485,8 @@ function addLegend(viewer, stats) {
             <div style="font-weight: bold; margin-bottom: 4px;">快捷键:</div>
             <div>F = 全屏切换 | H = 主页视角 | R = 重置相机</div>
             <div>T = 地形大气 | L = 光照切换 | S = 阴影切换</div>
-            <div>1 = 显示标签 | 0 = 隐藏标签 | ESC = 退出全屏</div>
+            <div>1 = 显示标签 | 0 = 隐藏标签 | K = 图例切换</div>
+            <div>ESC = 退出全屏</div>
         </div>
     `;
     
