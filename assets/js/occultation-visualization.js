@@ -69,14 +69,27 @@ function createThreeJSVisualization(data) {
     }
     
     const container = document.getElementById('main');
+    
+    // 确保容器有正确的样式
+    container.style.position = 'relative';
+    container.style.width = '100%';
+    container.style.height = '600px';
+    container.style.overflow = 'hidden';
+    
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setClearColor(0x000011); // 深蓝色背景
+    renderer.setPixelRatio(window.devicePixelRatio); // 支持高DPI屏幕
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
+    
+    // 设置canvas样式
+    renderer.domElement.style.width = '100%';
+    renderer.domElement.style.height = '100%';
+    renderer.domElement.style.display = 'block';
     
     // 创建地球 - 使用更好的材质和纹理
     const earthGeometry = new THREE.SphereGeometry(5, 64, 64);
@@ -120,7 +133,7 @@ function createThreeJSVisualization(data) {
             const lon = (parseFloat(p.lon) || 0) * Math.PI / 180;
             const lat = (parseFloat(p.lat) || 0) * Math.PI / 180;
             const alt = parseFloat(p.alt) || 0;
-            const radius = (6378.137 + alt / 100) * 1000; // 地球半径 + 高度
+            const radius = 5 + alt / 100; // 地球半径 + 高度（保持相对比例）
             
             const x = radius * Math.cos(lat) * Math.cos(lon);
             const y = radius * Math.sin(lat);
@@ -241,6 +254,20 @@ function createThreeJSVisualization(data) {
         camera.position.z += delta * zoomSpeed;
         camera.position.z = Math.max(8, Math.min(30, camera.position.z));
     });
+    
+    // 窗口大小变化处理
+    function onWindowResize() {
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        
+        renderer.setSize(width, height);
+    }
+    
+    // 监听窗口大小变化
+    window.addEventListener('resize', onWindowResize);
     
     // 动画循环
     function animate() {
