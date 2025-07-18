@@ -1,0 +1,74 @@
+---
+title: "三维地球掩星事件可视化"
+date: 2024-06-11
+permalink: /posts/2024/06/occultation-visualization
+excerpt: '基于ECharts GL的三维地球掩星事件轨迹动态可视化'
+tags:
+    - Occultation
+    - GNSS
+    - Atmosphere
+    - Visualization
+---
+
+<div class="occultation-card">
+  <h1>三维地球掩星事件可视化</h1>
+  <p>本页面基于 ECharts GL + D3.js 动态渲染 <code>occultation_events.json</code> 掩星事件数据，展示大气与电离层掩星轨迹在三维地球上的分布。</p>
+  <div id="main" style="width:100%;height:600px;"></div>
+</div>
+<link rel="stylesheet" href="/assets/css/weather.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.9/dist/echarts-gl.min.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+const eventFile = '/assets/data/occultation_events.json'; // 确保此文件可被访问
+function getColor(type) {
+    if (type === 'iono') return '#00ffff';
+    if (type === 'atm') return '#ff8800';
+    return '#cccccc';
+}
+d3.json(eventFile).then(function(data) {
+    const series = [];
+    data.forEach(event => {
+        if (!event.points || event.points.length < 2) return;
+        const coords = event.points.map(p => [p.lon, p.lat, (p.alt || 0)*100]);
+        series.push({
+            type: 'lines3D',
+            coordinateSystem: 'globe',
+            effect: {
+                show: true,
+                trailWidth: 2,
+                trailLength: 0.2,
+                trailOpacity: 0.7,
+                trailColor: getColor(event.type)
+            },
+            lineStyle: {
+                width: 2,
+                color: getColor(event.type),
+                opacity: 0.8
+            },
+            data: [{ coords }]
+        });
+    });
+    const chart = echarts.init(document.getElementById('main'));
+    chart.setOption({
+        backgroundColor: '#000',
+        globe: {
+            baseTexture: 'https://echarts.apache.org/examples/data-gl/asset/world.topo.bathy.200401.jpg',
+            heightTexture: 'https://echarts.apache.org/examples/data-gl/asset/bathymetry_bw_composite_4k.jpg',
+            shading: 'lambert',
+            environment: '#222',
+            globeOuterRadius: 100,
+            viewControl: {
+                autoRotate: true,
+                autoRotateAfterStill: 5,
+                distance: 200
+            },
+            light: {
+                main: { intensity: 1.2 },
+                ambient: { intensity: 0.5 }
+            }
+        },
+        series: series
+    });
+});
+</script> 
