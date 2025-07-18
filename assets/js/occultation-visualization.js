@@ -70,22 +70,49 @@ function initCesiumViewer() {
         targetFrameRate: 60 // 目标帧率
     });
     
-    // 强制移除所有图层并创建颜色地球
+    // 尝试添加真实地球纹理
     try {
         // 移除所有默认图层
         viewer.scene.globe.imageryLayers.removeAll();
         console.log('已移除所有默认图层');
         
-        // 创建蓝色地球材质
-        const earthMaterial = Cesium.Material.fromType('Color', {
-            color: new Cesium.Color(0.2, 0.5, 0.8, 1.0) // 蓝色地球
+        // 方案1：使用OpenStreetMap（免费，无需API密钥）
+        const osmProvider = new Cesium.OpenStreetMapImageryProvider({
+            url: 'https://a.tile.openstreetmap.org/'
         });
         
-        viewer.scene.globe.material = earthMaterial;
-        console.log('颜色地球创建成功');
+        viewer.scene.globe.imageryLayers.addImageryProvider(osmProvider);
+        console.log('OpenStreetMap真实地球纹理添加成功');
         
     } catch (error) {
-        console.error('颜色地球创建失败:', error);
+        console.error('OpenStreetMap添加失败:', error);
+        
+        // 方案2：尝试使用CartoDB
+        try {
+            const cartoProvider = new Cesium.CartoDBImageryProvider({
+                map: 'light_all'
+            });
+            viewer.scene.globe.imageryLayers.addImageryProvider(cartoProvider);
+            console.log('CartoDB真实地球纹理添加成功');
+        } catch (cartoError) {
+            console.error('CartoDB也失败:', cartoError);
+            
+            // 方案3：使用默认的Cesium World Imagery
+            try {
+                const worldImagery = Cesium.createWorldImagery();
+                viewer.scene.globe.imageryLayers.addImageryProvider(worldImagery);
+                console.log('Cesium World Imagery真实地球纹理添加成功');
+            } catch (worldError) {
+                console.error('所有真实纹理都失败，使用颜色地球:', worldError);
+                
+                // 最后方案：创建蓝色地球材质
+                const earthMaterial = Cesium.Material.fromType('Color', {
+                    color: new Cesium.Color(0.2, 0.5, 0.8, 1.0) // 蓝色地球
+                });
+                viewer.scene.globe.material = earthMaterial;
+                console.log('使用蓝色地球作为备选方案');
+            }
+        }
     }
     
     // 配置场景
@@ -256,7 +283,7 @@ function addLegend(viewer, stats) {
             <div>A = 大气掩星起点/终点</div>
         </div>
         <div style="font-size: 10px; margin-top: 6px; opacity: 0.8; text-align: center;">
-            操作: 鼠标拖拽旋转 | 滚轮缩放 | 双击定位
+            操作: 鼠标拖拽旋转 | 滚轮缩放 | 双击定位 | 点击轨迹显示编号
         </div>
     `;
     
