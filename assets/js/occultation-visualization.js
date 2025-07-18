@@ -173,6 +173,115 @@ function initCesiumViewer() {
     // 初始更新
     updateDayNightTexture();
     
+    // 添加键盘快捷键支持
+    document.addEventListener('keydown', function(event) {
+        let message = '';
+        
+        switch(event.key.toLowerCase()) {
+            case 'f':
+                // F键：切换全屏
+                event.preventDefault();
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                    message = '退出全屏模式';
+                } else {
+                    document.getElementById('cesiumContainer').requestFullscreen();
+                    message = '进入全屏模式';
+                }
+                console.log('全屏模式切换');
+                break;
+                
+            case 'h':
+                // H键：回到主页视角
+                event.preventDefault();
+                viewer.camera.flyTo({
+                    destination: Cesium.Cartesian3.fromDegrees(0, 0, 20000000),
+                    orientation: {
+                        heading: 0.0,
+                        pitch: -Cesium.Math.PI_OVER_TWO,
+                        roll: 0.0
+                    },
+                    duration: 2.0
+                });
+                message = '回到主页视角';
+                console.log('回到主页视角');
+                break;
+                
+            case 'r':
+                // R键：重置相机
+                event.preventDefault();
+                viewer.camera.reset();
+                message = '重置相机';
+                console.log('重置相机');
+                break;
+                
+            case 't':
+                // T键：切换地形显示
+                event.preventDefault();
+                viewer.scene.globe.showGroundAtmosphere = !viewer.scene.globe.showGroundAtmosphere;
+                message = `地形大气: ${viewer.scene.globe.showGroundAtmosphere ? '开启' : '关闭'}`;
+                console.log('地形大气显示:', viewer.scene.globe.showGroundAtmosphere);
+                break;
+                
+            case 'l':
+                // L键：切换光照
+                event.preventDefault();
+                viewer.scene.globe.enableLighting = !viewer.scene.globe.enableLighting;
+                message = `光照效果: ${viewer.scene.globe.enableLighting ? '开启' : '关闭'}`;
+                console.log('光照效果:', viewer.scene.globe.enableLighting);
+                break;
+                
+            case 's':
+                // S键：切换阴影
+                event.preventDefault();
+                viewer.scene.shadowMap.enabled = !viewer.scene.shadowMap.enabled;
+                message = `阴影效果: ${viewer.scene.shadowMap.enabled ? '开启' : '关闭'}`;
+                console.log('阴影效果:', viewer.scene.shadowMap.enabled);
+                break;
+                
+            case '1':
+                // 1键：显示所有标签
+                event.preventDefault();
+                viewer.entities.values.forEach(function(e) {
+                    if (e.label) {
+                        e.label.show = true;
+                    }
+                });
+                message = '显示所有标签';
+                console.log('显示所有标签');
+                break;
+                
+            case '0':
+                // 0键：隐藏所有标签
+                event.preventDefault();
+                viewer.entities.values.forEach(function(e) {
+                    if (e.label) {
+                        e.label.show = false;
+                    }
+                });
+                message = '隐藏所有标签';
+                console.log('隐藏所有标签');
+                break;
+                
+            case 'escape':
+                // ESC键：退出全屏
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                    message = '退出全屏模式';
+                }
+                break;
+        }
+        
+        // 显示快捷键提示
+        if (message) {
+            showStatus(message);
+            // 3秒后清除提示
+            setTimeout(() => {
+                showStatus(`Cesium渲染完成!显示${stats.total}条轨迹。支持鼠标拖拽、滚轮缩放、双击定位。`);
+            }, 3000);
+        }
+    });
+    
     // 启用地形
     try {
         const worldTerrain = Cesium.createWorldTerrain();
@@ -349,6 +458,12 @@ function addLegend(viewer, stats) {
         </div>
         <div style="font-size: 9px; margin-top: 4px; opacity: 0.7; text-align: center;">
             地球纹理: 昼夜切换 | 地形: 世界地形 | 光照: 太阳光照
+        </div>
+        <div style="border-top: 1px solid #555; margin: 8px 0; padding-top: 6px; font-size: 9px; opacity: 0.8;">
+            <div style="font-weight: bold; margin-bottom: 4px;">快捷键:</div>
+            <div>F = 全屏切换 | H = 主页视角 | R = 重置相机</div>
+            <div>T = 地形大气 | L = 光照切换 | S = 阴影切换</div>
+            <div>1 = 显示标签 | 0 = 隐藏标签 | ESC = 退出全屏</div>
         </div>
     `;
     
