@@ -70,9 +70,10 @@ function initVisualization() {
         const testOption = {
             backgroundColor: '#000',
             globe: {
-                baseTexture: 'https://echarts.apache.org/examples/data-gl/asset/world.topo.bathy.200401.jpg',
-                heightTexture: 'https://echarts.apache.org/examples/data-gl/asset/bathymetry_bw_composite_4k.jpg',
-                shading: 'lambert',
+                // 使用简化的地球配置，避免CORS问题
+                baseTexture: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', // 1x1透明图片
+                heightTexture: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', // 1x1透明图片
+                shading: 'color',
                 environment: '#222',
                 globeOuterRadius: 100,
                 viewControl: {
@@ -157,9 +158,10 @@ function loadData(chart) {
             const option = {
                 backgroundColor: '#000',
                 globe: {
-                    baseTexture: 'https://echarts.apache.org/examples/data-gl/asset/world.topo.bathy.200401.jpg',
-                    heightTexture: 'https://echarts.apache.org/examples/data-gl/asset/bathymetry_bw_composite_4k.jpg',
-                    shading: 'lambert',
+                    // 使用简化的地球配置，避免CORS问题
+                    baseTexture: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', // 1x1透明图片
+                    heightTexture: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', // 1x1透明图片
+                    shading: 'color',
                     environment: '#222',
                     globeOuterRadius: 100,
                     viewControl: {
