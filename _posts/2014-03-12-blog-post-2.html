@@ -7,11 +7,12 @@ tags:
     - Weather
     - Atmosphere
 ---
+
   <div>
     <h1>全球天气查询</h1>
     <div>
       <input type="text" id="locationInput" placeholder="请输入地点">
-      <button onclick="getWeather()">查询</button>
+      <button id="weatherBtn">查询</button>
     </div>
     <p id="locationName"></p>
     <div>
@@ -312,6 +313,10 @@ tags:
         });
       });
     }
+    // 事件绑定，确保主题包裹下也能正常工作
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('weatherBtn').addEventListener('click', getWeather);
+    });
   </script>
 
 
