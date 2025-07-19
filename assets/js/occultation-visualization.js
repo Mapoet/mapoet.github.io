@@ -488,7 +488,7 @@ function addOccultationTrajectories(viewer, data) {
             name: `${event.type} 掩星轨迹 ${index + 1}`,
             polyline: {
                 positions: positions,
-                width: 3.0, // 增加线宽，使轨迹更明显
+                width: 1.0, // 增加线宽，使轨迹更明显
                 material: lineMaterial,
                 clampToGround: false,
                 zIndex: 1000,
@@ -501,7 +501,7 @@ function addOccultationTrajectories(viewer, data) {
             id: `event_${index}_start`,
             position: positions[0],
             point: {
-                pixelSize: 3, // 减小点大小
+                pixelSize: 1.5, // 减小点大小
                 color: lineColor,
                 outlineColor: Cesium.Color.WHITE,
                 outlineWidth: 0.5, // 减小轮廓宽度
@@ -525,7 +525,7 @@ function addOccultationTrajectories(viewer, data) {
             id: `event_${index}_end`,
             position: positions[positions.length - 1],
             point: {
-                pixelSize: 3, // 减小点大小
+                pixelSize: 1.5, // 减小点大小
                 color: lineColor,
                 outlineColor: Cesium.Color.WHITE,
                 outlineWidth: 0.5, // 减小轮廓宽度
@@ -593,10 +593,10 @@ function addSatelliteOrbits(viewer, orbitData) {
             name: `${satellite.type} 轨道 ${satName}`,
             polyline: {
                 positions: positions,
-                width: 2.0, // 增加线宽
+                width: 1.0, // 增加线宽
                 material: lineMaterial,
                 clampToGround: false,
-                zIndex: 500, // 轨道线在掩星轨迹下方
+                zIndex: 1000, // 轨道线在掩星轨迹上方
                 shadows: Cesium.ShadowMode.ENABLED
             }
         });
@@ -606,7 +606,7 @@ function addSatelliteOrbits(viewer, orbitData) {
             id: `orbit_${satName}_current`,
             position: positions[positions.length - 1], // 最后一个位置作为当前位置
             point: {
-                pixelSize: 4, // 卫星点稍大一些
+                pixelSize: 2, // 卫星点稍大一些
                 color: pointColor,
                 outlineColor: Cesium.Color.WHITE,
                 outlineWidth: 1,
@@ -649,12 +649,14 @@ function setupTimeSystem(viewer, eventData, orbitData) {
     // 如果没有轨道数据，尝试从掩星事件数据中获取
     else if (eventData && eventData.length > 0) {
         const firstEvent = eventData[0];
+        const lastEvent = eventData[eventData.length - 1];
         // 检查常见的时间字段名
         const timeFields = ['time', 'timestamp', 'date', 'datetime', 'start_time', 'event_time'];
         
         for (const field of timeFields) {
             if (firstEvent[field]) {
                 startTime = new Date(firstEvent[field]);
+                endTime = new Date(lastEvent[field]);
                 break;
             }
         }
@@ -662,11 +664,11 @@ function setupTimeSystem(viewer, eventData, orbitData) {
         // 如果没有找到时间字段，使用当前时间
         if (!startTime) {
             startTime = new Date();
+            // 设置结束时间为开始时间后24小时
+            endTime = new Date(startTime.getTime() + 24 * 60 * 60 * 1000);
             console.log('未找到数据时间字段，使用当前时间');
         }
         
-        // 设置结束时间为开始时间后24小时
-        endTime = new Date(startTime.getTime() + 24 * 60 * 60 * 1000);
     } else {
         // 如果没有数据，使用当前时间
         startTime = new Date();
