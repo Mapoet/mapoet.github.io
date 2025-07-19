@@ -36,23 +36,6 @@ pie title 研究领域分布 (17篇论文)
 | 2018 | 1篇 | IRI模型改进 | IRI模型F2层参数改进 |
 | 2016 | 2篇 | LEO-LEO掩星、电离层尺度高度建模 | LEO-LEO掩星数据处理技术 |
 
-### 🏆 最新代表性论文
-
-#### 2025年 - Atmospheric Measurement Techniques
-**标题**: Quality assessment of YUNYAO radio occultation data in the neutral atmosphere  
-**研究内容**: 评估云遥宇航90颗卫星星座的GNSS掩星数据质量，为数值天气预报系统提供数据支持  
-**技术特色**: 使用"三边帽"方法评估折射率误差，与ERA5、COSMIC-2、Metop-C数据对比验证
-
-#### 2024年 - Journal of Geophysical Research: Space Physics  
-**标题**: Dynamic Characterization of Equatorial Plasma Bubble Based on Triangle Network-Joint Slope Approach  
-**研究内容**: 基于三角形网络-联合斜率方法的赤道等离子体气泡动态特征研究  
-**技术特色**: 提出新的三角形网络分析方法，改进赤道等离子体气泡的检测和表征
-
-#### 2023年 - Radio Science
-**标题**: The Ionospheric Exploration Based on TJU#01 Meteorological Microsatellite Mission: Initial Results  
-**研究内容**: 天津大学TJU#01气象微卫星任务的电离层探测初步结果  
-**技术特色**: 微卫星平台上的电离层探测技术验证，为后续星座建设提供技术基础
-
 ## 🎯 研究重点与贡献
 
 ### 核心技术贡献
