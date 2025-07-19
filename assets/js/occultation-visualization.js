@@ -70,6 +70,11 @@ function initCesiumViewer() {
         targetFrameRate: 60 // 目标帧率
     });
     
+    // 配置时间轴样式
+    const timeline = viewer.timeline;
+    timeline.container.style.height = '80px';
+    timeline.container.style.fontSize = '12px';
+    
     // 尝试添加真实地球纹理
     try {
         // 移除所有默认图层
@@ -114,8 +119,7 @@ function initCesiumViewer() {
         }
     });
     
-    // 设置当前时间为真实时间
-    viewer.clock.currentTime = Cesium.JulianDate.fromDate(new Date());
+    // 时间设置将在数据加载后完成
     viewer.clock.shouldAnimate = true;
     
     // 添加键盘快捷键支持
@@ -263,6 +267,18 @@ function initCesiumViewer() {
                 }
                 break;
                 
+            case 'w':
+                // W键：测试时间过滤
+                event.preventDefault();
+                if (viewer.clock.shouldAnimate) {
+                    viewer.clock.shouldAnimate = false;
+                    message = '时间动画已暂停';
+                } else {
+                    viewer.clock.shouldAnimate = true;
+                    message = '时间动画已恢复';
+                }
+                break;
+                
             case 'escape':
                 // ESC键：退出全屏
                 if (document.fullscreenElement) {
@@ -400,11 +416,14 @@ function startDayNightCycle(_viewer) {
 function addOccultationTrajectories(viewer, data) {
     //console.log('添加掩星轨迹到Cesium...');
     
-    const testData = data.slice(0, 100); // 显示前100个事件
-    //const testData = data; // 显示所有事件
+    //const testData = data.slice(0, 100); // 显示前100个事件
+    const testData = data; // 显示所有事件
     let validEvents = 0;
     let ionoCount = 0;
     let atmCount = 0;
+    
+    // 存储所有事件数据用于时间过滤
+    viewer.occultationEvents = testData;
     
     testData.forEach((event, index) => {
         if (!event.points || event.points.length < 2) {
@@ -425,23 +444,24 @@ function addOccultationTrajectories(viewer, data) {
         let lineColor, lineMaterial;
         if (event.type === 'iono') {
             lineColor = Cesium.Color.CYAN;
-            lineMaterial = Cesium.Color.CYAN.withAlpha(0.8);
+            lineMaterial = Cesium.Color.CYAN.withAlpha(0.6); // 降低透明度
             ionoCount++;
         } else if (event.type === 'atm') {
             lineColor = Cesium.Color.ORANGE;
-            lineMaterial = Cesium.Color.ORANGE.withAlpha(0.8);
+            lineMaterial = Cesium.Color.ORANGE.withAlpha(0.6); // 降低透明度
             atmCount++;
         } else {
             lineColor = Cesium.Color.GRAY;
-            lineMaterial = Cesium.Color.GRAY.withAlpha(0.8);
+            lineMaterial = Cesium.Color.GRAY.withAlpha(0.6); // 降低透明度
         }
         
-        // 添加轨迹线
+        // 添加轨迹线 - 更细的线条
         const polyline = viewer.entities.add({
+            id: `event_${index}_line`,
             name: `${event.type} 掩星轨迹 ${index + 1}`,
             polyline: {
                 positions: positions,
-                width: 3, // 增加线宽
+                width: 1.5, // 减小线宽
                 material: lineMaterial,
                 clampToGround: false,
                 zIndex: 1000,
@@ -449,47 +469,49 @@ function addOccultationTrajectories(viewer, data) {
             }
         });
         
-        // 添加起点标记和标签
+        // 添加起点标记和标签 - 更小的点
         const startPoint = viewer.entities.add({
+            id: `event_${index}_start`,
             position: positions[0],
             point: {
-                pixelSize: 6,
+                pixelSize: 3, // 减小点大小
                 color: lineColor,
                 outlineColor: Cesium.Color.WHITE,
-                outlineWidth: 1,
+                outlineWidth: 0.5, // 减小轮廓宽度
                 heightReference: Cesium.HeightReference.NONE
             },
             label: {
                 text: `${event.type === 'iono' ? 'I' : 'A'}${index + 1}`,
-                font: '10pt sans-serif',
+                font: '8pt sans-serif', // 减小字体
                 fillColor: Cesium.Color.WHITE,
                 outlineColor: Cesium.Color.BLACK,
                 outlineWidth: 1,
                 style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                pixelOffset: new Cesium.Cartesian2(0, -15),
+                pixelOffset: new Cesium.Cartesian2(0, -12), // 减小偏移
                 heightReference: Cesium.HeightReference.NONE,
                 show: false // 默认隐藏标签
             }
         });
         
-        // 添加终点标记和标签
+        // 添加终点标记和标签 - 更小的点
         const endPoint = viewer.entities.add({
+            id: `event_${index}_end`,
             position: positions[positions.length - 1],
             point: {
-                pixelSize: 6,
+                pixelSize: 3, // 减小点大小
                 color: lineColor,
                 outlineColor: Cesium.Color.WHITE,
-                outlineWidth: 1,
+                outlineWidth: 0.5, // 减小轮廓宽度
                 heightReference: Cesium.HeightReference.NONE
             },
             label: {
                 text: `${event.type === 'iono' ? 'I' : 'A'}${index + 1}`,
-                font: '10pt sans-serif',
+                font: '8pt sans-serif', // 减小字体
                 fillColor: Cesium.Color.WHITE,
                 outlineColor: Cesium.Color.BLACK,
                 outlineWidth: 1,
                 style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                pixelOffset: new Cesium.Cartesian2(0, -15),
+                pixelOffset: new Cesium.Cartesian2(0, -12), // 减小偏移
                 heightReference: Cesium.HeightReference.NONE,
                 show: false // 默认隐藏标签
             }
@@ -498,15 +520,137 @@ function addOccultationTrajectories(viewer, data) {
         // 添加点击事件处理
         startPoint.point.id = `event_${index}`;
         endPoint.point.id = `event_${index}`;
-        
-        // 为轨迹线也添加点击事件
-        polyline.id = `event_${index}`;
+        polyline.polyline.id = `event_${index}`;
         
         validEvents++;
     });
     
     //console.log(`统计: 电离层掩星 ${ionoCount} 条, 大气掩星 ${atmCount} 条`);
     return { total: validEvents, iono: ionoCount, atm: atmCount };
+}
+
+// 设置时间系统
+function setupTimeSystem(viewer, data) {
+    // 尝试从数据中提取时间信息
+    let startTime = null;
+    let endTime = null;
+    
+    // 查找数据中的时间字段
+    if (data.length > 0) {
+        const firstEvent = data[0];
+        // 检查常见的时间字段名
+        const timeFields = ['time', 'timestamp', 'date', 'datetime', 'start_time', 'event_time'];
+        
+        for (const field of timeFields) {
+            if (firstEvent[field]) {
+                startTime = new Date(firstEvent[field]);
+                break;
+            }
+        }
+        
+        // 如果没有找到时间字段，使用当前时间
+        if (!startTime) {
+            startTime = new Date();
+            console.log('未找到数据时间字段，使用当前时间');
+        }
+        
+        // 设置结束时间为开始时间后24小时
+        endTime = new Date(startTime.getTime() + 24 * 60 * 60 * 1000);
+    } else {
+        // 如果没有数据，使用当前时间
+        startTime = new Date();
+        endTime = new Date(startTime.getTime() + 24 * 60 * 60 * 1000);
+    }
+    
+    // 设置Cesium时钟
+    viewer.clock.startTime = Cesium.JulianDate.fromDate(startTime);
+    viewer.clock.stopTime = Cesium.JulianDate.fromDate(endTime);
+    viewer.clock.currentTime = Cesium.JulianDate.fromDate(startTime);
+    viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP;
+    viewer.clock.multiplier = 3600; // 1小时 = 1秒
+    
+    // 存储时间信息
+    viewer.dataStartTime = startTime;
+    viewer.dataEndTime = endTime;
+    
+    console.log(`时间系统设置: 开始时间 ${startTime.toISOString()}, 结束时间 ${endTime.toISOString()}`);
+    
+    // 启动时间过滤
+    startTimeFiltering(viewer);
+}
+
+// 启动时间过滤
+function startTimeFiltering(viewer) {
+    // 监听时间变化
+    viewer.clock.onTick.addEventListener(function(clock) {
+        updateVisibleEvents(viewer, clock.currentTime);
+    });
+    
+    // 初始更新
+    updateVisibleEvents(viewer, viewer.clock.currentTime);
+}
+
+// 更新可见事件
+function updateVisibleEvents(viewer, currentTime) {
+    const currentDate = Cesium.JulianDate.toDate(currentTime);
+    const oneHourAgo = new Date(currentDate.getTime() - 60 * 60 * 1000); // 一小时前
+    
+    // 隐藏所有实体
+    viewer.entities.values.forEach(function(entity) {
+        if (entity.polyline || entity.point) {
+            entity.show = false;
+        }
+    });
+    
+    // 显示一小时内的数据
+    if (viewer.occultationEvents) {
+        let visibleCount = 0;
+        
+        viewer.occultationEvents.forEach((event, index) => {
+            let eventTime = null;
+            
+            // 尝试从事件数据中提取时间信息
+            const timeFields = ['time', 'timestamp', 'date', 'datetime', 'start_time', 'event_time'];
+            for (const field of timeFields) {
+                if (event[field]) {
+                    eventTime = new Date(event[field]);
+                    break;
+                }
+            }
+            
+            // 如果没有时间信息，使用索引作为时间（模拟时间分布）
+            if (!eventTime) {
+                // 假设数据按时间顺序排列，使用索引创建模拟时间
+                const timeSpan = viewer.dataEndTime.getTime() - viewer.dataStartTime.getTime();
+                const timeStep = timeSpan / viewer.occultationEvents.length;
+                eventTime = new Date(viewer.dataStartTime.getTime() + index * timeStep);
+            }
+            
+            // 检查事件是否在一小时时间窗口内
+            if (eventTime >= oneHourAgo && eventTime <= currentDate) {
+                const entityStart = viewer.entities.getById(`event_${index}_start`);
+                const entityEnd = viewer.entities.getById(`event_${index}_end`);
+                const entityLine = viewer.entities.getById(`event_${index}_line`);
+                
+                if (entityStart) {
+                    entityStart.show = true;
+                    visibleCount++;
+                }
+                if (entityEnd) {
+                    entityEnd.show = true;
+                    visibleCount++;
+                }
+                if (entityLine) {
+                    entityLine.show = true;
+                    visibleCount++;
+                }
+            }
+        });
+        
+        // 更新状态显示
+        const timeStr = currentDate.toISOString().replace('T', ' ').substring(0, 19);
+        showStatus(`当前时间: ${timeStr}, 显示事件: ${Math.floor(visibleCount/3)}个`);
+    }
 }
 
 // 添加图例
@@ -546,11 +690,17 @@ function addLegend(viewer, stats) {
             地球纹理: OSM昼夜切换 | 地形: 世界地形 | 光照: 太阳光照
         </div>
         <div style="border-top: 1px solid #555; margin: 8px 0; padding-top: 6px; font-size: 9px; opacity: 0.8;">
+            <div style="font-weight: bold; margin-bottom: 4px;">时间控制:</div>
+            <div>时间轴: 显示历史1小时数据</div>
+            <div>时间加速: 1小时/秒</div>
+            <div>循环播放: 24小时周期</div>
+        </div>
+        <div style="border-top: 1px solid #555; margin: 8px 0; padding-top: 6px; font-size: 9px; opacity: 0.8;">
             <div style="font-weight: bold; margin-bottom: 4px;">快捷键:</div>
             <div>F = 全屏切换 | H = 主页视角 | R = 重置相机</div>
             <div>T = 地形大气 | L = 光照切换 | S = 阴影切换</div>
             <div>1 = 显示标签 | 0 = 隐藏标签 | K = 图例切换</div>
-            <div>D = 昼夜测试 | I = 高度信息 | ESC = 退出全屏</div>
+            <div>D = 昼夜测试 | I = 高度信息 | W = 时间暂停</div>
         </div>
     `;
     
@@ -600,6 +750,9 @@ function loadDataForCesium(viewer) {
             //console.log('Cesium数据加载成功:', data.length, '个事件');
             showStatus(`数据加载成功，共 ${data.length} 个事件`);
             
+            // 解析数据时间并设置Cesium时间
+            setupTimeSystem(viewer, data);
+            
             const stats = addOccultationTrajectories(viewer, data);
             addLegend(viewer, stats);
             
@@ -618,11 +771,15 @@ function loadDataForCesium(viewer) {
                         
                         // 显示选中事件的标签
                         const eventIndex = entity.id.split('_')[1];
-                        viewer.entities.values.forEach(function(e) {
-                            if (e.id === `event_${eventIndex}` && e.label) {
-                                e.label.show = true;
-                            }
-                        });
+                        const startEntity = viewer.entities.getById(`event_${eventIndex}_start`);
+                        const endEntity = viewer.entities.getById(`event_${eventIndex}_end`);
+                        
+                        if (startEntity && startEntity.label) {
+                            startEntity.label.show = true;
+                        }
+                        if (endEntity && endEntity.label) {
+                            endEntity.label.show = true;
+                        }
                         
                         //console.log(`选中掩星事件 ${parseInt(eventIndex) + 1}`);
                     }
