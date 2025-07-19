@@ -12,7 +12,7 @@ function getColor(type) {
 
 function showStatus(message) {
     statusDiv.innerHTML = message;
-    console.log(message);
+    //console.log(message);
 }
 
 // 检查Cesium是否可用
@@ -24,8 +24,8 @@ function checkCesium() {
         return false;
     }
     
-    console.log('Cesium版本:', Cesium.VERSION);
-    console.log('Cesium对象:', Cesium);
+    //console.log('Cesium版本:', Cesium.VERSION);
+    //console.log('Cesium对象:', Cesium);
     
     showStatus('Cesium库已加载，正在初始化地球...');
     return true;
@@ -50,7 +50,7 @@ function checkDOM() {
 
 // 初始化Cesium地球
 function initCesiumViewer() {
-    console.log('初始化Cesium Viewer...');
+    //console.log('初始化Cesium Viewer...');
     
     // 创建Cesium Viewer - 使用最简配置确保地球显示
     const viewer = new Cesium.Viewer('cesiumContainer', {
@@ -74,7 +74,7 @@ function initCesiumViewer() {
     try {
         // 移除所有默认图层
         viewer.scene.globe.imageryLayers.removeAll();
-        console.log('已移除所有默认图层');
+        //console.log('已移除所有默认图层');
         
         // 使用OpenStreetMap实现昼夜交替
         updateLighting(viewer);
@@ -87,7 +87,7 @@ function initCesiumViewer() {
             color: new Cesium.Color(0.2, 0.5, 0.8, 1.0) // 蓝色地球
         });
         viewer.scene.globe.material = earthMaterial;
-        console.log('使用蓝色地球作为备选方案');
+        //console.log('使用蓝色地球作为备选方案');
     }
     
     // 配置场景
@@ -133,7 +133,7 @@ function initCesiumViewer() {
                     document.getElementById('cesiumContainer').requestFullscreen();
                     message = '进入全屏模式';
                 }
-                console.log('全屏模式切换');
+                //console.log('全屏模式切换');
                 break;
                 
             case 'h':
@@ -149,7 +149,7 @@ function initCesiumViewer() {
                     duration: 2.0
                 });
                 message = '回到主页视角';
-                console.log('回到主页视角');
+                //console.log('回到主页视角');
                 break;
                 
             case 'i':
@@ -166,7 +166,7 @@ function initCesiumViewer() {
                         }
                     }
                 });
-                console.log(heightInfo);
+                //console.log(heightInfo);
                 message = '高度信息已输出到Console';
                 break;
                 
@@ -175,7 +175,7 @@ function initCesiumViewer() {
                 event.preventDefault();
                 viewer.camera.reset();
                 message = '重置相机';
-                console.log('重置相机');
+                //console.log('重置相机');
                 break;
                 
             case 't':
@@ -183,7 +183,7 @@ function initCesiumViewer() {
                 event.preventDefault();
                 viewer.scene.globe.showGroundAtmosphere = !viewer.scene.globe.showGroundAtmosphere;
                 message = `地形大气: ${viewer.scene.globe.showGroundAtmosphere ? '开启' : '关闭'}`;
-                console.log('地形大气显示:', viewer.scene.globe.showGroundAtmosphere);
+                //console.log('地形大气显示:', viewer.scene.globe.showGroundAtmosphere);
                 break;
                 
             case 'l':
@@ -191,7 +191,7 @@ function initCesiumViewer() {
                 event.preventDefault();
                 viewer.scene.globe.enableLighting = !viewer.scene.globe.enableLighting;
                 message = `光照效果: ${viewer.scene.globe.enableLighting ? '开启' : '关闭'}`;
-                console.log('光照效果:', viewer.scene.globe.enableLighting);
+                //console.log('光照效果:', viewer.scene.globe.enableLighting);
                 break;
                 
             case 's':
@@ -199,7 +199,7 @@ function initCesiumViewer() {
                 event.preventDefault();
                 viewer.scene.shadowMap.enabled = !viewer.scene.shadowMap.enabled;
                 message = `阴影效果: ${viewer.scene.shadowMap.enabled ? '开启' : '关闭'}`;
-                console.log('阴影效果:', viewer.scene.shadowMap.enabled);
+                //console.log('阴影效果:', viewer.scene.shadowMap.enabled);
                 break;
                 
             case '1':
@@ -211,7 +211,7 @@ function initCesiumViewer() {
                     }
                 });
                 message = '显示所有标签';
-                console.log('显示所有标签');
+                //console.log('显示所有标签');
                 break;
                 
             case '0':
@@ -223,7 +223,7 @@ function initCesiumViewer() {
                     }
                 });
                 message = '隐藏所有标签';
-                console.log('隐藏所有标签');
+                //console.log('隐藏所有标签');
                 break;
                 
             case 'k':
@@ -241,10 +241,10 @@ function initCesiumViewer() {
                 if (legend && legend.innerHTML.includes('掩星轨迹图例')) {
                     legend.style.display = legend.style.display === 'none' ? 'block' : 'none';
                     message = `图例显示: ${legend.style.display === 'none' ? '关闭' : '开启'}`;
-                    console.log('图例显示切换:', legend.style.display);
+                    //console.log('图例显示切换:', legend.style.display);
                 } else {
                     message = '未找到图例元素';
-                    console.log('未找到图例元素');
+                    //console.log('未找到图例元素');
                 }
                 break;
                 
@@ -256,10 +256,10 @@ function initCesiumViewer() {
                     const currentAlpha = nightLayer.alpha;
                     nightLayer.alpha = currentAlpha > 0.5 ? 0.0 : 1.0;
                     message = `昼夜切换测试: ${nightLayer.alpha > 0.5 ? '夜间' : '白天'}`;
-                    console.log('昼夜切换测试:', nightLayer.alpha);
+                    //console.log('昼夜切换测试:', nightLayer.alpha);
                 } else {
                     message = '夜间图层未找到';
-                    console.log('夜间图层未找到');
+                    //console.log('夜间图层未找到');
                 }
                 break;
                 
@@ -286,7 +286,7 @@ function initCesiumViewer() {
     try {
         const worldTerrain = Cesium.createWorldTerrain();
         viewer.terrainProvider = worldTerrain;
-        console.log('世界地形添加成功');
+        //console.log('世界地形添加成功');
     } catch (terrainError) {
         console.error('地形添加失败:', terrainError);
     }
@@ -308,7 +308,7 @@ function initCesiumViewer() {
     // 强制渲染
     scene.requestRender();
     
-    console.log('Cesium Viewer初始化完成');
+    //console.log('Cesium Viewer初始化完成');
     return viewer;
 }
 
@@ -346,7 +346,7 @@ function updateLighting(_viewer) {
     _viewer.dayLayer = dayLayer;
     _viewer.nightLayer = nightLayer;
     
-    console.log('OpenStreetMap昼夜交替图层添加成功');
+    //console.log('OpenStreetMap昼夜交替图层添加成功');
     
     // 启动昼夜交替
     startDayNightCycle(_viewer);
@@ -383,9 +383,9 @@ function startDayNightCycle(_viewer) {
             alpha = Math.max(0.0, Math.min(1.0, alpha));
             
             nightLayer.alpha = alpha;
-            console.log(`时间: ${hour}:${date.getUTCMinutes().toString().padStart(2, '0')}, 夜间纹理透明度: ${alpha.toFixed(2)}`);
+            //console.log(`时间: ${hour}:${date.getUTCMinutes().toString().padStart(2, '0')}, 夜间纹理透明度: ${alpha.toFixed(2)}`);
         } else {
-            console.log('夜间图层未找到，无法进行昼夜切换');
+            //console.log('夜间图层未找到，无法进行昼夜切换');
         }
     }
     
@@ -398,7 +398,7 @@ function startDayNightCycle(_viewer) {
 
 // 添加掩星轨迹到Cesium
 function addOccultationTrajectories(viewer, data) {
-    console.log('添加掩星轨迹到Cesium...');
+    //console.log('添加掩星轨迹到Cesium...');
     
     const testData = data.slice(0, 100); // 显示前100个事件
     //const testData = data; // 显示所有事件
@@ -408,25 +408,15 @@ function addOccultationTrajectories(viewer, data) {
     
     testData.forEach((event, index) => {
         if (!event.points || event.points.length < 2) {
-            console.log(`事件 ${index} 点数不足，跳过`);
+            //console.log(`事件 ${index} 点数不足，跳过`);
             return;
         }
         
-        console.log(`事件 ${index} (${event.type}): ${event.points.length}个点`);
+        //console.log(`事件 ${index} (${event.type}): ${event.points.length}个点`);
         
         // 转换坐标并检查高度
         const positions = event.points.map(point => {
             let height = point.alt;
-            
-            // 检查高度单位，如果超过1000km，可能是单位错误
-            if (height > 1000) {
-                // 如果高度超过1000，假设单位是米，转换为千米
-                height = height / 1000;
-                console.log(`事件 ${index} 高度单位修正: ${point.alt}m -> ${height}km`);
-            }
-            
-            // 限制高度范围在0-1000km之间
-            height = Math.max(0, Math.min(1000, height));
             
             return Cesium.Cartesian3.fromDegrees(point.lon, point.lat, height * 1000);
         });
@@ -461,7 +451,7 @@ function addOccultationTrajectories(viewer, data) {
         
         // 添加起点标记和标签
         const startPoint = viewer.entities.add({
-            position: Cesium.Cartesian3.fromDegrees(positions[0].x, positions[0].y, positions[0].z),
+            position: positions[0],
             point: {
                 pixelSize: 6,
                 color: lineColor,
@@ -484,7 +474,7 @@ function addOccultationTrajectories(viewer, data) {
         
         // 添加终点标记和标签
         const endPoint = viewer.entities.add({
-            position: Cesium.Cartesian3.fromDegrees(positions[positions.length - 1].x, positions[positions.length - 1].y, positions[positions.length - 1].z),
+            position: positions[positions.length - 1],
             point: {
                 pixelSize: 6,
                 color: lineColor,
@@ -515,7 +505,7 @@ function addOccultationTrajectories(viewer, data) {
         validEvents++;
     });
     
-    console.log(`统计: 电离层掩星 ${ionoCount} 条, 大气掩星 ${atmCount} 条`);
+    //console.log(`统计: 电离层掩星 ${ionoCount} 条, 大气掩星 ${atmCount} 条`);
     return { total: validEvents, iono: ionoCount, atm: atmCount };
 }
 
@@ -569,22 +559,22 @@ function addLegend(viewer, stats) {
 
 // 主函数
 function initVisualization() {
-    console.log('开始初始化Cesium可视化...');
+    //console.log('开始初始化Cesium可视化...');
     
     if (!checkDOM()) {
-        console.log('DOM检查失败');
+        //console.log('DOM检查失败');
         return;
     }
     
     if (!checkCesium()) {
-        console.log('Cesium检查失败');
+        //console.log('Cesium检查失败');
         return;
     }
     
     try {
         // 初始化Cesium Viewer
         const viewer = initCesiumViewer();
-        console.log('Cesium Viewer初始化成功');
+        //console.log('Cesium Viewer初始化成功');
         
         // 加载数据
         loadDataForCesium(viewer);
@@ -596,7 +586,7 @@ function initVisualization() {
 }
 
 function loadDataForCesium(viewer) {
-    console.log('开始加载数据用于Cesium...');
+    //console.log('开始加载数据用于Cesium...');
     
     // 使用fetch API加载数据
     fetch(eventFile)
@@ -607,7 +597,7 @@ function loadDataForCesium(viewer) {
             return response.json();
         })
         .then(data => {
-            console.log('Cesium数据加载成功:', data.length, '个事件');
+            //console.log('Cesium数据加载成功:', data.length, '个事件');
             showStatus(`数据加载成功，共 ${data.length} 个事件`);
             
             const stats = addOccultationTrajectories(viewer, data);
@@ -634,7 +624,7 @@ function loadDataForCesium(viewer) {
                             }
                         });
                         
-                        console.log(`选中掩星事件 ${parseInt(eventIndex) + 1}`);
+                        //console.log(`选中掩星事件 ${parseInt(eventIndex) + 1}`);
                     }
                 } else {
                     // 点击空白区域，隐藏所有标签
@@ -646,7 +636,7 @@ function loadDataForCesium(viewer) {
                 }
             }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
             
-            console.log(`Cesium渲染完成!显示${stats.total}条轨迹。支持鼠标拖拽、滚轮缩放、双击定位。`);
+            //console.log(`Cesium渲染完成!显示${stats.total}条轨迹。支持鼠标拖拽、滚轮缩放、双击定位。`);
             showStatus(`Cesium渲染完成!显示${stats.total}条轨迹。支持鼠标拖拽、滚轮缩放、双击定位。`);
         })
         .catch(error => {
