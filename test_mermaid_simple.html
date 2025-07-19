@@ -11,43 +11,35 @@
             margin: 0 auto;
             padding: 20px;
         }
-        .mermaid-diagram {
+        .mermaid {
             text-align: center;
             margin: 20px 0;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
-            min-height: 100px;
-        }
-        pre {
-            background: #f5f5f5;
-            padding: 10px;
-            border-radius: 4px;
-            overflow-x: auto;
         }
     </style>
 </head>
 <body>
-    <h1>Mermaid简单测试</h1>
+    <h1>🔧 Mermaid简单测试</h1>
     
-    <h2>1. 简单流程图</h2>
+    <h2>测试1: 简单流程图</h2>
     <pre><code class="language-mermaid">graph LR
     A[开始] --> B[处理]
-    B --> C[结束]
-</code></pre>
+    B --> C[结束]</code></pre>
 
-    <h2>2. 饼图</h2>
+    <h2>测试2: 饼图</h2>
     <pre><code class="language-mermaid">pie title 研究领域分布
     "COSMIC掩星" : 4
     "IRI模型" : 4
     "GNSS技术" : 3
     "电离层研究" : 1
-    "大气观测" : 2
-</code></pre>
+    "大气观测" : 2</code></pre>
 
-    <!-- Mermaid Library -->
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
-    <script src="assets/js/mermaid-init.js"></script>
+    <h2>测试3: 序列图</h2>
+    <pre><code class="language-mermaid">sequenceDiagram
+    participant A as 用户
+    participant B as 系统
+    A->>B: 请求数据
+    B->>A: 返回数据</code></pre>
+
+    <!-- 这个页面会自动使用head/custom.html中的Mermaid配置 -->
 </body>
 </html> 
