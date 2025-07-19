@@ -6,18 +6,43 @@
 (function() {
   'use strict';
 
-  // 等待DOM加载完成
-  document.addEventListener('DOMContentLoaded', function() {
+  let mermaidInitialized = false;
+
+  // 监听Mermaid库加载完成事件
+  document.addEventListener('mermaidLoaded', function() {
+    console.log('Mermaid library loaded event received');
     initMermaid();
   });
 
+  // 等待DOM加载完成
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, checking Mermaid library...');
+    
+    // 检查Mermaid库是否已加载
+    if (typeof mermaid !== 'undefined') {
+      console.log('Mermaid library already available');
+      initMermaid();
+    } else {
+      console.log('Mermaid library not yet loaded, waiting for mermaidLoaded event...');
+      // 如果Mermaid库还没有加载，等待mermaidLoaded事件
+      // 如果5秒后还没有加载，显示错误
+      setTimeout(function() {
+        if (!mermaidInitialized && typeof mermaid === 'undefined') {
+          console.error('Mermaid library not loaded after timeout');
+          showMermaidError('Mermaid库加载失败，请刷新页面重试');
+        }
+      }, 5000);
+    }
+  });
+
   function initMermaid() {
-    // 检查mermaid是否已加载
-    if (typeof mermaid === 'undefined') {
-      console.warn('Mermaid library not loaded');
+    if (mermaidInitialized) {
+      console.log('Mermaid already initialized, skipping...');
       return;
     }
-
+    
+    console.log('Initializing Mermaid...');
+    
     // 初始化mermaid配置
     mermaid.initialize({
       startOnLoad: false, // 手动控制渲染
@@ -71,6 +96,9 @@
       }
     });
 
+    mermaidInitialized = true;
+    console.log('Mermaid initialized, processing diagrams...');
+
     // 处理markdown中的mermaid代码块
     processMermaidCodeBlocks();
     
@@ -82,6 +110,8 @@
     // 查找所有mermaid代码块
     const mermaidBlocks = document.querySelectorAll('pre code.language-mermaid, pre code.language-mermaidjs');
     
+    console.log('Found', mermaidBlocks.length, 'mermaid code blocks');
+    
     mermaidBlocks.forEach(function(block, index) {
       const pre = block.parentElement;
       const diagramId = 'mermaid-diagram-' + index + '-' + Date.now();
@@ -92,6 +122,13 @@
       container.id = diagramId;
       container.style.textAlign = 'center';
       container.style.margin = '20px 0';
+      container.style.padding = '15px';
+      container.style.background = '#f8f9fa';
+      container.style.borderRadius = '8px';
+      container.style.border = '1px solid #e9ecef';
+      
+      // 添加加载提示
+      container.innerHTML = '<div style="color: #6c757d; font-style: italic;">正在渲染图表...</div>';
       
       // 替换pre元素
       pre.parentNode.insertBefore(container, pre);
@@ -100,11 +137,14 @@
       // 渲染mermaid图表
       try {
         const graphDefinition = block.textContent || block.innerText;
+        console.log('Rendering diagram', diagramId, 'with definition:', graphDefinition.substring(0, 100) + '...');
+        
         mermaid.render(diagramId, graphDefinition, function(svgCode) {
           container.innerHTML = svgCode;
+          console.log('Successfully rendered diagram', diagramId);
         });
       } catch (error) {
-        console.error('Mermaid rendering error:', error);
+        console.error('Mermaid rendering error for', diagramId, ':', error);
         container.innerHTML = '<div style="color: red; padding: 20px; border: 1px solid red; background: #fff5f5;">Mermaid图表渲染失败: ' + error.message + '</div>';
       }
     });
@@ -114,6 +154,8 @@
     // 查找所有带有mermaid类的元素
     const mermaidElements = document.querySelectorAll('.mermaid, [data-mermaid]');
     
+    console.log('Found', mermaidElements.length, 'mermaid elements');
+    
     mermaidElements.forEach(function(element, index) {
       const diagramId = 'mermaid-element-' + index + '-' + Date.now();
       element.id = diagramId;
@@ -121,13 +163,34 @@
       // 渲染mermaid图表
       try {
         const graphDefinition = element.textContent || element.innerText;
+        console.log('Rendering element', diagramId, 'with definition:', graphDefinition.substring(0, 100) + '...');
+        
         mermaid.render(diagramId, graphDefinition, function(svgCode) {
           element.innerHTML = svgCode;
+          console.log('Successfully rendered element', diagramId);
         });
       } catch (error) {
-        console.error('Mermaid rendering error:', error);
+        console.error('Mermaid rendering error for', diagramId, ':', error);
         element.innerHTML = '<div style="color: red; padding: 20px; border: 1px solid red; background: #fff5f5;">Mermaid图表渲染失败: ' + error.message + '</div>';
       }
+    });
+  }
+
+  function showMermaidError(message) {
+    // 在所有mermaid代码块位置显示错误信息
+    const mermaidBlocks = document.querySelectorAll('pre code.language-mermaid, pre code.language-mermaidjs');
+    mermaidBlocks.forEach(function(block) {
+      const pre = block.parentElement;
+      const errorDiv = document.createElement('div');
+      errorDiv.style.color = 'red';
+      errorDiv.style.padding = '20px';
+      errorDiv.style.border = '1px solid red';
+      errorDiv.style.background = '#fff5f5';
+      errorDiv.style.margin = '20px 0';
+      errorDiv.textContent = message;
+      
+      pre.parentNode.insertBefore(errorDiv, pre);
+      pre.style.display = 'none';
     });
   }
 
@@ -145,8 +208,10 @@
               if (mermaidBlocks.length > 0 || mermaidElements.length > 0) {
                 // 延迟处理，确保DOM完全更新
                 setTimeout(function() {
-                  processMermaidCodeBlocks();
-                  processMermaidElements();
+                  if (mermaidInitialized) {
+                    processMermaidCodeBlocks();
+                    processMermaidElements();
+                  }
                 }, 100);
               }
             }
