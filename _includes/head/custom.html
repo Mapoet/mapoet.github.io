@@ -23,7 +23,9 @@
 <meta name="msapplication-config" content="{{ base_path }}/images/browserconfig.xml?v=M44lzPylqQ">
 <meta name="theme-color" content="#ffffff">
 <link rel="stylesheet" href="{{ base_path }}/assets/css/academicons.css"/>
+<link rel="stylesheet" href="{{ base_path }}/assets/css/mermaid-custom.css"/>
 
+<!-- MathJax Configuration -->
 <script type="text/x-mathjax-config"> MathJax.Hub.Config({ TeX: { equationNumbers: { autoNumber: "all" } } }); </script>
 <script type="text/x-mathjax-config">
   MathJax.Hub.Config({
@@ -34,5 +36,63 @@
   });
 </script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/latest.js?config=TeX-MML-AM_CHTML' async></script>
+
+<!-- Mermaid Configuration -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      flowchart: {
+        useMaxWidth: true,
+        htmlLabels: true,
+        curve: 'basis'
+      },
+      sequence: {
+        useMaxWidth: true,
+        diagramMarginX: 50,
+        diagramMarginY: 10,
+        actorMargin: 50,
+        width: 150,
+        height: 65,
+        boxMargin: 10,
+        boxTextMargin: 5,
+        noteMargin: 10,
+        messageMargin: 35,
+        mirrorActors: true,
+        bottomMarginAdj: 1,
+        useMaxWidth: true,
+        rightAngles: false,
+        showSequenceNumbers: false
+      },
+      gantt: {
+        titleTopMargin: 25,
+        barHeight: 20,
+        barGap: 4,
+        topPadding: 50,
+        leftPadding: 75,
+        gridLineStartPadding: 35,
+        fontSize: 11,
+        fontFamily: '"Open-Sans", "sans-serif"',
+        numberSectionStyles: 4,
+        axisFormat: '%Y-%m-%d'
+      },
+      class: {
+        useMaxWidth: true,
+        htmlLabels: true
+      },
+      gitGraph: {
+        useMaxWidth: true,
+        htmlLabels: true,
+        diagaramPadding: 8,
+        titleTopMargin: 25,
+        nodeSpacing: 50,
+        rankSpacing: 50,
+        curve: 'basis'
+      }
+    });
+  });
+</script>
 
 <!-- end custom head snippets -->
