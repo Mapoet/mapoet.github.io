@@ -1,0 +1,142 @@
+name: 掩星预报数据更新
+
+on:
+  schedule:
+    - cron: "0 */2 * * *"  # 每隔两小时运行一次
+  workflow_dispatch:     # 支持手动触发
+  push:
+    paths:
+      - scripts/occultation_predict.py
+      - scripts/Rx-YY_*.tle
+
+jobs:
+  occultation-predict:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30  # 设置超时时间
+    
+    steps:
+      - name: 拉取仓库
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # 获取完整历史用于提交
+
+      - name: 设置 Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.10
+
+      - name: 安装系统依赖
+        run: |
+          echo "开始安装系统依赖..."
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            gcc \
+            g++ \
+            libproj-dev \
+            proj-data \
+            proj-bin \
+            build-essential
+          echo "系统依赖安装完成"
+
+      - name: 安装 Python 依赖
+        run: |
+          echo "开始安装 Python 依赖..."
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir -r requirements.txt
+          echo "Python 依赖安装完成"
+          echo "已安装的包:"
+          pip list | grep -E "(numpy|sgp4|pyproj|scipy)"
+
+      - name: 创建输出目录
+        run: |
+          echo "创建输出目录..."
+          mkdir -p assets/traj
+          echo "输出目录创建完成: assets/traj/"
+
+      - name: 检查输入文件
+        run: |
+          echo "检查输入文件..."
+          if [ -f "scripts/occultation_predict.py" ]; then
+            echo "✓ 找到 occultation_predict.py"
+          else
+            echo "✗ 未找到 occultation_predict.py"
+            exit 1
+          fi
+          
+          if ls scripts/Rx-YY_*.tle 1> /dev/null 2>&1; then
+            echo "✓ 找到 TLE 文件:"
+            ls -la scripts/Rx-YY_*.tle
+          else
+            echo "✗ 未找到 TLE 文件"
+            exit 1
+          fi
+
+      - name: 运行掩星预报脚本
+        run: |
+          echo "开始运行掩星预报脚本..."
+          cd scripts
+          python occultation_predict.py
+          echo "掩星预报脚本执行完成"
+
+      - name: 检查输出文件
+        run: |
+          echo "检查生成的文件..."
+          if [ -f "assets/traj/occultation_events.json" ]; then
+            echo "✓ 掩星事件文件已生成"
+            echo "文件大小: $(wc -l < assets/traj/occultation_events.json) 行"
+            echo "文件大小: $(du -h assets/traj/occultation_events.json | cut -f1)"
+          else
+            echo "✗ 掩星事件文件未生成"
+            exit 1
+          fi
+          
+          if [ -f "assets/traj/satellite_orbits.json" ]; then
+            echo "✓ 卫星轨道文件已生成"
+            echo "文件大小: $(wc -l < assets/traj/satellite_orbits.json) 行"
+            echo "文件大小: $(du -h assets/traj/satellite_orbits.json | cut -f1)"
+          else
+            echo "✗ 卫星轨道文件未生成"
+            exit 1
+          fi
+          
+          echo "所有输出文件检查完成"
+
+      - name: 验证 JSON 格式
+        run: |
+          echo "验证 JSON 文件格式..."
+          python -m json.tool assets/traj/occultation_events.json > /dev/null && echo "✓ 掩星事件 JSON 格式正确" || (echo "✗ 掩星事件 JSON 格式错误" && exit 1)
+          python -m json.tool assets/traj/satellite_orbits.json > /dev/null && echo "✓ 卫星轨道 JSON 格式正确" || (echo "✗ 卫星轨道 JSON 格式错误" && exit 1)
+          echo "JSON 格式验证完成"
+
+      - name: 配置 Git
+        run: |
+          echo "配置 Git 用户信息..."
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: 提交更新
+        run: |
+          echo "准备提交更新..."
+          git add assets/traj/occultation_events.json
+          git add assets/traj/satellite_orbits.json
+          
+          # 检查是否有变更
+          if git diff --staged --quiet; then
+            echo "没有新的变更需要提交"
+          else
+            echo "提交变更..."
+            git commit -m "🤖 Auto update occultation data $(date '+%Y-%m-%d %H:%M:%S UTC')"
+            echo "推送变更..."
+            git push
+            echo "✓ 变更已成功提交和推送"
+          fi
+
+      - name: 显示更新状态
+        run: |
+          echo "=========================================="
+          echo "🎉 掩星预报数据更新完成"
+          echo "=========================================="
+          echo "更新时间: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "生成文件:"
+          ls -la assets/traj/
+          echo "==========================================" 

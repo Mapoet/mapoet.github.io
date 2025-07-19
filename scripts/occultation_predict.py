@@ -17,7 +17,8 @@ from functools import partial
 from typing import List, Dict, Tuple
 
 TLE_FILE = "./scripts/Rx-YY_20250718.tle"  # TLE文件路径
-OUTPUT_FILE = "./assets/data/occultation_events.json"  # 输出文件
+OUTPUT_FILE = "./assets/traj/occultation_events.json"  # 输出文件
+ORBIT_FILE = "./assets/traj/satellite_orbits.json"  # 轨道输出文件
 TIME_STEP = 30  # 轨道计算采样间隔（秒）
 IONO_STEP = 20  # 电离层掩星细化采样（秒）
 ATM_STEP = 5    # 大气掩星细化采样（秒）
@@ -74,6 +75,15 @@ def eci_to_ecef(eci_pos: np.ndarray, times: List[datetime]) -> np.ndarray:
         y_ecef = -x * np.sin(theta) + y * np.cos(theta)
         ecef.append([x_ecef, y_ecef, z])
     return np.array(ecef)
+
+def ecef_to_llh(ecef_pos: np.ndarray) -> np.ndarray:
+    """ECEF坐标转换为经纬高"""
+    llh = []
+    for pos in ecef_pos:
+        lon, lat, alt = transformer.transform(pos[0]*1e3, pos[1]*1e3, pos[2]*1e3)
+        alt = alt / 1e3  # 转换为km
+        llh.append([lon, lat, alt])
+    return np.array(llh)
 
 # =====================
 # 并行轨道计算函数（需为全局函数）
@@ -188,7 +198,7 @@ def main():
     leo_sats = [s for s in satellites if s["type"] != "GNSS"]
 
     end_time = datetime.now(timezone.utc)
-    start_time = end_time - timedelta(hours=2)
+    start_time = end_time - timedelta(hours=3)
     times = [start_time + timedelta(seconds=i) for i in range(0, int((end_time-start_time).total_seconds())+1, TIME_STEP)]
     jd_fr_list = [jday(t.year, t.month, t.day, t.hour, t.minute, t.second + t.microsecond*1e-6) for t in times]
 
@@ -199,6 +209,69 @@ def main():
     print(f"[主进程] 轨道计算完成，开始并行事件判别...", flush=True)
     nav_orbits = {nav_sats[i]["name"]: nav_ecef[i] for i in range(len(nav_sats))}
     leo_orbits = {leo_sats[i]["name"]: leo_ecef[i] for i in range(len(leo_sats))}
+
+    # 处理轨道数据输出
+    print(f"[主进程] 开始处理轨道数据输出...", flush=True)
+    orbit_data = {
+        "metadata": {
+            "start_time": start_time.isoformat(),
+            "end_time": end_time.isoformat(),
+            "time_step": TIME_STEP,
+            "total_satellites": len(satellites),
+            "nav_satellites": len(nav_sats),
+            "leo_satellites": len(leo_sats)
+        },
+        "satellites": {}
+    }
+    
+    # 处理导航卫星轨道
+    for i, nav in enumerate(nav_sats):
+        nav_name = nav["name"]
+        nav_ecef_pos = nav_ecef[i]
+        nav_llh = ecef_to_llh(nav_ecef_pos)
+        
+        orbit_data["satellites"][nav_name] = {
+            "type": "GNSS",
+            "tle_name": nav["name"],
+            "tle_type": nav["type"],
+            "positions": []
+        }
+        
+        for j, t in enumerate(times):
+            if not np.isnan(nav_llh[j][0]):  # 检查是否为有效数据
+                orbit_data["satellites"][nav_name]["positions"].append({
+                    "time": t.isoformat(),
+                    "lon": float(nav_llh[j][0]),
+                    "lat": float(nav_llh[j][1]),
+                    "alt": float(nav_llh[j][2])
+                })
+    
+    # 处理低轨卫星轨道
+    for i, leo in enumerate(leo_sats):
+        leo_name = leo["name"]
+        leo_ecef_pos = leo_ecef[i]
+        leo_llh = ecef_to_llh(leo_ecef_pos)
+        
+        orbit_data["satellites"][leo_name] = {
+            "type": "LEO",
+            "tle_name": leo["name"],
+            "tle_type": leo["type"],
+            "positions": []
+        }
+        
+        for j, t in enumerate(times):
+            if not np.isnan(leo_llh[j][0]):  # 检查是否为有效数据
+                orbit_data["satellites"][leo_name]["positions"].append({
+                    "time": t.isoformat(),
+                    "lon": float(leo_llh[j][0]),
+                    "lat": float(leo_llh[j][1]),
+                    "alt": float(leo_llh[j][2])
+                })
+    
+    # 保存轨道数据
+    with open(ORBIT_FILE, "w") as f:
+        json.dump(orbit_data, f, indent=2, ensure_ascii=False)
+    print(f"[主进程] 轨道数据已保存到 {ORBIT_FILE}", flush=True)
 
     with ProcessPoolExecutor() as executor:
         nav_events_list = list(executor.map(
