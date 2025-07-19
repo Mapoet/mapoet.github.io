@@ -15,10 +15,13 @@ from scipy.interpolate import interp1d
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 from typing import List, Dict, Tuple
+from astropy.time import Time
+import astropy.units as u
 
 TLE_FILE = "./scripts/Rx-YY_20250718.tle"  # TLE文件路径
 OUTPUT_FILE = "./assets/traj/occultation_events.json"  # 输出文件
 ORBIT_FILE = "./assets/traj/satellite_orbits.json"  # 轨道输出文件
+AZIM_WIDTH = 50  # 方位角宽度（度）
 TIME_STEP = 30  # 轨道计算采样间隔（秒）
 IONO_STEP = 20  # 电离层掩星细化采样（秒）
 ATM_STEP = 5    # 大气掩星细化采样（秒）
@@ -57,23 +60,30 @@ def propagate_orbit(satrec, jd_fr_list) -> np.ndarray:
     for jd, fr in jd_fr_list:
         e, r, v = satrec.sgp4(jd, fr)
         if e == 0:
-            eci.append(r)
+            eci.append([r[0],r[1],r[2],v[0],v[1],v[2]])
         else:
-            eci.append([np.nan, np.nan, np.nan])
+            eci.append([np.nan, np.nan, np.nan,np.nan, np.nan, np.nan])
     return np.array(eci)
 
 def eci_to_ecef(eci_pos: np.ndarray, times: List[datetime]) -> np.ndarray:
-    """简化ECI->ECEF转换（只考虑地球自转）"""
-    omega = 7.2921150e-5  # rad/s
+    """使用GAST进行ECI->ECEF转换（考虑岁差、章动等效应）"""
     ecef = []
-    t0 = times[0]
     for i, r in enumerate(eci_pos):
-        dt = (times[i] - t0).total_seconds()
-        theta = omega * dt
-        x, y, z = r
+        # 使用astropy计算GAST（格林尼治视恒星时）
+        t = Time(times[i], scale='utc')
+        gast = t.sidereal_time('apparent', 'greenwich')
+        theta = gast.to(u.radian).value
+        
+        x, y, z = r[0], r[1], r[2]
+        vx, vy, vz = r[3], r[4], r[5]
+        
+        # 使用GAST进行坐标转换
         x_ecef = x * np.cos(theta) + y * np.sin(theta)
         y_ecef = -x * np.sin(theta) + y * np.cos(theta)
-        ecef.append([x_ecef, y_ecef, z])
+        xv_ecef = vx * np.cos(theta) + vy * np.sin(theta)
+        yv_ecef = -vx * np.sin(theta) + vy * np.cos(theta)
+        
+        ecef.append([x_ecef, y_ecef, z, xv_ecef, yv_ecef, vz])
     return np.array(ecef)
 
 def ecef_to_llh(ecef_pos: np.ndarray) -> np.ndarray:
@@ -97,28 +107,33 @@ def get_ecef(sat, times, jd_fr_list):
 # =====================
 # 切点几何与高度角
 # =====================
-def calc_tangent_point(tx, rx) -> Tuple[float, float, float, float]:
+def calc_tangent_point(txv, rxv) -> Tuple[float, float, float, float,float]:
+    tx,rx,rv=txv[0:3],rxv[0:3],rxv[3:6]
     drt=tx-rx
     lrt=np.sum(drt[:]**2.0)**0.5
     r0=np.sum(rx[:]**2.0)**0.5
-    if lrt<1e-3:return np.nan,np.nan,np.nan,np.nan
-    if r0<1e-3:return np.nan,np.nan,np.nan,np.nan
+    v0=np.sum(rv[:]**2.0)**0.5
+    if lrt<1e-3:return np.nan,np.nan,np.nan,np.nan,np.nan
+    if r0<1e-3:return np.nan,np.nan,np.nan,np.nan,np.nan
+    if v0<1e-3:return np.nan,np.nan,np.nan,np.nan,np.nan
     drt0=drt/lrt # unit vector of sats-link
     rx0=rx/r0
+    rv0=rv/v0
     tp=rx-np.dot(rx,drt0)*drt0 # caculating target point
     #if rx&tx at sameside,prt would be positive.
     lon, lat, alt = transformer.transform(tp[0]*1e3, tp[1]*1e3, tp[2]*1e3)
     alt = alt / 1e3
     elev = np.arcsin(np.dot(rx0, drt0)) * 180/np.pi
-    return lon, lat, alt, elev
+    azim = np.arcsin(np.dot(rv0, drt0)) * 180/np.pi
+    return lon, lat, alt, elev,azim
 
 # =====================
 # 掩星类型判别
 # =====================
-def classify_occultation(alt: float, elev: float) -> str:
+def classify_occultation(alt: float, elev: float,azim:float) -> str:
     if np.isnan(alt) or np.isnan(elev):
         return "none"
-    if elev > 0:
+    if elev > 0 or abs(azim)>AZIM_WIDTH:
         return "none"
     if alt > 60:
         return "iono"
@@ -133,8 +148,8 @@ def classify_occultation(alt: float, elev: float) -> str:
 # =====================
 def interpolate_orbit(times, pos, new_times) -> np.ndarray:
     pos = np.asarray(pos)
-    new_pos = np.zeros((len(new_times), 3))
-    for i in range(3):
+    new_pos = np.zeros((len(new_times), 6))
+    for i in range(6):
         f = interp1d([(t - times[0]).total_seconds() for t in times], pos[:, i], kind='linear', fill_value='extrapolate')
         new_pos[:, i] = f([(t - times[0]).total_seconds() for t in new_times])
     return new_pos
@@ -155,8 +170,8 @@ def process_nav_sat(nav, leo_sats, nav_orbits, leo_orbits, times):
         for i, t in enumerate(times):
             nav_pos = nav_pos_seq[i]
             leo_pos = leo_pos_seq[i]
-            lon, lat, alt, elev = calc_tangent_point(nav_pos, leo_pos)
-            occ_type = classify_occultation(alt, elev)
+            lon, lat, alt, elev,azim = calc_tangent_point(nav_pos, leo_pos)
+            occ_type = classify_occultation(alt, elev,azim)
             if occ_type != state[leo_name]:
                 if state[leo_name] == "iono":
                     t0 = state_change_time[leo_name]-timedelta(seconds=TIME_STEP)
@@ -166,8 +181,8 @@ def process_nav_sat(nav, leo_sats, nav_orbits, leo_orbits, times):
                     leo_fine = interpolate_orbit(times, leo_pos_seq, fine_times)
                     points = []
                     for j in range(len(fine_times)):
-                        lon2, lat2, alt2, elev2 = calc_tangent_point(nav_fine[j], leo_fine[j])
-                        occ_type = classify_occultation(alt2, elev2)
+                        lon2, lat2, alt2, elev2,azim2 = calc_tangent_point(nav_fine[j], leo_fine[j])
+                        occ_type = classify_occultation(alt2, elev2,azim2)
                         if occ_type == "iono":
                             points.append({"time": fine_times[j].isoformat(), "lon": lon2, "lat": lat2, "alt": alt2, "elev": elev2})
                     events.append({"type": "iono", "nav": nav_name, "leo": leo_name, "time": event_time.isoformat(), "points": points})
@@ -179,8 +194,8 @@ def process_nav_sat(nav, leo_sats, nav_orbits, leo_orbits, times):
                     leo_fine = interpolate_orbit(times, leo_pos_seq, fine_times)
                     points = []
                     for j in range(len(fine_times)):
-                        lon2, lat2, alt2, elev2 = calc_tangent_point(nav_fine[j], leo_fine[j])
-                        occ_type = classify_occultation(alt2, elev2)
+                        lon2, lat2, alt2, elev2,azim2 = calc_tangent_point(nav_fine[j], leo_fine[j])
+                        occ_type = classify_occultation(alt2, elev2,azim2)
                         if occ_type == "atm":
                             points.append({"time": fine_times[j].isoformat(), "lon": lon2, "lat": lat2, "alt": alt2, "elev": elev2})
                     events.append({"type": "atm", "nav": nav_name, "leo": leo_name, "time": event_time.isoformat(), "points": points})
