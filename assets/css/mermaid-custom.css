@@ -1,0 +1,164 @@
+/**
+ * Mermaid图表自定义样式
+ * 优化mermaid图表在Jekyll站点中的显示效果
+ */
+
+/* Mermaid图表容器样式 */
+.mermaid-diagram {
+  text-align: center;
+  margin: 20px 0;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  overflow-x: auto;
+}
+
+/* Mermaid图表SVG样式 */
+.mermaid-diagram svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* 流程图样式优化 */
+.mermaid-diagram .flowchart {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* 序列图样式优化 */
+.mermaid-diagram .sequence {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* 甘特图样式优化 */
+.mermaid-diagram .gantt {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* 类图样式优化 */
+.mermaid-diagram .classDiagram {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* 状态图样式优化 */
+.mermaid-diagram .stateDiagram {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* 实体关系图样式优化 */
+.mermaid-diagram .erDiagram {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* 用户旅程图样式优化 */
+.mermaid-diagram .userJourney {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* Git图样式优化 */
+.mermaid-diagram .gitGraph {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* 饼图样式优化 */
+.mermaid-diagram .pie {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* 需求图样式优化 */
+.mermaid-diagram .requirement {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* 错误状态样式 */
+.mermaid-diagram .mermaid-error {
+  color: #dc3545;
+  padding: 20px;
+  border: 1px solid #dc3545;
+  background: #f8d7da;
+  border-radius: 4px;
+  text-align: center;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .mermaid-diagram {
+    margin: 15px 0;
+    padding: 10px;
+  }
+  
+  .mermaid-diagram svg {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mermaid-diagram {
+    margin: 10px 0;
+    padding: 8px;
+  }
+  
+  .mermaid-diagram svg {
+    font-size: 10px;
+  }
+}
+
+/* 深色主题支持 */
+@media (prefers-color-scheme: dark) {
+  .mermaid-diagram {
+    background: #2d3748;
+    border-color: #4a5568;
+  }
+  
+  .mermaid-diagram svg {
+    filter: invert(1) hue-rotate(180deg);
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .mermaid-diagram {
+    background: white;
+    border: 1px solid #ccc;
+    page-break-inside: avoid;
+  }
+  
+  .mermaid-diagram svg {
+    filter: none;
+  }
+}
+
+/* 加载动画 */
+.mermaid-diagram.loading {
+  position: relative;
+  min-height: 100px;
+}
+
+.mermaid-diagram.loading::after {
+  content: "正在渲染图表...";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* 图表标题样式 */
+.mermaid-diagram .mermaid-title {
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #495057;
+  font-size: 1.1em;
+}
+
+/* 图表说明样式 */
+.mermaid-diagram .mermaid-caption {
+  font-size: 0.9em;
+  color: #6c757d;
+  margin-top: 10px;
+  font-style: italic;
+  text-align: center;
+} 
