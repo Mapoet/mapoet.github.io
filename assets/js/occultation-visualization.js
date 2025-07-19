@@ -439,6 +439,49 @@ function startDayNightCycle(_viewer) {
     updateDayNightTexture();
 }
 
+// 生成掩星事件标签
+function generateOccultationLabel(event, index) {
+    try {
+        // 从事件数据中提取时间信息
+        let eventTime = null;
+        const timeFields = ['time', 'timestamp', 'date', 'datetime', 'start_time', 'event_time'];
+        for (const field of timeFields) {
+            if (event[field]) {
+                eventTime = new Date(event[field]);
+                break;
+            }
+        }
+        
+        // 如果没有时间信息，使用当前时间
+        if (!eventTime) {
+            eventTime = new Date();
+        }
+        
+        // 计算年积日 (Day of Year)
+        const year = eventTime.getUTCFullYear();
+        const startOfYear = new Date(year, 0, 1);
+        const dayOfYear = Math.floor((eventTime - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
+        
+        // 获取UTC时分
+        const hour = eventTime.getUTCHours().toString().padStart(2, '0');
+        const minute = eventTime.getUTCMinutes().toString().padStart(2, '0');
+        
+        // 获取卫星名称
+        const leoName = event.leo || 'LEO';
+        const gnssName = event.nav || 'GNSS';
+        
+        // 生成标签
+        const prefix = event.type === 'iono' ? 'ionPrf' : 'atmPrf';
+        const label = `${prefix}_${leoName}.${year}.${dayOfYear.toString().padStart(3, '0')}.${hour}.${minute}.${gnssName}_0001.0001_nc`;
+        
+        return label;
+    } catch (error) {
+        console.error('生成掩星标签失败:', error);
+        // 如果生成失败，返回默认标签
+        return `${event.type === 'iono' ? 'I' : 'A'}${index + 1}`;
+    }
+}
+
 // 添加掩星轨迹到Cesium
 function addOccultationTrajectories(viewer, data) {
     //console.log('添加掩星轨迹到Cesium...');
@@ -482,6 +525,9 @@ function addOccultationTrajectories(viewer, data) {
             lineMaterial = Cesium.Color.GRAY.withAlpha(0.8); // 增加不透明度
         }
         
+        // 生成掩星事件标签
+        const eventLabel = generateOccultationLabel(event, index);
+        
         // 添加轨迹线 - 增加线宽和透明度
         const polyline = viewer.entities.add({
             id: `event_${index}_line`,
@@ -508,8 +554,8 @@ function addOccultationTrajectories(viewer, data) {
                 heightReference: Cesium.HeightReference.NONE
             },
             label: {
-                text: `${event.type === 'iono' ? 'I' : 'A'}${index + 1}`,
-                font: '8pt sans-serif', // 减小字体
+                text: eventLabel,
+                font: '7pt sans-serif', // 减小字体以适应更长的标签
                 fillColor: Cesium.Color.WHITE,
                 outlineColor: Cesium.Color.BLACK,
                 outlineWidth: 1,
@@ -680,7 +726,7 @@ function setupTimeSystem(viewer, eventData, orbitData) {
     viewer.clock.stopTime = Cesium.JulianDate.fromDate(endTime);
     viewer.clock.currentTime = Cesium.JulianDate.fromDate(startTime);
     viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP;
-    viewer.clock.multiplier = 3600; // 1小时 = 1秒
+    viewer.clock.multiplier = 1; // 1秒 = 1秒，正常时间流动
     
     // 存储时间信息
     viewer.dataStartTime = startTime;
@@ -890,7 +936,7 @@ function updateVisibleEvents(viewer, currentTime) {
     
     // 更新状态显示
     const timeStr = currentDate.toISOString().replace('T', ' ').substring(0, 19);
-    showStatus(`当前时间: ${timeStr}, 显示事件: ${Math.floor(visibleEvents/3)}个, 卫星: ${visibleOrbits}个 (时间窗口: ±2小时)`);
+    showStatus(`当前时间: ${timeStr}, 显示事件: ${Math.floor(visibleEvents/3)}个, 卫星: ${visibleOrbits}个 (时间窗口: 1小时)`);
 }
 
 // 添加图例
@@ -928,20 +974,17 @@ function addLegend(viewer, stats, orbitStats) {
         </div>
         <div style="border-top: 1px solid #555; margin: 8px 0; padding-top: 6px; font-size: 10px; opacity: 0.9;">
             <div>标记说明:</div>
-            <div>I = 电离层掩星起点/终点</div>
-            <div>A = 大气掩星起点/终点</div>
+            <div>ionPrf_* = 电离层掩星起点/终点</div>
+            <div>atmPrf_* = 大气掩星起点/终点</div>
             <div>黄点 = 导航卫星当前位置</div>
             <div>绿点 = 低轨卫星当前位置</div>
         </div>
         <div style="font-size: 10px; margin-top: 6px; opacity: 0.8; text-align: center;">
             操作: 鼠标拖拽旋转 | 滚轮缩放 | 双击定位 | 点击轨迹显示编号
         </div>
-        <div style="font-size: 9px; margin-top: 4px; opacity: 0.7; text-align: center;">
-            地球纹理: OSM昼夜切换 | 地形: 世界地形 | 光照: 太阳光照
-        </div>
         <div style="border-top: 1px solid #555; margin: 8px 0; padding-top: 6px; font-size: 9px; opacity: 0.8;">
             <div style="font-weight: bold; margin-bottom: 4px;">时间控制:</div>
-            <div>时间轴: 显示历史1小时数据</div>
+            <div>时间轴: 正常时间流动 (1秒=1秒)</div>
             <div>循环播放: 自动循环</div>
             <div>文件监测: 30秒检查更新</div>
         </div>
