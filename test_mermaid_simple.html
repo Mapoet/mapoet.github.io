@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mermaid简单测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .mermaid-diagram {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            min-height: 100px;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mermaid简单测试</h1>
+    
+    <h2>1. 简单流程图</h2>
+    <pre><code class="language-mermaid">graph LR
+    A[开始] --> B[处理]
+    B --> C[结束]
+</code></pre>
+
+    <h2>2. 饼图</h2>
+    <pre><code class="language-mermaid">pie title 研究领域分布
+    "COSMIC掩星" : 4
+    "IRI模型" : 4
+    "GNSS技术" : 3
+    "电离层研究" : 1
+    "大气观测" : 2
+</code></pre>
+
+    <!-- Mermaid Library -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <script src="assets/js/mermaid-init.js"></script>
+</body>
+</html> 
