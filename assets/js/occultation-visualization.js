@@ -791,7 +791,7 @@ function updateVisibleEvents(viewer, currentTime) {
     // 扩大时间窗口，显示更多数据
     const timeWindow = timePeriod * 1000; // 时间窗口
     const timeAgo = new Date(currentDate.getTime() - timeWindow);
-    const timeAhead = new Date(currentDate.getTime() + timeWindow); // 也显示未来数据
+    const timeAhead = new Date(currentDate.getTime()); // 也显示未来数据
     
     // 隐藏所有实体
     viewer.entities.values.forEach(function(entity) {
