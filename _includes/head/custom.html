@@ -37,31 +37,7 @@
 </script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/latest.js?config=TeX-MML-AM_CHTML' async></script>
 
-<!-- Mermaid Library - 延迟加载 -->
-<script>
-  // 延迟加载Mermaid库
-  function loadMermaid() {
-    if (typeof mermaid === 'undefined') {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js';
-      script.onload = function() {
-        console.log('Mermaid library loaded successfully');
-        // 触发自定义事件，通知mermaid-init.js
-        document.dispatchEvent(new CustomEvent('mermaidLoaded'));
-      };
-      script.onerror = function() {
-        console.error('Failed to load Mermaid library');
-      };
-      document.head.appendChild(script);
-    }
-  }
-  
-  // 在DOM加载完成后加载Mermaid
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadMermaid);
-  } else {
-    loadMermaid();
-  }
-</script>
+<!-- Mermaid Library - 直接加载 -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
 
 <!-- end custom head snippets -->
