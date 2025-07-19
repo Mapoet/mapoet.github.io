@@ -368,15 +368,15 @@ function startDayNightCycle(_viewer) {
         if (nightLayer) {
             // 根据时间计算夜间纹理的透明度
             let alpha = 0.0;
-            if (hour >= 18 || hour < 6) {
+            if (hour >= 19 || hour < 5) {
                 // 夜间 (18:00-06:00)
                 alpha = 1.0;
-            } else if (hour >= 6 && hour < 8) {
+            } else if (hour >= 5 && hour < 7) {
                 // 日出过渡 (06:00-08:00) - 更平滑的过渡
-                alpha = 1.0 - (hour - 6 + date.getUTCMinutes() / 60) / 2;
-            } else if (hour >= 16 && hour < 18) {
+                alpha = 1.0 - (hour - 5 + date.getUTCMinutes() / 60) / 2;
+            } else if (hour >= 17 && hour < 19) {
                 // 日落过渡 (16:00-18:00) - 更平滑的过渡
-                alpha = (hour - 16 + date.getUTCMinutes() / 60) / 2;
+                alpha = (hour - 17 + date.getUTCMinutes() / 60) / 2;
             }
             
             // 确保alpha值在0-1范围内
