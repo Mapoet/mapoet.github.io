@@ -8,36 +8,22 @@
 
   let mermaidInitialized = false;
 
-  // 监听Mermaid库加载完成事件
-  document.addEventListener('mermaidLoaded', function() {
-    console.log('Mermaid library loaded event received');
-    initMermaid();
-  });
-
   // 等待DOM加载完成
   document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, checking Mermaid library...');
-    
-    // 检查Mermaid库是否已加载
-    if (typeof mermaid !== 'undefined') {
-      console.log('Mermaid library already available');
-      initMermaid();
-    } else {
-      console.log('Mermaid library not yet loaded, waiting for mermaidLoaded event...');
-      // 如果Mermaid库还没有加载，等待mermaidLoaded事件
-      // 如果5秒后还没有加载，显示错误
-      setTimeout(function() {
-        if (!mermaidInitialized && typeof mermaid === 'undefined') {
-          console.error('Mermaid library not loaded after timeout');
-          showMermaidError('Mermaid库加载失败，请刷新页面重试');
-        }
-      }, 5000);
-    }
+    console.log('DOM loaded, initializing Mermaid...');
+    initMermaid();
   });
 
   function initMermaid() {
     if (mermaidInitialized) {
       console.log('Mermaid already initialized, skipping...');
+      return;
+    }
+    
+    // 检查Mermaid库是否已加载
+    if (typeof mermaid === 'undefined') {
+      console.error('Mermaid library not loaded');
+      showMermaidError('Mermaid库加载失败，请刷新页面重试');
       return;
     }
     
@@ -99,11 +85,11 @@
     mermaidInitialized = true;
     console.log('Mermaid initialized, processing diagrams...');
 
-    // 处理markdown中的mermaid代码块
-    processMermaidCodeBlocks();
-    
-    // 处理HTML中的mermaid图表
-    processMermaidElements();
+    // 延迟处理，确保DOM完全加载
+    setTimeout(function() {
+      processMermaidCodeBlocks();
+      processMermaidElements();
+    }, 100);
   }
 
   function processMermaidCodeBlocks() {
@@ -126,6 +112,7 @@
       container.style.background = '#f8f9fa';
       container.style.borderRadius = '8px';
       container.style.border = '1px solid #e9ecef';
+      container.style.minHeight = '100px';
       
       // 添加加载提示
       container.innerHTML = '<div style="color: #6c757d; font-style: italic;">正在渲染图表...</div>';
@@ -187,6 +174,7 @@
       errorDiv.style.border = '1px solid red';
       errorDiv.style.background = '#fff5f5';
       errorDiv.style.margin = '20px 0';
+      errorDiv.style.borderRadius = '8px';
       errorDiv.textContent = message;
       
       pre.parentNode.insertBefore(errorDiv, pre);
