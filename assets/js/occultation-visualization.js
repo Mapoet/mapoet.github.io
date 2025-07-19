@@ -75,7 +75,8 @@ function initCesiumViewer() {
         shadows: false, // 关闭阴影
         shouldAnimate: true, // 动画
         requestRenderMode: false, // 关闭请求渲染模式
-        targetFrameRate: 60 // 目标帧率
+        targetFrameRate: 60, // 目标帧率
+        keyboardInputEvent: false // 禁用Cesium的键盘输入处理，使用我们自己的
     });
     
     // 配置时间轴样式
@@ -113,7 +114,6 @@ function initCesiumViewer() {
     scene.globe.atmosphereBrightnessShift = 1.0; // 大气亮度偏移
     
     // 启用太阳光照
-    scene.globe.enableLighting = true;
     scene.sun = new Cesium.Sun();
     scene.moon = new Cesium.Moon();
     scene.skyBox = new Cesium.SkyBox({
@@ -133,6 +133,14 @@ function initCesiumViewer() {
     // 添加键盘快捷键支持
     document.addEventListener('keydown', function(event) {
         let message = '';
+        
+        // 调试信息：记录按键
+        //console.log('按键按下:', event.key, 'keyCode:', event.keyCode);
+        
+        // 检查是否在输入框中，如果是则不处理快捷键
+        if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+            return;
+        }
         
         switch(event.key.toLowerCase()) {
             case 'f':
@@ -320,7 +328,7 @@ function initCesiumViewer() {
             showStatus(message);
             // 3秒后清除提示
             setTimeout(() => {
-                showStatus(`Cesium渲染完成!显示${stats.total}条轨迹。支持鼠标拖拽、滚轮缩放、双击定位。`);
+                showStatus(`Cesium渲染完成!支持鼠标拖拽、滚轮缩放、双击定位。`);
             }, 3000);
         }
     });
