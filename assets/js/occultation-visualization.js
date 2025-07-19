@@ -152,6 +152,24 @@ function initCesiumViewer() {
                 console.log('回到主页视角');
                 break;
                 
+            case 'i':
+                // I键：显示高度信息
+                event.preventDefault();
+                let heightInfo = '高度信息:\n';
+                viewer.entities.values.forEach(function(e, idx) {
+                    if (e.position && idx < 10) { // 只显示前10个
+                        const cartesian = e.position.getValue(viewer.clock.currentTime);
+                        if (cartesian) {
+                            const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+                            const heightKm = cartographic.height / 1000;
+                            heightInfo += `事件${idx + 1}: ${heightKm.toFixed(1)}km\n`;
+                        }
+                    }
+                });
+                console.log(heightInfo);
+                message = '高度信息已输出到Console';
+                break;
+                
             case 'r':
                 // R键：重置相机
                 event.preventDefault();
@@ -319,7 +337,7 @@ function updateLighting(_viewer) {
     // 启用光照
     _viewer.scene.globe.enableLighting = true;
     _viewer.clock.shouldAnimate = true;
-    _viewer.clock.multiplier = 5000; // 时间加速
+    _viewer.clock.multiplier = 1; // 时间加速
     
     // 设置夜间图层初始透明度
     nightLayer.alpha = 0.0;
@@ -396,10 +414,22 @@ function addOccultationTrajectories(viewer, data) {
         
         console.log(`事件 ${index} (${event.type}): ${event.points.length}个点`);
         
-        // 转换坐标
-        const positions = event.points.map(point => 
-            Cesium.Cartesian3.fromDegrees(point.lon, point.lat, point.alt * 1000)
-        );
+        // 转换坐标并检查高度
+        const positions = event.points.map(point => {
+            let height = point.alt;
+            
+            // 检查高度单位，如果超过1000km，可能是单位错误
+            if (height > 1000) {
+                // 如果高度超过1000，假设单位是米，转换为千米
+                height = height / 1000;
+                console.log(`事件 ${index} 高度单位修正: ${point.alt}m -> ${height}km`);
+            }
+            
+            // 限制高度范围在0-1000km之间
+            height = Math.max(0, Math.min(1000, height));
+            
+            return Cesium.Cartesian3.fromDegrees(point.lon, point.lat, height * 1000);
+        });
         
         // 根据事件类型设置颜色
         let lineColor, lineMaterial;
@@ -530,7 +560,7 @@ function addLegend(viewer, stats) {
             <div>F = 全屏切换 | H = 主页视角 | R = 重置相机</div>
             <div>T = 地形大气 | L = 光照切换 | S = 阴影切换</div>
             <div>1 = 显示标签 | 0 = 隐藏标签 | K = 图例切换</div>
-            <div>D = 昼夜测试 | ESC = 退出全屏</div>
+            <div>D = 昼夜测试 | I = 高度信息 | ESC = 退出全屏</div>
         </div>
     `;
     
