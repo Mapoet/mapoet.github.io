@@ -7,12 +7,52 @@
   'use strict';
 
   let mermaidInitialized = false;
+  let mermaidLibraryLoaded = false;
+
+  // 检查Mermaid库是否已加载
+  function checkMermaidLibrary() {
+    if (typeof mermaid !== 'undefined') {
+      mermaidLibraryLoaded = true;
+      console.log('✅ Mermaid library loaded, version:', mermaid.version || 'unknown');
+      return true;
+    } else {
+      console.log('⏳ Mermaid library not yet loaded, waiting...');
+      return false;
+    }
+  }
 
   // 等待DOM加载完成
   document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, initializing Mermaid...');
-    initMermaid();
+    console.log('DOM loaded, checking Mermaid library...');
+    
+    // 如果库已加载，立即初始化
+    if (checkMermaidLibrary()) {
+      initMermaid();
+    } else {
+      // 等待库加载完成
+      waitForMermaidLibrary();
+    }
   });
+
+  // 等待Mermaid库加载
+  function waitForMermaidLibrary() {
+    let attempts = 0;
+    const maxAttempts = 50; // 最多等待5秒
+    
+    const checkInterval = setInterval(function() {
+      attempts++;
+      console.log('Checking Mermaid library, attempt:', attempts);
+      
+      if (checkMermaidLibrary()) {
+        clearInterval(checkInterval);
+        initMermaid();
+      } else if (attempts >= maxAttempts) {
+        clearInterval(checkInterval);
+        console.error('❌ Mermaid library failed to load after', maxAttempts, 'attempts');
+        showMermaidError('Mermaid库加载超时，请刷新页面重试');
+      }
+    }, 100);
+  }
 
   function initMermaid() {
     if (mermaidInitialized) {
@@ -20,14 +60,13 @@
       return;
     }
     
-    // 检查Mermaid库是否已加载
-    if (typeof mermaid === 'undefined') {
+    if (!mermaidLibraryLoaded) {
       console.error('Mermaid library not loaded');
       showMermaidError('Mermaid库加载失败，请刷新页面重试');
       return;
     }
     
-    console.log('Initializing Mermaid...');
+    console.log('🚀 Initializing Mermaid...');
     
     // 初始化mermaid配置
     mermaid.initialize({
@@ -83,20 +122,25 @@
     });
 
     mermaidInitialized = true;
-    console.log('Mermaid initialized, processing diagrams...');
+    console.log('✅ Mermaid initialized successfully');
 
     // 延迟处理，确保DOM完全加载
     setTimeout(function() {
       processMermaidCodeBlocks();
       processMermaidElements();
-    }, 100);
+    }, 200);
   }
 
   function processMermaidCodeBlocks() {
     // 查找所有mermaid代码块
     const mermaidBlocks = document.querySelectorAll('pre code.language-mermaid, pre code.language-mermaidjs');
     
-    console.log('Found', mermaidBlocks.length, 'mermaid code blocks');
+    console.log('🔍 Found', mermaidBlocks.length, 'mermaid code blocks');
+    
+    if (mermaidBlocks.length === 0) {
+      console.log('No mermaid code blocks found on this page');
+      return;
+    }
     
     mermaidBlocks.forEach(function(block, index) {
       const pre = block.parentElement;
@@ -124,14 +168,14 @@
       // 渲染mermaid图表
       try {
         const graphDefinition = block.textContent || block.innerText;
-        console.log('Rendering diagram', diagramId, 'with definition:', graphDefinition.substring(0, 100) + '...');
+        console.log('🎨 Rendering diagram', diagramId, 'with definition:', graphDefinition.substring(0, 100) + '...');
         
         mermaid.render(diagramId, graphDefinition, function(svgCode) {
           container.innerHTML = svgCode;
-          console.log('Successfully rendered diagram', diagramId);
+          console.log('✅ Successfully rendered diagram', diagramId);
         });
       } catch (error) {
-        console.error('Mermaid rendering error for', diagramId, ':', error);
+        console.error('❌ Mermaid rendering error for', diagramId, ':', error);
         container.innerHTML = '<div style="color: red; padding: 20px; border: 1px solid red; background: #fff5f5;">Mermaid图表渲染失败: ' + error.message + '</div>';
       }
     });
@@ -141,7 +185,12 @@
     // 查找所有带有mermaid类的元素
     const mermaidElements = document.querySelectorAll('.mermaid, [data-mermaid]');
     
-    console.log('Found', mermaidElements.length, 'mermaid elements');
+    console.log('🔍 Found', mermaidElements.length, 'mermaid elements');
+    
+    if (mermaidElements.length === 0) {
+      console.log('No mermaid elements found on this page');
+      return;
+    }
     
     mermaidElements.forEach(function(element, index) {
       const diagramId = 'mermaid-element-' + index + '-' + Date.now();
@@ -150,20 +199,22 @@
       // 渲染mermaid图表
       try {
         const graphDefinition = element.textContent || element.innerText;
-        console.log('Rendering element', diagramId, 'with definition:', graphDefinition.substring(0, 100) + '...');
+        console.log('🎨 Rendering element', diagramId, 'with definition:', graphDefinition.substring(0, 100) + '...');
         
         mermaid.render(diagramId, graphDefinition, function(svgCode) {
           element.innerHTML = svgCode;
-          console.log('Successfully rendered element', diagramId);
+          console.log('✅ Successfully rendered element', diagramId);
         });
       } catch (error) {
-        console.error('Mermaid rendering error for', diagramId, ':', error);
+        console.error('❌ Mermaid rendering error for', diagramId, ':', error);
         element.innerHTML = '<div style="color: red; padding: 20px; border: 1px solid red; background: #fff5f5;">Mermaid图表渲染失败: ' + error.message + '</div>';
       }
     });
   }
 
   function showMermaidError(message) {
+    console.error('🚨 Mermaid Error:', message);
+    
     // 在所有mermaid代码块位置显示错误信息
     const mermaidBlocks = document.querySelectorAll('pre code.language-mermaid, pre code.language-mermaidjs');
     mermaidBlocks.forEach(function(block) {
@@ -194,6 +245,7 @@
               const mermaidElements = node.querySelectorAll ? node.querySelectorAll('.mermaid, [data-mermaid]') : [];
               
               if (mermaidBlocks.length > 0 || mermaidElements.length > 0) {
+                console.log('🔄 New mermaid content detected, re-processing...');
                 // 延迟处理，确保DOM完全更新
                 setTimeout(function() {
                   if (mermaidInitialized) {
@@ -213,6 +265,8 @@
       childList: true,
       subtree: true
     });
+    
+    console.log('👀 MutationObserver started for dynamic content');
   }
 
   // 启动观察器
