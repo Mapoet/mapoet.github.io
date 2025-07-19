@@ -1,7 +1,7 @@
 const eventFile = '/assets/traj/occultation_events.json';
 const orbitFile = '/assets/traj/satellite_orbits.json';
 const statusDiv = document.getElementById('status');
-const dataPeriod = 60 * 60; // 数据时间窗口长度（秒）
+const timePeriod = 60 * 60; // 数据时间窗口长度（秒）
 
 // 文件更新监测相关变量
 let lastEventFileTime = 0;
@@ -287,6 +287,25 @@ function initCesiumViewer() {
                 }
                 break;
                 
+            case 'a':
+                // A键：显示所有数据（调试模式）
+                event.preventDefault();
+                viewer.showAllData = !viewer.showAllData;
+                if (viewer.showAllData) {
+                    // 显示所有实体
+                    viewer.entities.values.forEach(function(entity) {
+                        if (entity.polyline || entity.point) {
+                            entity.show = true;
+                        }
+                    });
+                    message = '调试模式：显示所有数据';
+                } else {
+                    // 恢复时间过滤
+                    updateVisibleEvents(viewer, viewer.clock.currentTime);
+                    message = '恢复正常时间过滤';
+                }
+                break;
+                
             case 'escape':
                 // ESC键：退出全屏
                 if (document.fullscreenElement) {
@@ -452,24 +471,24 @@ function addOccultationTrajectories(viewer, data) {
         let lineColor, lineMaterial;
         if (event.type === 'iono') {
             lineColor = Cesium.Color.CYAN;
-            lineMaterial = Cesium.Color.CYAN.withAlpha(0.6); // 降低透明度
+            lineMaterial = Cesium.Color.CYAN.withAlpha(0.8); // 增加不透明度
             ionoCount++;
         } else if (event.type === 'atm') {
             lineColor = Cesium.Color.ORANGE;
-            lineMaterial = Cesium.Color.ORANGE.withAlpha(0.6); // 降低透明度
+            lineMaterial = Cesium.Color.ORANGE.withAlpha(0.8); // 增加不透明度
             atmCount++;
         } else {
             lineColor = Cesium.Color.GRAY;
-            lineMaterial = Cesium.Color.GRAY.withAlpha(0.6); // 降低透明度
+            lineMaterial = Cesium.Color.GRAY.withAlpha(0.8); // 增加不透明度
         }
         
-        // 添加轨迹线 - 更细的线条
+        // 添加轨迹线 - 增加线宽和透明度
         const polyline = viewer.entities.add({
             id: `event_${index}_line`,
             name: `${event.type} 掩星轨迹 ${index + 1}`,
             polyline: {
                 positions: positions,
-                width: 1.5, // 减小线宽
+                width: 3.0, // 增加线宽，使轨迹更明显
                 material: lineMaterial,
                 clampToGround: false,
                 zIndex: 1000,
@@ -558,23 +577,23 @@ function addSatelliteOrbits(viewer, orbitData) {
         let lineColor, lineMaterial, pointColor;
         if (satellite.type === 'GNSS') {
             lineColor = Cesium.Color.YELLOW;
-            lineMaterial = Cesium.Color.YELLOW.withAlpha(0.4); // 导航卫星用黄色，更透明
+            lineMaterial = Cesium.Color.YELLOW.withAlpha(0.6); // 增加不透明度
             pointColor = Cesium.Color.YELLOW;
             navCount++;
         } else {
             lineColor = Cesium.Color.LIME;
-            lineMaterial = Cesium.Color.LIME.withAlpha(0.4); // 低轨卫星用绿色，更透明
+            lineMaterial = Cesium.Color.LIME.withAlpha(0.6); // 增加不透明度
             pointColor = Cesium.Color.LIME;
             leoCount++;
         }
         
-        // 添加轨道线
+        // 添加轨道线 - 使用更粗的线条和更高的透明度
         const orbitLine = viewer.entities.add({
             id: `orbit_${satName}_line`,
             name: `${satellite.type} 轨道 ${satName}`,
             polyline: {
                 positions: positions,
-                width: 1.0, // 轨道线更细
+                width: 2.0, // 增加线宽
                 material: lineMaterial,
                 clampToGround: false,
                 zIndex: 500, // 轨道线在掩星轨迹下方
@@ -762,8 +781,17 @@ function startFileMonitoring(viewer) {
 
 // 更新可见事件
 function updateVisibleEvents(viewer, currentTime) {
+    // 如果处于调试模式，跳过时间过滤
+    if (viewer.showAllData) {
+        return;
+    }
+    
     const currentDate = Cesium.JulianDate.toDate(currentTime);
-    const oneTimeAgo = new Date(currentDate.getTime() - dataPeriod * 1000); // 一小时前
+    
+    // 扩大时间窗口，显示更多数据
+    const timeWindow = timePeriod * 1000; // 时间窗口
+    const timeAgo = new Date(currentDate.getTime() - timeWindow);
+    const timeAhead = new Date(currentDate.getTime() + timeWindow); // 也显示未来数据
     
     // 隐藏所有实体
     viewer.entities.values.forEach(function(entity) {
@@ -775,7 +803,7 @@ function updateVisibleEvents(viewer, currentTime) {
     let visibleEvents = 0;
     let visibleOrbits = 0;
     
-    // 显示一小时内的掩星事件
+    // 显示时间窗口内的掩星事件
     if (viewer.occultationEvents) {
         viewer.occultationEvents.forEach((event, index) => {
             let eventTime = null;
@@ -797,8 +825,8 @@ function updateVisibleEvents(viewer, currentTime) {
                 eventTime = new Date(viewer.dataStartTime.getTime() + index * timeStep);
             }
             
-            // 检查事件是否在一小时时间窗口内
-            if (eventTime >= oneTimeAgo && eventTime <= currentDate) {
+            // 检查事件是否在时间窗口内
+            if (eventTime >= timeAgo && eventTime <= timeAhead) {
                 const entityStart = viewer.entities.getById(`event_${index}_start`);
                 const entityEnd = viewer.entities.getById(`event_${index}_end`);
                 const entityLine = viewer.entities.getById(`event_${index}_line`);
@@ -819,25 +847,30 @@ function updateVisibleEvents(viewer, currentTime) {
         });
     }
     
-    // 显示一小时内的卫星轨道
+    // 显示时间窗口内的卫星轨道
     if (viewer.satelliteOrbits) {
         Object.keys(viewer.satelliteOrbits.satellites).forEach(satName => {
             const satellite = viewer.satelliteOrbits.satellites[satName];
             
-            // 过滤一小时内的轨道点
+            // 过滤时间窗口内的轨道点
             const visiblePositions = satellite.positions.filter(pos => {
                 const posTime = new Date(pos.time);
-                return posTime >= oneTimeAgo && posTime <= currentDate;
+                return posTime >= timeAgo && posTime <= timeAhead;
             });
             
             if (visiblePositions.length > 1) {
-                // 更新轨道线位置
+                // 更新轨道线位置 - 使用更安全的方式
                 const orbitLine = viewer.entities.getById(`orbit_${satName}_line`);
                 if (orbitLine) {
                     const positions = visiblePositions.map(pos => {
                         return Cesium.Cartesian3.fromDegrees(pos.lon, pos.lat, pos.alt * 1000);
                     });
-                    orbitLine.polyline.positions = positions;
+                    
+                    // 使用 setValue 方法更新位置
+                    orbitLine.polyline.positions = new Cesium.CallbackProperty(() => {
+                        return positions;
+                    }, false);
+                    
                     orbitLine.show = true;
                     visibleOrbits++;
                 }
@@ -855,7 +888,7 @@ function updateVisibleEvents(viewer, currentTime) {
     
     // 更新状态显示
     const timeStr = currentDate.toISOString().replace('T', ' ').substring(0, 19);
-    showStatus(`当前时间: ${timeStr}, 显示事件: ${Math.floor(visibleEvents/3)}个, 卫星: ${visibleOrbits}个`);
+    showStatus(`当前时间: ${timeStr}, 显示事件: ${Math.floor(visibleEvents/3)}个, 卫星: ${visibleOrbits}个 (时间窗口: ±2小时)`);
 }
 
 // 添加图例
@@ -907,7 +940,6 @@ function addLegend(viewer, stats, orbitStats) {
         <div style="border-top: 1px solid #555; margin: 8px 0; padding-top: 6px; font-size: 9px; opacity: 0.8;">
             <div style="font-weight: bold; margin-bottom: 4px;">时间控制:</div>
             <div>时间轴: 显示历史1小时数据</div>
-            <div>时间加速: 1小时/秒</div>
             <div>循环播放: 自动循环</div>
             <div>文件监测: 30秒检查更新</div>
         </div>
@@ -917,6 +949,7 @@ function addLegend(viewer, stats, orbitStats) {
             <div>T = 地形大气 | L = 光照切换 | S = 阴影切换</div>
             <div>1 = 显示标签 | 0 = 隐藏标签 | K = 图例切换</div>
             <div>D = 昼夜测试 | I = 高度信息 | W = 时间暂停</div>
+            <div>A = 调试模式 | 显示所有数据</div>
         </div>
     `;
     
