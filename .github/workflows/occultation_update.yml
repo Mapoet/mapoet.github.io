@@ -8,6 +8,7 @@ on:
     paths:
       - scripts/occultation_predict.py
       - scripts/Rx-YY_*.tle
+      - requirements.txt
 
 jobs:
   occultation-predict:
@@ -45,7 +46,7 @@ jobs:
           pip install --no-cache-dir -r requirements.txt
           echo "Python 依赖安装完成"
           echo "已安装的包:"
-          pip list | grep -E "(numpy|sgp4|pyproj|scipy)"
+          pip list | grep -E "(numpy|sgp4|pyproj|scipy|astropy)"
 
       - name: 创建输出目录
         run: |
