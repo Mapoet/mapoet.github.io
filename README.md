@@ -1,18 +1,72 @@
-# 🌍 掩星预报系统 (Occultation Prediction System)
+# 🌍 付乃锋学术个人网站与掩星预报系统
 
-付乃锋 (Naifeng Fu) 的学术个人网站与掩星预报系统，理学博士，天津大学博士后，GNSS-R/-RO技术设备研制及数据应用专家。
+**付乃锋 (Naifeng Fu)** - 理学博士，天津大学博士后，GNSS-R/-RO技术设备研制及数据应用专家
 
-## 🚀 系统概述
+[![Website](https://img.shields.io/badge/Website-mapoet.github.io-blue)](https://mapoet.github.io)
+[![GitHub](https://img.shields.io/badge/GitHub-mapoet-green)](https://github.com/mapoet)
+[![Research](https://img.shields.io/badge/Research-GNSS--R/RO-orange)](https://mapoet.github.io)
+[![Publications](https://img.shields.io/badge/Publications-17%20Papers-red)](https://mapoet.github.io/publications/)
 
-本项目是一个集成的掩星事件预报系统，结合了学术个人网站和实时掩星事件可视化功能。系统能够：
+## 🎯 项目概述
+
+本项目是一个集成的学术个人网站和掩星事件预报系统，结合了个人学术成果展示和实时掩星事件可视化功能。系统能够：
 
 - **实时掩星预报**：基于TLE数据计算未来6小时的掩星事件
 - **3D可视化**：使用Cesium.js提供交互式地球可视化
+- **学术成果展示**：17篇学术论文的完整展示
+- **技术博客**：GNSS-R/-RO、电离层建模、大气掩星等技术文章
 - **多类型掩星**：支持电离层掩星和大气掩星事件
 - **高精度计算**：使用GAST（格林尼治视恒星时）进行精确的ECI到ECEF转换
-- **自动更新**：GitHub Actions自动更新掩星预报数据
 
-## 🎯 核心功能
+## 📊 学术成果概览
+
+### 出版物统计
+- **总论文数**: 17篇 (2016-2025)
+- **最近5年论文数**: 12篇
+- **高影响因子期刊论文数**: 8篇
+- **主要研究领域**: GNSS-R/-RO技术、电离层建模、大气掩星观测
+
+### 研究领域分布
+- **COSMIC掩星**: 4篇
+- **IRI模型**: 4篇
+- **GNSS技术**: 3篇
+- **电离层研究**: 1篇
+- **大气观测**: 2篇
+
+### 代表性论文
+- **2025年**: YUNYAO掩星数据质量评估 (Atmospheric Measurement Techniques)
+- **2024年**: 赤道等离子体气泡动态特征研究 (JGR: Space Physics)
+- **2023年**: TJU#01卫星任务电离层探测 (Radio Science)
+- **2022年**: COSMIC掩星数据ZTD评估 (Sensors)
+- **2020年**: 多源GNSS观测数据三维电离层研究 (天文学进展)
+
+## 🔬 核心研究方向
+
+### 1. GNSS-R/-RO技术设备研制
+- **卫星轨道建设与分布分析**
+- **一体化GNSS-RO载荷研制**
+- **掩星数据反演算法开发**
+- **GNSS-R载荷技术研究**
+
+### 2. 电离层建模与同化
+- **IRI模型改进与优化**
+- **多源数据同化技术**
+- **电离层尺度高度建模**
+- **Abel反演方法改进**
+
+### 3. 大气掩星观测
+- **COSMIC掩星数据处理**
+- **大气参数反演算法**
+- **山基掩星观测实验**
+- **掩星数据质量评估**
+
+### 4. 数据融合与分析
+- **地面与空基观测结合**
+- **多星座GNSS数据处理**
+- **时空分辨率分析**
+- **误差源分析与建模**
+
+## 🚀 系统功能特性
 
 ### 📡 掩星事件预报
 - **时间范围**：未来6小时
@@ -29,11 +83,11 @@
 - **昼夜效果**：自动昼夜交替显示
 - **快捷键支持**：丰富的键盘快捷键操作
 
-### 🔧 技术特性
-- **高精度坐标转换**：使用astropy库计算GAST
-- **并行计算**：多进程并行处理卫星轨道计算
-- **自动数据更新**：GitHub Actions定时更新
-- **响应式设计**：支持多种设备和屏幕尺寸
+### 📚 学术展示
+- **论文管理**：17篇学术论文的完整展示
+- **技术博客**：GNSS-R/-RO、电离层建模等技术文章
+- **项目展示**：掩星预报系统、可视化工具等
+- **研究进展**：最新研究成果和项目动态
 
 ## 🛠️ 技术栈
 
@@ -50,6 +104,8 @@
 - **JavaScript ES6+**：交互逻辑
 - **HTML5/CSS3**：页面布局和样式
 - **Jekyll**：静态网站生成
+- **Mermaid**：图表绘制
+- **MathJax**：数学公式渲染
 
 ### 部署和自动化
 - **GitHub Actions**：CI/CD自动化
@@ -65,237 +121,151 @@
 │   └── requirements.txt             # Python依赖
 ├── assets/                          # 前端资源
 │   ├── js/
-│   │   └── occultation-visualization.js  # Cesium可视化
-│   ├── traj/                        # 生成的轨迹数据
-│   │   ├── occultation_events.json  # 掩星事件数据
-│   │   └── satellite_orbits.json    # 卫星轨道数据
-│   └── css/                         # 样式文件
+│   │   ├── occultation-visualization.js  # Cesium可视化
+│   │   └── mermaid-init.js          # Mermaid图表初始化
+│   ├── css/
+│   │   └── mermaid-custom.css       # Mermaid样式
+│   └── traj/                        # 生成的轨迹数据
+│       ├── occultation_events.json  # 掩星事件数据
+│       └── satellite_orbits.json    # 卫星轨道数据
+├── _posts/                          # 博客文章
+│   ├── 2020-05-23-blog-post-14.md  # CESM学习教程
+│   ├── 2019-12-16-blog-post-11.md  # TNNA技术文章
+│   ├── 2018-03-15-blog-post-2.md   # SuperCube项目
+│   └── 2015-05-10-blog-post-1.md   # 多体运动可视化
+├── _publications/                   # 学术论文
+│   ├── 2025-01-01-*.md             # 最新论文
+│   ├── 2024-01-01-*.md             # 高影响因子论文
+│   └── ...                         # 其他论文
+├── _pages/                          # 静态页面
+│   ├── about.md                     # 个人介绍
+│   ├── publications.md              # 论文列表
+│   └── cv.md                        # 简历
 ├── .github/workflows/               # GitHub Actions
 │   └── occultation_update.yml       # 自动更新工作流
 ├── _config.yml                      # Jekyll配置
-├── _pages/                          # 静态页面
-├── _posts/                          # 博客文章
-├── _publications/                   # 学术论文
+├── Gemfile                          # Ruby依赖
+├── package.json                     # Node.js依赖
 └── README.md                        # 项目说明
 ```
 
-## 🚀 快速开始
+## 🎓 教育背景
 
-### 环境要求
-- Python 3.8+
-- Node.js 14+
-- Git
+**理学博士** (2014-2020)
+- 中国科学院上海天文台，天体测量与天体力学
+- 博士论文：《基于地基与空基 GNSS 电离层观测数据融合》
 
-### 本地开发
+**工科学士** (2010-2014)
+- 中南大学，测绘工程
+- 学士论文：《惠州市坐标转换系统》
 
-1. **克隆项目**
-```bash
-git clone https://github.com/mapoet/mapoet.github.io.git
-cd mapoet.github.io
-```
+## 💼 工作经历
 
-2. **安装Python依赖**
-```bash
-pip install -r scripts/requirements.txt
-```
+### 天津大学博士后 (2021年2月至今)
+- **研究内容**：GNSS-R/-RO技术设备研制及数据应用
+- **主要工作**：
+  - 卫星轨道建设与分布分析
+  - 一体化GNSS-RO载荷研制及掩星数据反演
+  - GNSS-R载荷研制及数据反演
+  - 大气及电离层掩星数据与多源数据融合
 
-3. **运行掩星预报**
-```bash
-python scripts/occultation_predict.py
-```
+### 天津云遥宇航科技公司算法研究员 (2020年至今，兼职)
+- **主要工作**：
+  - 大气及电离层掩星数据论证及模拟
+  - 卫星轨道设计及其时空分辨率分析
+  - 掩星开环跟踪及反掩算法实现
+  - 硬件研发合作验证接收机性能与指标
 
-4. **启动本地服务器**
-```bash
-# 使用Python内置服务器
-python -m http.server 8000
+## 🏆 荣誉与奖励
 
-# 或使用Jekyll（需要Ruby环境）
-bundle install
-bundle exec jekyll serve
-```
+- **2023年**：中国气象服务协会科学技术奖-气象科技创新奖，一等奖（第三完成人）
+- **2022年**：全国互联网+创新创业大赛，金奖（第一指导老师）
+- **2022年**：第八届"创青春"中国青年创新创业大赛(互联网专项)，一等奖（第一完成人）
+- **2021年**：全国创新创业优秀博士后
+- **2021年**：全国博士后创新创业大赛创业组，银奖（第一完成人）
+- **2020年**：全国互联网+创新创业大赛，一等奖
 
-5. **访问系统**
-打开浏览器访问 `http://localhost:8000`
+## 🔧 技术专长
 
-## 🎮 使用指南
+### 编程语言
+- **C/C++** (娴熟) - 核心算法实现
+- **Python** (娴熟) - 数据处理与分析
+- **Fortran** (娴熟) - 科学计算
+- **MATLAB** (精通) - 数值计算与可视化
+- **SQL** (娴熟) - 数据库管理
+- **Shell** (精通) - 系统脚本
+- **LaTeX** (娴熟) - 学术文档编写
 
-### 掩星可视化操作
+### 研究方向
+- **数值优化** - 算法优化与性能提升
+- **GNSS掩星** - 掩星数据处理与分析
+- **电离层建模及同化** - 电离层物理建模与数据同化
+- **大气反演** - 大气参数反演算法
+- **机器学习** - AI技术在空间科学中的应用
+- **计算机可视化** - 科学数据可视化
 
-#### 鼠标操作
-- **拖拽**：旋转地球视角
-- **滚轮**：缩放地球
-- **双击**：定位到点击位置
+## 📖 技术博客
 
-#### 键盘快捷键
-| 快捷键 | 功能 | 说明 |
-|--------|------|------|
-| `F` | 全屏切换 | 进入/退出全屏模式 |
-| `H` | 主页视角 | 回到默认地球视角 |
-| `R` | 重置相机 | 重置相机位置 |
-| `T` | 地形大气 | 切换地形大气显示 |
-| `L` | 光照切换 | 切换光照效果 |
-| `S` | 阴影切换 | 切换阴影效果 |
-| `1` | 显示标签 | 显示所有事件标签 |
-| `0` | 隐藏标签 | 隐藏所有事件标签 |
-| `K` | 图例切换 | 显示/隐藏图例 |
-| `D` | 昼夜测试 | 测试昼夜切换效果 |
-| `I` | 高度信息 | 显示高度信息 |
-| `W` | 时间暂停 | 暂停/恢复时间动画 |
-| `A` | 调试模式 | 显示所有数据 |
-| `ESC` | 退出全屏 | 退出全屏模式 |
+### 最新文章
+- **[CESM学习教程](https://mapoet.github.io/posts/2020/05/blog-post-14/)** - 完整的CESM模型学习指南
+- **[TNNA技术文章](https://mapoet.github.io/posts/2019/12/blog-post-11/)** - 张量神经网络架构详解
+- **[SuperCube项目](https://mapoet.github.io/posts/2018/03/blog-post-2/)** - 魔方求解算法与3D渲染
+- **[多体运动可视化](https://mapoet.github.io/posts/2015/05/blog-post-1/)** - 天体力学与OpenGL可视化
 
-### 数据格式
+## 📈 项目特色
 
-#### 掩星事件数据格式
-```json
-{
-  "type": "iono|atm",
-  "nav": "G01",
-  "leo": "FY3E", 
-  "time": "2025-07-19T04:50:07.515613+00:00",
-  "points": [
-    {
-      "time": "2025-07-19T04:49:52.515613+00:00",
-      "lon": -3.202627885840189,
-      "lat": -4.075054119560208,
-      "alt": -40.35875517386757,
-      "elev": -28.393873308710752
-    }
-  ]
-}
-```
+### 学术价值
+- **17篇学术论文**：涵盖GNSS-R/-RO、电离层建模、大气掩星等领域
+- **高影响因子期刊**：8篇论文发表于国际知名期刊
+- **持续研究活跃**：2020-2025年发表12篇论文
 
-#### 卫星轨道数据格式
-```json
-{
-  "metadata": {
-    "start_time": "2025-07-19T01:50:07.515613+00:00",
-    "end_time": "2025-07-19T07:50:07.515613+00:00",
-    "time_step": 30,
-    "total_satellites": 115,
-    "nav_satellites": 105,
-    "leo_satellites": 10
-  },
-  "satellites": {
-    "G01": {
-      "type": "GNSS",
-      "positions": [
-        {
-          "time": "2025-07-19T01:50:07.515613+00:00",
-          "lon": 120.5,
-          "lat": 30.2,
-          "alt": 20200.0
-        }
-      ]
-    }
-  }
-}
-```
+### 技术价值
+- **实时掩星预报**：基于高精度轨道计算的掩星事件预报
+- **3D可视化**：交互式地球可视化，支持实时轨迹显示
+- **多源数据融合**：地面与空基观测数据的综合处理
+- **算法优化**：掩星数据反演算法的持续改进
 
-## 🔧 技术细节
+### 应用价值
+- **气象预报**：掩星数据在数值天气预报中的应用
+- **电离层监测**：实时电离层状态监测和预警
+- **科学研究**：为空间科学和地球科学提供数据支持
+- **教育培训**：为相关领域提供教学和研究平台
 
-### ECI到ECEF转换改进
+## 🤝 合作与交流
 
-系统使用GAST（格林尼治视恒星时）进行高精度的ECI到ECEF坐标转换：
+### 学术合作
+- **研究方向**：GNSS-R/-RO技术、电离层建模、大气掩星
+- **合作领域**：算法开发、数据处理、硬件研制
+- **联系方式**：funaifeng@163.com
 
-```python
-def eci_to_ecef(eci_pos: np.ndarray, times: List[datetime]) -> np.ndarray:
-    """使用GAST进行ECI->ECEF转换（考虑岁差、章动等效应）"""
-    for i, r in enumerate(eci_pos):
-        # 使用astropy计算GAST（格林尼治视恒星时）
-        t = Time(times[i], scale='utc')
-        gast = t.sidereal_time('apparent', 'greenwich')
-        theta = gast.to(u.radian).value
-        
-        # 使用GAST进行坐标转换
-        x_ecef = x * np.cos(theta) + y * np.sin(theta)
-        y_ecef = -x * np.sin(theta) + y * np.cos(theta)
-```
+### 项目贡献
+欢迎对项目进行贡献，包括：
+- 代码改进和bug修复
+- 文档完善和翻译
+- 新功能开发和测试
+- 学术论文和技术文章
 
-### 掩星事件标签格式
-
-系统生成标准的掩星事件标签格式：
-
-- **电离层掩星**：`ionPrf_leoName.year.ddd.hh.mm.gnssName_0001.0001_nc`
-- **大气掩星**：`atmPrf_leoName.year.ddd.hh.mm.gnssName_0001.0001_nc`
-
-示例：`ionPrf_C2E1.2024.364.00.01.R08_0001.0001_nc`
-
-## 🤖 自动化部署
-
-### GitHub Actions工作流
-
-系统使用GitHub Actions自动更新掩星预报数据：
-
-```yaml
-name: 掩星预报自动更新
-on:
-  schedule:
-    - cron: '0 */6 * * *'  # 每6小时运行一次
-  push:
-    paths:
-      - scripts/occultation_predict.py
-      - scripts/Rx-YY_*.tle
-      - requirements.txt
-```
-
-### 自动更新流程
-
-1. **定时触发**：每6小时自动运行
-2. **依赖安装**：安装Python依赖包
-3. **数据验证**：验证astropy库和GAST计算
-4. **掩星预报**：运行预报脚本
-5. **数据生成**：生成JSON格式的轨迹数据
-6. **自动提交**：提交更新的数据文件
-
-## 📊 性能指标
-
-- **计算效率**：支持105个导航卫星 + 10个低轨卫星并行计算
-- **数据量**：生成约7.7MB轨道数据和18.9MB掩星事件数据
-- **精度提升**：ECI到ECEF转换精度提升约10km
-- **响应时间**：3D可视化加载时间 < 3秒
-
-## 🔬 学术应用
-
-### 研究领域
-- **GNSS掩星技术**：全球导航卫星系统掩星观测
-- **大气探测**：利用掩星事件进行大气参数反演
-- **电离层监测**：电离层电子密度廓线探测
-- **气候变化**：长期掩星数据用于气候变化研究
-
-### 技术贡献
-- **高精度坐标转换**：改进的ECI到ECEF转换算法
-- **实时预报系统**：基于TLE的实时掩星事件预报
-- **可视化平台**：交互式3D掩星事件可视化
-- **自动化流程**：端到端的自动化数据处理流程
-## 🤝 贡献指南
-
-欢迎提交Issue和Pull Request来改进系统：
-
-1. Fork本项目
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 打开Pull Request
+### 联系方式
+- **邮箱**：funaifeng@163.com
+- **GitHub**：https://github.com/mapoet
+- **个人网站**：https://mapoet.github.io
+- **ORCID**：0000-0002-7989-7521
 
 ## 📄 许可证
 
-本项目采用MIT许可证 - 详见 [LICENSE](LICENSE) 文件。
+本项目采用MIT许可证，详见[LICENSE](LICENSE)文件。
 
 ## 🙏 致谢
 
-- **Cesium.js**：提供优秀的3D地球可视化库
-- **astropy**：提供精确的天文时间计算功能
-- **SGP4**：提供可靠的卫星轨道传播算法
-- **GitHub Actions**：提供强大的自动化部署平台
-
-## 📞 联系方式
-
-- **个人网站**：https://mapoet.github.io
-- **GitHub**：https://github.com/mapoet
+感谢以下机构和项目的支持：
+- **天津大学**：博士后研究支持
+- **中国科学院上海天文台**：博士培养
+- **天津云遥宇航科技公司**：技术合作
+- **NCAR**：CESM模型技术支持
+- **GitHub**：代码托管和Pages服务
 
 ---
 
-**项目维护者**：付乃锋 (Naifeng Fu)  
-**最后更新**：2025年1月  
-**版本**：v2.0.0
+**付乃锋 (Naifeng Fu)** - 专注于GNSS-R/-RO技术设备研制及数据应用研究
+
+*让科技改变世界，让数据驱动未来*
