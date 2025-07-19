@@ -1,5 +1,13 @@
-const eventFile = '/assets/data/occultation_events.json';
+const eventFile = '/assets/traj/occultation_events.json';
+const orbitFile = '/assets/traj/satellite_orbits.json';
 const statusDiv = document.getElementById('status');
+const dataPeriod = 60 * 60; // 数据时间窗口长度（秒）
+
+// 文件更新监测相关变量
+let lastEventFileTime = 0;
+let lastOrbitFileTime = 0;
+let fileCheckInterval = null;
+let currentViewer = null;
 
 // 设置Cesium Ion访问令牌 - 使用用户申请的token
 Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIzOTZhYjUxMy0yM2RhLTQzYTQtYjVmNy1hNTI1NjZiNGI5NDgiLCJpZCI6MzIyODkzLCJpYXQiOjE3NTI4ODExMTd9.ZW3143EaO-0r7H7Tr9Q0rfboNl2FjBWUzm2JgcEKj5g';
@@ -529,15 +537,99 @@ function addOccultationTrajectories(viewer, data) {
     return { total: validEvents, iono: ionoCount, atm: atmCount };
 }
 
+// 添加卫星轨道到Cesium
+function addSatelliteOrbits(viewer, orbitData) {
+    //console.log('添加卫星轨道到Cesium...');
+    
+    // 存储轨道数据用于时间过滤
+    viewer.satelliteOrbits = orbitData;
+    
+    let navCount = 0;
+    let leoCount = 0;
+    
+    // 为每个卫星创建轨道实体
+    Object.keys(orbitData.satellites).forEach((satName, satIndex) => {
+        const satellite = orbitData.satellites[satName];
+        const positions = satellite.positions.map(pos => {
+            return Cesium.Cartesian3.fromDegrees(pos.lon, pos.lat, pos.alt * 1000);
+        });
+        
+        // 根据卫星类型设置颜色
+        let lineColor, lineMaterial, pointColor;
+        if (satellite.type === 'GNSS') {
+            lineColor = Cesium.Color.YELLOW;
+            lineMaterial = Cesium.Color.YELLOW.withAlpha(0.4); // 导航卫星用黄色，更透明
+            pointColor = Cesium.Color.YELLOW;
+            navCount++;
+        } else {
+            lineColor = Cesium.Color.LIME;
+            lineMaterial = Cesium.Color.LIME.withAlpha(0.4); // 低轨卫星用绿色，更透明
+            pointColor = Cesium.Color.LIME;
+            leoCount++;
+        }
+        
+        // 添加轨道线
+        const orbitLine = viewer.entities.add({
+            id: `orbit_${satName}_line`,
+            name: `${satellite.type} 轨道 ${satName}`,
+            polyline: {
+                positions: positions,
+                width: 1.0, // 轨道线更细
+                material: lineMaterial,
+                clampToGround: false,
+                zIndex: 500, // 轨道线在掩星轨迹下方
+                shadows: Cesium.ShadowMode.ENABLED
+            }
+        });
+        
+        // 添加卫星当前位置点
+        const currentPoint = viewer.entities.add({
+            id: `orbit_${satName}_current`,
+            position: positions[positions.length - 1], // 最后一个位置作为当前位置
+            point: {
+                pixelSize: 4, // 卫星点稍大一些
+                color: pointColor,
+                outlineColor: Cesium.Color.WHITE,
+                outlineWidth: 1,
+                heightReference: Cesium.HeightReference.NONE
+            },
+            label: {
+                text: satName,
+                font: '9pt sans-serif',
+                fillColor: Cesium.Color.WHITE,
+                outlineColor: Cesium.Color.BLACK,
+                outlineWidth: 1,
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                pixelOffset: new Cesium.Cartesian2(0, -15),
+                heightReference: Cesium.HeightReference.NONE,
+                show: false // 默认隐藏标签
+            }
+        });
+        
+        // 添加点击事件处理
+        currentPoint.point.id = `orbit_${satName}`;
+        orbitLine.polyline.id = `orbit_${satName}`;
+    });
+    
+    //console.log(`统计: 导航卫星 ${navCount} 个, 低轨卫星 ${leoCount} 个`);
+    return { nav: navCount, leo: leoCount };
+}
+
 // 设置时间系统
-function setupTimeSystem(viewer, data) {
+function setupTimeSystem(viewer, eventData, orbitData) {
     // 尝试从数据中提取时间信息
     let startTime = null;
     let endTime = null;
     
-    // 查找数据中的时间字段
-    if (data.length > 0) {
-        const firstEvent = data[0];
+    // 优先从轨道数据中获取时间范围
+    if (orbitData && orbitData.metadata) {
+        startTime = new Date(orbitData.metadata.start_time);
+        endTime = new Date(orbitData.metadata.end_time);
+        console.log('从轨道数据获取时间范围');
+    }
+    // 如果没有轨道数据，尝试从掩星事件数据中获取
+    else if (eventData && eventData.length > 0) {
+        const firstEvent = eventData[0];
         // 检查常见的时间字段名
         const timeFields = ['time', 'timestamp', 'date', 'datetime', 'start_time', 'event_time'];
         
@@ -590,10 +682,88 @@ function startTimeFiltering(viewer) {
     updateVisibleEvents(viewer, viewer.clock.currentTime);
 }
 
+// 检查文件更新
+async function checkFileUpdates() {
+    try {
+        // 检查事件文件
+        const eventResponse = await fetch(eventFile, { method: 'HEAD' });
+        if (eventResponse.ok) {
+            const eventLastModified = new Date(eventResponse.headers.get('last-modified')).getTime();
+            if (eventLastModified > lastEventFileTime) {
+                console.log('检测到事件文件更新，重新加载数据...');
+                lastEventFileTime = eventLastModified;
+                await reloadData(currentViewer);
+                return;
+            }
+        }
+        
+        // 检查轨道文件
+        const orbitResponse = await fetch(orbitFile, { method: 'HEAD' });
+        if (orbitResponse.ok) {
+            const orbitLastModified = new Date(orbitResponse.headers.get('last-modified')).getTime();
+            if (orbitLastModified > lastOrbitFileTime) {
+                console.log('检测到轨道文件更新，重新加载数据...');
+                lastOrbitFileTime = orbitLastModified;
+                await reloadData(currentViewer);
+                return;
+            }
+        }
+    } catch (error) {
+        console.error('文件更新检查失败:', error);
+    }
+}
+
+// 重新加载数据
+async function reloadData(viewer) {
+    if (!viewer) return;
+    
+    try {
+        showStatus('检测到数据更新，正在重新加载...');
+        
+        // 清除现有实体
+        viewer.entities.removeAll();
+        
+        // 重新加载数据
+        await loadDataForCesium(viewer);
+        
+        showStatus('数据重新加载完成');
+    } catch (error) {
+        console.error('数据重新加载失败:', error);
+        showStatus('数据重新加载失败: ' + error.message);
+    }
+}
+
+// 启动文件更新监测
+function startFileMonitoring(viewer) {
+    currentViewer = viewer;
+    
+    // 获取初始文件时间
+    fetch(eventFile, { method: 'HEAD' })
+        .then(response => {
+            if (response.ok) {
+                lastEventFileTime = new Date(response.headers.get('last-modified')).getTime();
+            }
+        })
+        .catch(error => console.error('获取事件文件时间失败:', error));
+    
+    fetch(orbitFile, { method: 'HEAD' })
+        .then(response => {
+            if (response.ok) {
+                lastOrbitFileTime = new Date(response.headers.get('last-modified')).getTime();
+            }
+        })
+        .catch(error => console.error('获取轨道文件时间失败:', error));
+    
+    // 每30秒检查一次文件更新
+    fileCheckInterval = setInterval(checkFileUpdates, 30000);
+    
+    console.log('文件更新监测已启动，每30秒检查一次');
+}
+
 // 更新可见事件
 function updateVisibleEvents(viewer, currentTime) {
     const currentDate = Cesium.JulianDate.toDate(currentTime);
-    const oneHourAgo = new Date(currentDate.getTime() - 60 * 60 * 1000); // 一小时前
+    const oneTimeAgo = new Date(currentDate.getTime() - dataPeriod * 1000); // 一小时前
     
     // 隐藏所有实体
     viewer.entities.values.forEach(function(entity) {
@@ -602,10 +772,11 @@ function updateVisibleEvents(viewer, currentTime) {
         }
     });
     
-    // 显示一小时内的数据
+    let visibleEvents = 0;
+    let visibleOrbits = 0;
+    
+    // 显示一小时内的掩星事件
     if (viewer.occultationEvents) {
-        let visibleCount = 0;
-        
         viewer.occultationEvents.forEach((event, index) => {
             let eventTime = null;
             
@@ -627,34 +798,68 @@ function updateVisibleEvents(viewer, currentTime) {
             }
             
             // 检查事件是否在一小时时间窗口内
-            if (eventTime >= oneHourAgo && eventTime <= currentDate) {
+            if (eventTime >= oneTimeAgo && eventTime <= currentDate) {
                 const entityStart = viewer.entities.getById(`event_${index}_start`);
                 const entityEnd = viewer.entities.getById(`event_${index}_end`);
                 const entityLine = viewer.entities.getById(`event_${index}_line`);
                 
                 if (entityStart) {
                     entityStart.show = true;
-                    visibleCount++;
+                    visibleEvents++;
                 }
                 if (entityEnd) {
                     entityEnd.show = true;
-                    visibleCount++;
+                    visibleEvents++;
                 }
                 if (entityLine) {
                     entityLine.show = true;
-                    visibleCount++;
+                    visibleEvents++;
                 }
             }
         });
-        
-        // 更新状态显示
-        const timeStr = currentDate.toISOString().replace('T', ' ').substring(0, 19);
-        showStatus(`当前时间: ${timeStr}, 显示事件: ${Math.floor(visibleCount/3)}个`);
     }
+    
+    // 显示一小时内的卫星轨道
+    if (viewer.satelliteOrbits) {
+        Object.keys(viewer.satelliteOrbits.satellites).forEach(satName => {
+            const satellite = viewer.satelliteOrbits.satellites[satName];
+            
+            // 过滤一小时内的轨道点
+            const visiblePositions = satellite.positions.filter(pos => {
+                const posTime = new Date(pos.time);
+                return posTime >= oneTimeAgo && posTime <= currentDate;
+            });
+            
+            if (visiblePositions.length > 1) {
+                // 更新轨道线位置
+                const orbitLine = viewer.entities.getById(`orbit_${satName}_line`);
+                if (orbitLine) {
+                    const positions = visiblePositions.map(pos => {
+                        return Cesium.Cartesian3.fromDegrees(pos.lon, pos.lat, pos.alt * 1000);
+                    });
+                    orbitLine.polyline.positions = positions;
+                    orbitLine.show = true;
+                    visibleOrbits++;
+                }
+                
+                // 更新卫星当前位置
+                const currentPoint = viewer.entities.getById(`orbit_${satName}_current`);
+                if (currentPoint && visiblePositions.length > 0) {
+                    const lastPos = visiblePositions[visiblePositions.length - 1];
+                    currentPoint.position = Cesium.Cartesian3.fromDegrees(lastPos.lon, lastPos.lat, lastPos.alt * 1000);
+                    currentPoint.show = true;
+                }
+            }
+        });
+    }
+    
+    // 更新状态显示
+    const timeStr = currentDate.toISOString().replace('T', ' ').substring(0, 19);
+    showStatus(`当前时间: ${timeStr}, 显示事件: ${Math.floor(visibleEvents/3)}个, 卫星: ${visibleOrbits}个`);
 }
 
 // 添加图例
-function addLegend(viewer, stats) {
+function addLegend(viewer, stats, orbitStats) {
     const legend = document.createElement('div');
     legend.style.position = 'absolute';
     legend.style.top = '10px';
@@ -666,10 +871,10 @@ function addLegend(viewer, stats) {
     legend.style.fontSize = '12px';
     legend.style.fontFamily = 'Arial, sans-serif';
     legend.style.zIndex = '1000';
-    legend.style.minWidth = '200px';
+    legend.style.minWidth = '220px';
     
     legend.innerHTML = `
-        <div style="margin-bottom: 8px; font-weight: bold; text-align: center;">掩星轨迹图例</div>
+        <div style="margin-bottom: 8px; font-weight: bold; text-align: center;">掩星轨迹与卫星轨道图例</div>
         <div style="display: flex; align-items: center; margin-bottom: 6px;">
             <div style="width: 20px; height: 3px; background-color: cyan; margin-right: 8px;"></div>
             <span>电离层掩星 (${stats.iono}条)</span>
@@ -678,10 +883,20 @@ function addLegend(viewer, stats) {
             <div style="width: 20px; height: 3px; background-color: orange; margin-right: 8px;"></div>
             <span>大气掩星 (${stats.atm}条)</span>
         </div>
+        <div style="display: flex; align-items: center; margin-bottom: 6px;">
+            <div style="width: 20px; height: 3px; background-color: yellow; margin-right: 8px;"></div>
+            <span>导航卫星轨道 (${orbitStats.nav}个)</span>
+        </div>
+        <div style="display: flex; align-items: center; margin-bottom: 6px;">
+            <div style="width: 20px; height: 3px; background-color: lime; margin-right: 8px;"></div>
+            <span>低轨卫星轨道 (${orbitStats.leo}个)</span>
+        </div>
         <div style="border-top: 1px solid #555; margin: 8px 0; padding-top: 6px; font-size: 10px; opacity: 0.9;">
             <div>标记说明:</div>
             <div>I = 电离层掩星起点/终点</div>
             <div>A = 大气掩星起点/终点</div>
+            <div>黄点 = 导航卫星当前位置</div>
+            <div>绿点 = 低轨卫星当前位置</div>
         </div>
         <div style="font-size: 10px; margin-top: 6px; opacity: 0.8; text-align: center;">
             操作: 鼠标拖拽旋转 | 滚轮缩放 | 双击定位 | 点击轨迹显示编号
@@ -693,7 +908,8 @@ function addLegend(viewer, stats) {
             <div style="font-weight: bold; margin-bottom: 4px;">时间控制:</div>
             <div>时间轴: 显示历史1小时数据</div>
             <div>时间加速: 1小时/秒</div>
-            <div>循环播放: 24小时周期</div>
+            <div>循环播放: 自动循环</div>
+            <div>文件监测: 30秒检查更新</div>
         </div>
         <div style="border-top: 1px solid #555; margin: 8px 0; padding-top: 6px; font-size: 9px; opacity: 0.8;">
             <div style="font-weight: bold; margin-bottom: 4px;">快捷键:</div>
@@ -708,7 +924,7 @@ function addLegend(viewer, stats) {
 }
 
 // 主函数
-function initVisualization() {
+async function initVisualization() {
     //console.log('开始初始化Cesium可视化...');
     
     if (!checkDOM()) {
@@ -727,7 +943,7 @@ function initVisualization() {
         //console.log('Cesium Viewer初始化成功');
         
         // 加载数据
-        loadDataForCesium(viewer);
+        await loadDataForCesium(viewer);
         
     } catch (error) {
         showStatus(`Cesium初始化失败: ${error.message}`);
@@ -735,41 +951,57 @@ function initVisualization() {
     }
 }
 
-function loadDataForCesium(viewer) {
+async function loadDataForCesium(viewer) {
     //console.log('开始加载数据用于Cesium...');
     
-    // 使用fetch API加载数据
-    fetch(eventFile)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            //console.log('Cesium数据加载成功:', data.length, '个事件');
-            showStatus(`数据加载成功，共 ${data.length} 个事件`);
-            
-            // 解析数据时间并设置Cesium时间
-            setupTimeSystem(viewer, data);
-            
-            const stats = addOccultationTrajectories(viewer, data);
-            addLegend(viewer, stats);
-            
-            // 添加点击事件处理
-            viewer.screenSpaceEventHandler.setInputAction(function(click) {
-                const pickedObject = viewer.scene.pick(click.position);
-                if (Cesium.defined(pickedObject)) {
-                    const entity = pickedObject.id;
-                    if (entity && entity.id && entity.id.startsWith('event_')) {
-                        // 隐藏所有标签
-                        viewer.entities.values.forEach(function(e) {
-                            if (e.label) {
-                                e.label.show = false;
-                            }
-                        });
-                        
-                        // 显示选中事件的标签
+    try {
+        // 同时加载掩星事件和卫星轨道数据
+        const [eventData, orbitData] = await Promise.all([
+            fetch(eventFile).then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            }),
+            fetch(orbitFile).then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+        ]);
+        
+        //console.log('Cesium数据加载成功:', eventData.length, '个事件,', Object.keys(orbitData.satellites).length, '个卫星');
+        showStatus(`数据加载成功，共 ${eventData.length} 个事件, ${Object.keys(orbitData.satellites).length} 个卫星`);
+        
+        // 解析数据时间并设置Cesium时间
+        setupTimeSystem(viewer, eventData, orbitData);
+        
+        // 添加掩星轨迹
+        const eventStats = addOccultationTrajectories(viewer, eventData);
+        
+        // 添加卫星轨道
+        const orbitStats = addSatelliteOrbits(viewer, orbitData);
+        
+        // 添加图例
+        addLegend(viewer, eventStats, orbitStats);
+        
+        // 添加点击事件处理
+        viewer.screenSpaceEventHandler.setInputAction(function(click) {
+            const pickedObject = viewer.scene.pick(click.position);
+            if (Cesium.defined(pickedObject)) {
+                const entity = pickedObject.id;
+                
+                // 隐藏所有标签
+                viewer.entities.values.forEach(function(e) {
+                    if (e.label) {
+                        e.label.show = false;
+                    }
+                });
+                
+                if (entity && entity.id) {
+                    if (entity.id.startsWith('event_')) {
+                        // 处理掩星事件点击
                         const eventIndex = entity.id.split('_')[1];
                         const startEntity = viewer.entities.getById(`event_${eventIndex}_start`);
                         const endEntity = viewer.entities.getById(`event_${eventIndex}_end`);
@@ -782,24 +1014,48 @@ function loadDataForCesium(viewer) {
                         }
                         
                         //console.log(`选中掩星事件 ${parseInt(eventIndex) + 1}`);
-                    }
-                } else {
-                    // 点击空白区域，隐藏所有标签
-                    viewer.entities.values.forEach(function(e) {
-                        if (e.label) {
-                            e.label.show = false;
+                    } else if (entity.id.startsWith('orbit_')) {
+                        // 处理卫星轨道点击
+                        const satName = entity.id.split('_')[1];
+                        const currentEntity = viewer.entities.getById(`orbit_${satName}_current`);
+                        
+                        if (currentEntity && currentEntity.label) {
+                            currentEntity.label.show = true;
                         }
-                    });
+                        
+                        //console.log(`选中卫星 ${satName}`);
+                    }
                 }
-            }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-            
-            //console.log(`Cesium渲染完成!显示${stats.total}条轨迹。支持鼠标拖拽、滚轮缩放、双击定位。`);
-            showStatus(`Cesium渲染完成!显示${stats.total}条轨迹。支持鼠标拖拽、滚轮缩放、双击定位。`);
-        })
-        .catch(error => {
-            console.error('Cesium数据加载失败:', error);
-            showStatus(`数据加载失败: ${error.message}`);
-        });
+            } else {
+                // 点击空白区域，隐藏所有标签
+                viewer.entities.values.forEach(function(e) {
+                    if (e.label) {
+                        e.label.show = false;
+                    }
+                });
+            }
+        }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+        
+        //console.log(`Cesium渲染完成!显示${eventStats.total}条轨迹, ${orbitStats.nav + orbitStats.leo}个卫星轨道。支持鼠标拖拽、滚轮缩放、双击定位。`);
+        showStatus(`Cesium渲染完成!显示${eventStats.total}条轨迹, ${orbitStats.nav + orbitStats.leo}个卫星轨道。支持鼠标拖拽、滚轮缩放、双击定位。`);
+        
+        // 启动文件更新监测
+        startFileMonitoring(viewer);
+        
+    } catch (error) {
+        console.error('Cesium数据加载失败:', error);
+        showStatus(`数据加载失败: ${error.message}`);
+        throw error;
+    }
+}
+
+// 清理函数
+function cleanup() {
+    if (fileCheckInterval) {
+        clearInterval(fileCheckInterval);
+        fileCheckInterval = null;
+        console.log('文件更新监测已停止');
+    }
 }
 
 // 等待DOM加载完成后初始化
@@ -807,4 +1063,7 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initVisualization);
 } else {
     initVisualization();
-} 
+}
+
+// 页面卸载时清理资源
+window.addEventListener('beforeunload', cleanup); 
