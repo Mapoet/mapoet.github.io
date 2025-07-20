@@ -43,8 +43,7 @@
   // 初始化Mermaid
   mermaid.initialize({ 
     startOnLoad: true,
-    theme: 'default',
-    logLevel: 1
+    theme: 'default'
   });
   
   // 处理Jekyll生成的language-mermaid代码块
@@ -69,18 +68,12 @@
       // 替换代码块
       const preBlock = codeBlock.parentElement;
       preBlock.parentNode.replaceChild(mermaidDiv, preBlock);
-      
-      console.log('✅ 转换Mermaid代码块 #' + (index + 1));
     });
     
     // 重新运行Mermaid渲染
     if (mermaidCodeBlocks.length > 0) {
       setTimeout(function() {
-        mermaid.run().then(function() {
-          console.log('✅ Mermaid渲染完成');
-        }).catch(function(error) {
-          console.error('❌ Mermaid渲染失败:', error);
-        });
+        mermaid.run();
       }, 100);
     }
   });
