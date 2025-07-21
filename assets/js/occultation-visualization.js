@@ -84,36 +84,21 @@ function initCesiumViewer() {
     timeline.container.style.height = '80px';
     timeline.container.style.fontSize = '12px';
     
-    // 尝试添加真实地球纹理
-    try {
-        // 移除所有默认图层
-        //viewer.scene.globe.imageryLayers.removeAll();
-        //console.log('已移除所有默认图层');
-        
-        // 使用OpenStreetMap实现昼夜交替
-        updateLighting(viewer);
-        
-    } catch (error) {
-        console.error('所有纹理添加失败:', error);
-        
-        // 最后方案：创建蓝色地球材质
-        const earthMaterial = Cesium.Material.fromType('Color', {
-            color: new Cesium.Color(0.2, 0.5, 0.8, 1.0) // 蓝色地球
-        });
-        viewer.scene.globe.material = earthMaterial;
-        //console.log('使用蓝色地球作为备选方案');
-    }
-    
-    // 配置场景
+    // 增强大气和光照真实感
     const scene = viewer.scene;
-    scene.globe.enableLighting = true; // 启用光照
-    scene.globe.atmosphereLighting = true; // 启用大气光照
-    scene.globe.atmosphereLightingIntensity = 5.0; // 大气光照强度
-    scene.globe.atmosphereHueShift = 0.1; // 大气色调偏移
-    scene.globe.atmosphereSaturationShift = 0.1; // 大气饱和度偏移
-    scene.globe.atmosphereBrightnessShift = 1.0; // 大气亮度偏移
-    
-    // 启用太阳光照
+    scene.globe.enableLighting = true;
+    scene.globe.atmosphereLighting = true;
+    scene.globe.atmosphereLightingIntensity = 5.0;
+    scene.globe.atmosphereHueShift = 0.1;
+    scene.globe.atmosphereSaturationShift = 0.1;
+    scene.globe.atmosphereBrightnessShift = 1.0;
+    scene.globe.showGroundAtmosphere = true;
+    scene.globe.atmosphereAlpha = 1.0;
+    scene.globe.nightFadeInDistance = 1000000;
+    scene.globe.nightFadeOutDistance = 5000000;
+    scene.globe.dynamicAtmosphereLighting = true;
+    scene.globe.dynamicAtmosphereLightingFromSun = true;
+
     scene.sun = new Cesium.Sun();
     scene.moon = new Cesium.Moon();
     scene.skyBox = new Cesium.SkyBox({
@@ -126,8 +111,7 @@ function initCesiumViewer() {
             negativeZ: 'https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Assets/Textures/SkyBox/tycho2t3_80_mz.jpg'
         }
     });
-    
-    // 时间设置将在数据加载后完成
+
     viewer.clock.shouldAnimate = true;
     
     // 添加键盘快捷键支持
@@ -268,21 +252,6 @@ function initCesiumViewer() {
                 }
                 break;
                 
-            case 'd':
-                // D键：测试昼夜切换
-                event.preventDefault();
-                const nightLayer = viewer.nightLayer;
-                if (nightLayer) {
-                    const currentAlpha = nightLayer.alpha;
-                    nightLayer.alpha = currentAlpha > 0.5 ? 0.0 : 1.0;
-                    message = `昼夜切换测试: ${nightLayer.alpha > 0.5 ? '夜间' : '白天'}`;
-                    //console.log('昼夜切换测试:', nightLayer.alpha);
-                } else {
-                    message = '夜间图层未找到';
-                    //console.log('夜间图层未找到');
-                }
-                break;
-                
             case 'w':
                 // W键：测试时间过滤
                 event.preventDefault();
@@ -361,94 +330,6 @@ function initCesiumViewer() {
     
     //console.log('Cesium Viewer初始化完成');
     return viewer;
-}
-
-/**
- * @description: 昼夜交替效果
- * @param {*} _viewer
- * @return {*}
- */
-function updateLighting(_viewer) {
-    // OSM标准风格地图（白天）
-    const dayLayer = _viewer.scene.globe.imageryLayers.addImageryProvider(
-        new Cesium.UrlTemplateImageryProvider({
-            url: 'https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-            subdomains: ["a", "b", "c", "d"],
-        })
-    );
-
-    // OSM暗色系地图（夜间）
-    const nightLayer = _viewer.scene.globe.imageryLayers.addImageryProvider(
-        new Cesium.UrlTemplateImageryProvider({
-            url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-            subdomains: ["a", "b", "c", "d"],
-        })
-    );
-    
-    // 启用光照
-    _viewer.scene.globe.enableLighting = true;
-    _viewer.clock.shouldAnimate = true;
-    _viewer.clock.multiplier = 1; // 时间加速
-    
-    // 设置夜间图层初始透明度
-    nightLayer.alpha = 0.0;
-    
-    // 存储图层引用
-    _viewer.dayLayer = dayLayer;
-    _viewer.nightLayer = nightLayer;
-    
-    //console.log('OpenStreetMap昼夜交替图层添加成功');
-    
-    // 启动昼夜交替
-    startDayNightCycle(_viewer);
-}
-
-// 在合适位置插入太阳子午点经度计算函数
-function getSubsolarLongitude(date) {
-    // 太阳正对的经度（-180~180）
-    const utcHours = date.getUTCHours() + date.getUTCMinutes() / 60;
-    let lon = (utcHours * 15 + 180) % 360;
-    if (lon > 180) lon -= 360;
-    return lon;
-}
-
-/**
- * @description: 启动昼夜循环（基于太阳子午点经度和相机中心点经度，动态调整夜间Layer透明度，模拟晨昏线）
- * @param {*} _viewer
- */
-function startDayNightCycle(_viewer) {
-    function updateDayNightTexture() {
-        const time = _viewer.clock.currentTime;
-        const date = Cesium.JulianDate.toDate(time);
-        const subsolarLon = getSubsolarLongitude(date);
-
-        // 获取相机中心点经度
-        const cameraCartographic = Cesium.Cartographic.fromCartesian(_viewer.camera.positionWC);
-        const cameraLon = Cesium.Math.toDegrees(cameraCartographic.longitude);
-
-        // 计算经度差
-        let delta = Math.abs(cameraLon - subsolarLon);
-        if (delta > 180) delta = 360 - delta;
-
-        // 白天：夹角<90°，夜间：夹角>90°，晨昏线过渡区间80~90°
-        let alpha = 0.0;
-        if (delta > 90) {
-            // 夜间
-            alpha = 1.0;
-        } else if (delta > 80) {
-            // 晨昏线过渡
-            alpha = (delta - 80) / 10;
-        } else {
-            // 白天
-            alpha = 0.0;
-        }
-
-        _viewer.nightLayer.alpha = alpha;
-        _viewer.dayLayer.alpha = 1.0 - alpha;
-    }
-
-    _viewer.clock.onTick.addEventListener(updateDayNightTexture);
-    updateDayNightTexture();
 }
 
 // 生成掩星事件标签
