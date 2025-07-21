@@ -90,12 +90,12 @@ function initCesiumViewer() {
     scene.globe.atmosphereLighting = true;
     scene.globe.atmosphereLightingIntensity = 5.0;
     scene.globe.atmosphereHueShift = 0.1;
-    scene.globe.atmosphereSaturationShift = 0.1;
-    scene.globe.atmosphereBrightnessShift = 1.0;
-    scene.globe.showGroundAtmosphere = true;
+    scene.globe.atmosphereSaturationShift = 0.15; // 调整饱和度增强晨昏线色彩
+    scene.globe.atmosphereBrightnessShift = 0.2; // 调整亮度增强晨昏线渐变
     scene.globe.atmosphereAlpha = 1.0;
-    scene.globe.nightFadeInDistance = 1000000;
-    scene.globe.nightFadeOutDistance = 5000000;
+    scene.globe.showGroundAtmosphere = true;
+    scene.globe.nightFadeInDistance = 4000000;   // 晨昏线渐变起始距离（4,000 km）
+    scene.globe.nightFadeOutDistance = 12000000; // 晨昏线渐变结束距离（12,000 km）
     scene.globe.dynamicAtmosphereLighting = true;
     scene.globe.dynamicAtmosphereLightingFromSun = true;
 
