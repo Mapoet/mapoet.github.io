@@ -416,17 +416,18 @@ function startDayNightCycle(_viewer) {
         
         // 获取夜间图层
         const nightLayer = _viewer.nightLayer;
-        if (nightLayer) {
+        const dayLayer = _viewer.dayLayer;
+        if (nightLayer && dayLayer) {
             // 根据时间计算夜间纹理的透明度
             let alpha = 0.0;
             if (hour >= 19 || hour < 5) {
-                // 夜间 (18:00-06:00)
+                // 夜间 (19:00-05:00)
                 alpha = 1.0;
             } else if (hour >= 5 && hour < 7) {
-                // 日出过渡 (06:00-08:00) - 更平滑的过渡
+                // 日出过渡 (05:00-07:00) - 更平滑的过渡
                 alpha = 1.0 - (hour - 5 + date.getUTCMinutes() / 60) / 2;
             } else if (hour >= 17 && hour < 19) {
-                // 日落过渡 (16:00-18:00) - 更平滑的过渡
+                // 日落过渡 (17:00-19:00) - 更平滑的过渡
                 alpha = (hour - 17 + date.getUTCMinutes() / 60) / 2;
             }
             
@@ -434,6 +435,7 @@ function startDayNightCycle(_viewer) {
             alpha = Math.max(0.0, Math.min(1.0, alpha));
             
             nightLayer.alpha = alpha;
+            dayLayer.alpha = 1.0 - alpha;
             //console.log(`时间: ${hour}:${date.getUTCMinutes().toString().padStart(2, '0')}, 夜间纹理透明度: ${alpha.toFixed(2)}`);
         } else {
             //console.log('夜间图层未找到，无法进行昼夜切换');
