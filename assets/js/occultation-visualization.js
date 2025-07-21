@@ -87,7 +87,7 @@ function initCesiumViewer() {
     // 尝试添加真实地球纹理
     try {
         // 移除所有默认图层
-        viewer.scene.globe.imageryLayers.removeAll();
+        //viewer.scene.globe.imageryLayers.removeAll();
         //console.log('已移除所有默认图层');
         
         // 使用OpenStreetMap实现昼夜交替
