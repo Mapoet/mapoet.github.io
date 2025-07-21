@@ -63,15 +63,15 @@ function initCesiumViewer() {
     // 创建Cesium Viewer - 使用最简配置确保地球显示
     const viewer = new Cesium.Viewer('cesiumContainer', {
         baseLayerPicker: false, // 暂时关闭图层选择器
-        geocoder: false, // 暂时关闭地理编码器
-        homeButton: false, // 暂时关闭主页按钮
-        sceneModePicker: false, // 暂时关闭场景模式选择器
-        navigationHelpButton: false, // 暂时关闭导航帮助按钮
+        geocoder: true, // 启用地理编码器
+        homeButton: true, // 启用主页按钮
+        sceneModePicker: true, // 启用场景模式选择器
+        navigationHelpButton: true, // 启用导航帮助按钮
         animation: true, // 启用动画控件
         timeline: true, // 启用时间轴
-        fullscreenButton: false, // 暂时关闭全屏按钮
-        infoBox: false, // 暂时关闭信息框
-        selectionIndicator: false, // 暂时关闭选择指示器
+        fullscreenButton: true, // 启用全屏按钮
+        infoBox: true, // 启用信息框
+        selectionIndicator: true, // 启用选择指示器
         shadows: false, // 关闭阴影
         shouldAnimate: true, // 动画
         requestRenderMode: false, // 关闭请求渲染模式
