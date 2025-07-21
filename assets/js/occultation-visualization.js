@@ -403,49 +403,51 @@ function updateLighting(_viewer) {
     startDayNightCycle(_viewer);
 }
 
+// 在合适位置插入太阳子午点经度计算函数
+function getSubsolarLongitude(date) {
+    // 太阳正对的经度（-180~180）
+    const utcHours = date.getUTCHours() + date.getUTCMinutes() / 60;
+    let lon = (utcHours * 15 + 180) % 360;
+    if (lon > 180) lon -= 360;
+    return lon;
+}
+
 /**
- * @description: 启动昼夜循环
+ * @description: 启动昼夜循环（基于太阳子午点经度和相机中心点经度，动态调整夜间Layer透明度，模拟晨昏线）
  * @param {*} _viewer
  */
 function startDayNightCycle(_viewer) {
-    // 昼夜纹理切换函数
     function updateDayNightTexture() {
         const time = _viewer.clock.currentTime;
         const date = Cesium.JulianDate.toDate(time);
-        const hour = date.getUTCHours();
-        
-        // 获取夜间图层
-        const nightLayer = _viewer.nightLayer;
-        const dayLayer = _viewer.dayLayer;
-        if (nightLayer && dayLayer) {
-            // 根据时间计算夜间纹理的透明度
-            let alpha = 0.0;
-            if (hour >= 19 || hour < 5) {
-                // 夜间 (19:00-05:00)
-                alpha = 1.0;
-            } else if (hour >= 5 && hour < 7) {
-                // 日出过渡 (05:00-07:00) - 更平滑的过渡
-                alpha = 1.0 - (hour - 5 + date.getUTCMinutes() / 60) / 2;
-            } else if (hour >= 17 && hour < 19) {
-                // 日落过渡 (17:00-19:00) - 更平滑的过渡
-                alpha = (hour - 17 + date.getUTCMinutes() / 60) / 2;
-            }
-            
-            // 确保alpha值在0-1范围内
-            alpha = Math.max(0.0, Math.min(1.0, alpha));
-            
-            nightLayer.alpha = alpha;
-            dayLayer.alpha = 1.0 - alpha;
-            //console.log(`时间: ${hour}:${date.getUTCMinutes().toString().padStart(2, '0')}, 夜间纹理透明度: ${alpha.toFixed(2)}`);
+        const subsolarLon = getSubsolarLongitude(date);
+
+        // 获取相机中心点经度
+        const cameraCartographic = Cesium.Cartographic.fromCartesian(_viewer.camera.positionWC);
+        const cameraLon = Cesium.Math.toDegrees(cameraCartographic.longitude);
+
+        // 计算经度差
+        let delta = Math.abs(cameraLon - subsolarLon);
+        if (delta > 180) delta = 360 - delta;
+
+        // 白天：夹角<90°，夜间：夹角>90°，晨昏线过渡区间80~90°
+        let alpha = 0.0;
+        if (delta > 90) {
+            // 夜间
+            alpha = 1.0;
+        } else if (delta > 80) {
+            // 晨昏线过渡
+            alpha = (delta - 80) / 10;
         } else {
-            //console.log('夜间图层未找到，无法进行昼夜切换');
+            // 白天
+            alpha = 0.0;
         }
+
+        _viewer.nightLayer.alpha = alpha;
+        _viewer.dayLayer.alpha = 1.0 - alpha;
     }
-    
-    // 监听时间变化
+
     _viewer.clock.onTick.addEventListener(updateDayNightTexture);
-    
-    // 初始更新
     updateDayNightTexture();
 }
 
