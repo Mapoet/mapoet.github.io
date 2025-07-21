@@ -76,7 +76,7 @@ function initCesiumViewer() {
         shouldAnimate: true, // 动画
         requestRenderMode: false, // 关闭请求渲染模式
         targetFrameRate: 60, // 目标帧率
-        keyboardInputEvent: true // 启用Cesium的键盘输入处理，使用我们自己的
+        keyboardInputEvent: false // 启用Cesium的键盘输入处理，使用我们自己的
     });
     
     // 配置时间轴样式
