@@ -10,7 +10,6 @@ import json
 import numpy as np
 from datetime import datetime, timedelta, timezone
 from sgp4.api import Satrec, jday
-from scipy.interpolate import interp1d
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 from typing import List, Dict, Tuple
@@ -171,9 +170,40 @@ def interpolate_orbit(times, pos, new_times) -> np.ndarray:
     pos = np.asarray(pos)
     new_pos = np.zeros((len(new_times), 6))
     for i in range(6):
-        f = interp1d([(t - times[0]).total_seconds() for t in times], pos[:, i], kind='linear', fill_value='extrapolate')
-        new_pos[:, i] = f([(t - times[0]).total_seconds() for t in new_times])
+        # 将所有 interp1d([(t - times[0]).total_seconds() for t in times], pos[:, i], kind='linear', fill_value='extrapolate')
+        # 替换为 linear_interp1d([(t - times[0]).total_seconds() for t in times], pos[:, i], x_new)
+        # 其中 x_new 为你需要插值的点
+        new_pos[:, i] = linear_interp1d([(t - times[0]).total_seconds() for t in times], pos[:, i], [(t - times[0]).total_seconds() for t in new_times])
     return new_pos
+
+def linear_interp1d(x, y, x_new):
+    """
+    纯 Python 分段线性插值，支持外推。
+    x, y: 原始数据点（均为一维递增数组）
+    x_new: 待插值点（可为标量或一维数组）
+    返回：插值结果（与 x_new 形状一致）
+    """
+    import numpy as np
+    x = np.asarray(x)
+    y = np.asarray(y)
+    x_new = np.atleast_1d(x_new)
+    y_new = []
+    for xi in x_new:
+        if xi <= x[0]:
+            slope = (y[1] - y[0]) / (x[1] - x[0])
+            yi = y[0] + slope * (xi - x[0])
+        elif xi >= x[-1]:
+            slope = (y[-1] - y[-2]) / (x[-1] - x[-2])
+            yi = y[-1] + slope * (xi - x[-1])
+        else:
+            idx = np.searchsorted(x, xi) - 1
+            x0, x1 = x[idx], x[idx+1]
+            y0, y1 = y[idx], y[idx+1]
+            slope = (y1 - y0) / (x1 - x0)
+            yi = y0 + slope * (xi - x0)
+        y_new.append(yi)
+    y_new = np.array(y_new)
+    return y_new if y_new.size > 1 else y_new[0]
 
 def process_nav_sat(nav, leo_sats, nav_orbits, leo_orbits, times):
     import os

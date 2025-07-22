@@ -48,7 +48,7 @@ jobs:
           pip install --no-cache-dir -r requirements.txt
           echo "Python 依赖安装完成"
           echo "已安装的包:"
-          pip list | grep -E "(numpy|sgp4|scipy)"
+          pip list | grep -E "(numpy|sgp4)"
 
       - name: 检查输入文件
         run: |
@@ -60,9 +60,9 @@ jobs:
             exit 1
           fi
           
-          if ls scripts/Rx-YY_*.tle 1> /dev/null 2>&1; then
+          if ls assets/traj/Rx-YY_*.tle 1> /dev/null 2>&1; then
             echo "✓ 找到 TLE 文件:"
-            ls -la scripts/Rx-YY_*.tle
+            ls -la assets/traj/Rx-YY_*.tle
           else
             echo "✗ 未找到 TLE 文件"
             exit 1
