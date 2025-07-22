@@ -29,14 +29,14 @@ def ecef_to_llh(x: float, y: float, z: float) -> tuple[float, float, float]:
     import math
     a = 6378137.0 # WGS84 semi-major axis
     f = 1/298.257223563 # WGS84 flattening
+    r2d=180/np.pi
     e2 = f * (2 - f)
     r = math.sqrt(x**2 + y**2)
     lat = math.atan2(z, r * (1 - e2))
     N = a / math.sqrt(1 - e2 * math.sin(lat)**2)
     alt = r / math.cos(lat) - N
     lon = math.atan2(y, x)
-    alt = alt / 1e3  # 转换为km
-    return lon, lat, alt
+    return lon*r2d, lat*r2d, alt
 
 # 使用astropy计算GAST（格林尼治视恒星时）
 def gast_approx(dt_utc):
