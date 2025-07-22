@@ -48,7 +48,7 @@ jobs:
           pip install --no-cache-dir -r requirements.txt
           echo "Python 依赖安装完成"
           echo "已安装的包:"
-          pip list | grep -E "(numpy|sgp4|pyproj|scipy|astropy)"
+          pip list | grep -E "(numpy|sgp4|scipy)"
 
       - name: 检查输入文件
         run: |
