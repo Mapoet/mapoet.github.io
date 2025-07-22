@@ -7,7 +7,7 @@ on:
   push:
     paths:
       - scripts/occultation_predict.py
-      - scripts/Rx-YY_*.tle
+      - assets/traj/Rx-YY_*.tle
       - requirements.txt
 
 jobs:
@@ -21,7 +21,7 @@ jobs:
         with:
           fetch-depth: 0  # 获取完整历史用于提交
 
-      - name: 设置 Python
+      - name: 设置 Python 
         uses: actions/setup-python@v5
         with:
           python-version: 3.14.0-beta.4
@@ -49,12 +49,6 @@ jobs:
           echo "Python 依赖安装完成"
           echo "已安装的包:"
           pip list | grep -E "(numpy|sgp4|pyproj|scipy|astropy)"
-
-      - name: 创建输出目录
-        run: |
-          echo "创建输出目录..."
-          mkdir -p assets/traj
-          echo "输出目录创建完成: assets/traj/"
 
       - name: 检查输入文件
         run: |

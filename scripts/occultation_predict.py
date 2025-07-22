@@ -10,23 +10,48 @@ import json
 import numpy as np
 from datetime import datetime, timedelta, timezone
 from sgp4.api import Satrec, jday
-from pyproj import Transformer
 from scipy.interpolate import interp1d
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 from typing import List, Dict, Tuple
-from astropy.time import Time
-import astropy.units as u
 
-TLE_FILE = "./scripts/Rx-YY_20250718.tle"  # TLE文件路径
-OUTPUT_FILE = "./assets/traj/occultation_events.json"  # 输出文件
-ORBIT_FILE = "./assets/traj/satellite_orbits.json"  # 轨道输出文件
+TLE_FILE = "../assets/traj/Rx-YY_20250718.tle"  # TLE文件路径
+OUTPUT_FILE = "../assets/traj/occultation_events.json"  # 输出文件
+ORBIT_FILE = "../assets/traj/satellite_orbits.json"  # 轨道输出文件
 AZIM_WIDTH = 50  # 方位角宽度（度）
 TIME_STEP = 30  # 轨道计算采样间隔（秒）
 IONO_STEP = 20  # 电离层掩星细化采样（秒）
 ATM_STEP = 5    # 大气掩星细化采样（秒）
 
-transformer = Transformer.from_crs(4978, 4326, always_xy=True)
+# ECEF 转 LLH
+def ecef_to_llh(x: float, y: float, z: float) -> tuple[float, float, float]:
+    """ECEF坐标转换为经纬高"""
+    import math
+    a = 6378137.0 # WGS84 semi-major axis
+    f = 1/298.257223563 # WGS84 flattening
+    e2 = f * (2 - f)
+    r = math.sqrt(x**2 + y**2)
+    lat = math.atan2(z, r * (1 - e2))
+    N = a / math.sqrt(1 - e2 * math.sin(lat)**2)
+    alt = r / math.cos(lat) - N
+    lon = math.atan2(y, x)
+    alt = alt / 1e3  # 转换为km
+    return lon, lat, alt
+
+# 使用astropy计算GAST（格林尼治视恒星时）
+def gast_approx(dt_utc):
+    # 把 datetime 转换到 Julian Date（UTC≈UT1）
+    # dt_utc 必须是 timezone-aware 的 UTC 时间
+    # 算 JD from J2000.0 epoch
+    jd = 2451545.0 + (dt_utc - datetime(2000,1,1,12, tzinfo=timezone.utc)).total_seconds() / 86400.0
+    T  = (jd - 2451545.0) / 36525.0
+    # 近似公式（度）
+    theta = (280.46061837
+             + 360.98564736629 * (jd - 2451545.0)
+             + 0.000387933 * T**2
+             - (T**3) / 38710000.0) % 360.0
+    # 转为弧度
+    return np.deg2rad(theta)
 
 # =====================
 # TLE读取（不构造Satrec对象）
@@ -69,11 +94,7 @@ def eci_to_ecef(eci_pos: np.ndarray, times: List[datetime]) -> np.ndarray:
     """使用GAST进行ECI->ECEF转换（考虑岁差、章动等效应）"""
     ecef = []
     for i, r in enumerate(eci_pos):
-        # 使用astropy计算GAST（格林尼治视恒星时）
-        t = Time(times[i], scale='utc')
-        gast = t.sidereal_time('apparent', 'greenwich')
-        theta = gast.to(u.radian).value
-        
+        theta = gast_approx(times[i])
         x, y, z = r[0], r[1], r[2]
         vx, vy, vz = r[3], r[4], r[5]
         
@@ -86,11 +107,11 @@ def eci_to_ecef(eci_pos: np.ndarray, times: List[datetime]) -> np.ndarray:
         ecef.append([x_ecef, y_ecef, z, xv_ecef, yv_ecef, vz])
     return np.array(ecef)
 
-def ecef_to_llh(ecef_pos: np.ndarray) -> np.ndarray:
+def ecef_to_llhs(ecef_pos: np.ndarray) -> np.ndarray:
     """ECEF坐标转换为经纬高"""
     llh = []
     for pos in ecef_pos:
-        lon, lat, alt = transformer.transform(pos[0]*1e3, pos[1]*1e3, pos[2]*1e3)
+        lon, lat, alt = ecef_to_llh(pos[0]*1e3, pos[1]*1e3, pos[2]*1e3)
         alt = alt / 1e3  # 转换为km
         llh.append([lon, lat, alt])
     return np.array(llh)
@@ -121,7 +142,7 @@ def calc_tangent_point(txv, rxv) -> Tuple[float, float, float, float,float]:
     rv0=rv/v0
     tp=rx-np.dot(rx,drt0)*drt0 # caculating target point
     #if rx&tx at sameside,prt would be positive.
-    lon, lat, alt = transformer.transform(tp[0]*1e3, tp[1]*1e3, tp[2]*1e3)
+    lon, lat, alt = ecef_to_llh(tp[0]*1e3, tp[1]*1e3, tp[2]*1e3)
     alt = alt / 1e3
     elev = np.arcsin(np.dot(rx0, drt0)) * 180/np.pi
     azim = np.arcsin(np.dot(rv0, drt0)) * 180/np.pi
@@ -243,7 +264,7 @@ def main():
     for i, nav in enumerate(nav_sats):
         nav_name = nav["name"]
         nav_ecef_pos = nav_ecef[i]
-        nav_llh = ecef_to_llh(nav_ecef_pos)
+        nav_llh = ecef_to_llhs(nav_ecef_pos)
         
         orbit_data["satellites"][nav_name] = {
             "type": "GNSS",
@@ -265,7 +286,7 @@ def main():
     for i, leo in enumerate(leo_sats):
         leo_name = leo["name"]
         leo_ecef_pos = leo_ecef[i]
-        leo_llh = ecef_to_llh(leo_ecef_pos)
+        leo_llh = ecef_to_llhs(leo_ecef_pos)
         
         orbit_data["satellites"][leo_name] = {
             "type": "LEO",

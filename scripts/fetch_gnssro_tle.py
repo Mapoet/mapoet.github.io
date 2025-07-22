@@ -162,7 +162,7 @@ def fetch_tle(satellite_id):
 def main():
     # 输出文件名：Rx-YY_YYYYMMDD.tle
     today = datetime.now().strftime("%Y%m%d")
-    fname = f"Rx-YY_{today}.tle"
+    fname = f"../assets/traj/Rx-YY_{today}.tle"
 
     with open(fname, 'w') as fp:
         for norad, info in SATELLITE_DICT.items():
