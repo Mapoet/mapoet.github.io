@@ -1,12 +1,17 @@
 const orbitFile = '/assets/traj/satellite_orbits.json';
 const visibilityFile = '/assets/traj/visibility_events.json';
 const stationFile = '/assets/traj/trk-GroundStation.gst';
+
 const statusDiv = document.getElementById('status');
+
+
+// 设置Cesium Ion访问令牌 - 使用用户申请的token
+Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIzOTZhYjUxMy0yM2RhLTQzYTQtYjVmNy1hNTI1NjZiNGI5NDgiLCJpZCI6MzIyODkzLCJpYXQiOjE3NTI4ODExMTd9.ZW3143EaO-0r7H7Tr9Q0rfboNl2FjBWUzm2JgcEKj5g';
+
 
 function showStatus(message) {
     statusDiv.innerHTML = message;
 }
-
 function parseStationData(txt) {
     const lines = txt.split('\n').filter(line => line.trim() && !line.startsWith('#'));
     if (lines.length < 2) return [];
