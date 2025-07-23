@@ -32,6 +32,8 @@ function addGroundStations(viewer, stations) {
 let satelliteOrbitEntities = {};
 let satelliteOrbitRawData = {};
 let orbitTimeList = {};
+let visibilityArcEntities = [];
+let visibilityArcRawData = [];
 
 function addSatelliteOrbits(viewer, orbitData) {
     satelliteOrbitEntities = {};
@@ -51,11 +53,11 @@ function addSatelliteOrbits(viewer, orbitData) {
             return;
         }
         let color = satellite.type === 'GNSS' ? Cesium.Color.YELLOW.withAlpha(0.7) : Cesium.Color.LIME.withAlpha(0.7);
-        // 初始只显示全部轨道，后续onTick动态更新
+        // 初始显示全部轨道，后续onTick动态更新
         const entity = viewer.entities.add({
             id: `orbit_${satName}`,
             name: `${satellite.type} 轨道 ${satName}`,
-            polyline: { positions: validPositions.map(p => p.cart3), width: 1.5, material: color, clampToGround: false }
+            polyline: { positions: validPositions.map(p => p.cart3), width: 1.0, material: color, clampToGround: false }
         });
         satelliteOrbitEntities[satName] = entity;
         satelliteOrbitRawData[satName] = validPositions;
@@ -64,21 +66,31 @@ function addSatelliteOrbits(viewer, orbitData) {
 }
 
 function addVisibilityArcs(viewer, visibilityData) {
-    visibilityData.forEach((ev, idx) => {
-        const positions = (ev.points || [])
+    visibilityArcEntities = [];
+    visibilityArcRawData = [];
+    (visibilityData || []).forEach((ev, idx) => {
+        const points = (ev.points || [])
             .filter(p => isFinite(p.lon) && isFinite(p.lat) && isFinite(p.alt))
-            .map(p => Cesium.Cartesian3.fromDegrees(p.lon, p.lat, p.alt * 1000));
-        if (positions.length < 2) {
+            .map(p => ({
+                cart3: Cesium.Cartesian3.fromDegrees(p.lon, p.lat, p.alt * 1000),
+                time: p.time ? new Date(p.time) : undefined
+            }));
+        if (points.length < 2) {
             console.warn('可见弧段点数不足或存在无效点，已跳过:', ev);
             return;
         }
-        let color = Cesium.Color.fromRandom({ alpha: 0.8 });
-        viewer.entities.add({
+        // 事件时间区间
+        const startTime = points[0].time;
+        const endTime = points[points.length - 1].time;
+        // 初始隐藏，后续onTick动态控制
+        const entity = viewer.entities.add({
             id: `vis_${ev.station}_${ev.satellite}_${idx}`,
             name: `可见弧段: ${ev.station} - ${ev.satellite}`,
-            polyline: { positions, width: 2.5, material: color, clampToGround: false },
+            polyline: { positions: points.map(p => p.cart3), width: 4.0, material: Cesium.Color.fromRandom({ alpha: 0.8 }), clampToGround: false, show: false },
             description: `地面站: ${ev.station}, 卫星: ${ev.satellite}`
         });
+        visibilityArcEntities.push(entity);
+        visibilityArcRawData.push({ entity, startTime, endTime });
     });
 }
 
@@ -94,28 +106,43 @@ async function loadDataForCesium(viewer) {
         addSatelliteOrbits(viewer, orbitData);
         addVisibilityArcs(viewer, visibilityData.events || visibilityData); // 兼容旧结构
         // 设置时间系统
+        let simStart, simEnd;
         if (visibilityData.metadata && visibilityData.metadata.start_time && visibilityData.metadata.end_time) {
-            const startTime = Cesium.JulianDate.fromDate(new Date(visibilityData.metadata.start_time));
-            const endTime = Cesium.JulianDate.fromDate(new Date(visibilityData.metadata.end_time));
+            simStart = new Date(visibilityData.metadata.start_time);
+            simEnd = new Date(visibilityData.metadata.end_time);
+            const startTime = Cesium.JulianDate.fromDate(simStart);
+            const endTime = Cesium.JulianDate.fromDate(simEnd);
             viewer.clock.startTime = startTime;
             viewer.clock.stopTime = endTime;
             viewer.clock.currentTime = startTime;
             viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP;
             viewer.clock.multiplier = 60; // 1秒=1分钟，可根据需要调整
         }
-        // 轨道动态更新
+        // 轨道与可视弧段动态更新
         viewer.clock.onTick.addEventListener(function(clock) {
             const currentDate = Cesium.JulianDate.toDate(clock.currentTime);
             const tailStart = new Date(currentDate.getTime() - 2 * 3600 * 1000); // 2小时尾巴
+            // 轨道线动态更新
             Object.keys(satelliteOrbitRawData).forEach(satName => {
                 const raw = satelliteOrbitRawData[satName];
                 // 只保留2小时内的轨迹
                 const tail = raw.filter(p => p.time >= tailStart && p.time <= currentDate);
                 if (tail.length >= 2) {
                     satelliteOrbitEntities[satName].polyline.positions = tail.map(p => p.cart3);
+                    satelliteOrbitEntities[satName].polyline.width = 1.0;
                     satelliteOrbitEntities[satName].show = true;
                 } else {
                     satelliteOrbitEntities[satName].show = false;
+                }
+            });
+            // 可视弧段高亮
+            visibilityArcRawData.forEach(({ entity, startTime, endTime }) => {
+                // 判断弧段时间区间与当前2小时轨道尾巴是否有重叠
+                if (startTime && endTime && !(endTime < tailStart || startTime > currentDate)) {
+                    entity.polyline.show = true;
+                    entity.polyline.width = 4.0;
+                } else {
+                    entity.polyline.show = false;
                 }
             });
         });
