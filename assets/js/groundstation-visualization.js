@@ -152,6 +152,104 @@ async function loadDataForCesium(viewer) {
     }
 }
 
+function addLegend(viewer) {
+    let legend = document.getElementById('cesium-legend');
+    if (!legend) {
+        legend = document.createElement('div');
+        legend.id = 'cesium-legend';
+        legend.style.position = 'absolute';
+        legend.style.top = '10px';
+        legend.style.right = '10px';
+        legend.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+        legend.style.color = 'white';
+        legend.style.padding = '12px';
+        legend.style.borderRadius = '6px';
+        legend.style.fontSize = '12px';
+        legend.style.fontFamily = 'Arial, sans-serif';
+        legend.style.zIndex = '1000';
+        legend.style.minWidth = '220px';
+        legend.innerHTML = `
+            <div style="margin-bottom: 8px; font-weight: bold; text-align: center;">轨道与可视弧段图例</div>
+            <div style="display: flex; align-items: center; margin-bottom: 6px;">
+                <div style="width: 20px; height: 2px; background-color: yellow; margin-right: 8px;"></div>
+                <span>GNSS卫星轨道（细线）</span>
+            </div>
+            <div style="display: flex; align-items: center; margin-bottom: 6px;">
+                <div style="width: 20px; height: 2px; background-color: lime; margin-right: 8px;"></div>
+                <span>LEO卫星轨道（细线）</span>
+            </div>
+            <div style="display: flex; align-items: center; margin-bottom: 6px;">
+                <div style="width: 20px; height: 4px; background-color: orange; margin-right: 8px;"></div>
+                <span>高亮可视弧段（粗线）</span>
+            </div>
+            <div style="display: flex; align-items: center; margin-bottom: 6px;">
+                <div style="width: 10px; height: 10px; background-color: red; border-radius: 50%; margin-right: 8px;"></div>
+                <span>地面站</span>
+            </div>
+            <div style="border-top: 1px solid #555; margin: 8px 0; padding-top: 6px; font-size: 10px; opacity: 0.9;">
+                <div style="font-weight: bold; margin-bottom: 4px;">快捷键说明：</div>
+                <div>F = 全屏切换</div>
+                <div>H = 主页视角</div>
+                <div>L = 图例显示/隐藏</div>
+            </div>
+            <div style="font-size: 10px; margin-top: 6px; opacity: 0.8; text-align: center;">
+                操作: 鼠标拖拽旋转 | 滚轮缩放 | 双击定位 | 点击轨迹显示编号
+            </div>
+        `;
+        document.getElementById('cesiumContainer').appendChild(legend);
+    } else {
+        legend.style.display = 'block';
+    }
+}
+
+function setupKeyboardShortcuts(viewer) {
+    document.addEventListener('keydown', function(event) {
+        let message = '';
+        if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+            return;
+        }
+        switch(event.key.toLowerCase()) {
+            case 'f':
+                event.preventDefault();
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                    message = '退出全屏模式';
+                } else {
+                    document.getElementById('cesiumContainer').requestFullscreen();
+                    message = '进入全屏模式';
+                }
+                break;
+            case 'h':
+                event.preventDefault();
+                viewer.camera.flyTo({
+                    destination: Cesium.Cartesian3.fromDegrees(0, 0, 20000000),
+                    orientation: {
+                        heading: 0.0,
+                        pitch: -Cesium.Math.PI_OVER_TWO,
+                        roll: 0.0
+                    },
+                    duration: 2.0
+                });
+                message = '回到主页视角';
+                break;
+            case 'l':
+                event.preventDefault();
+                let legend = document.getElementById('cesium-legend');
+                if (legend) {
+                    legend.style.display = legend.style.display === 'none' ? 'block' : 'none';
+                    message = `图例显示: ${legend.style.display === 'none' ? '关闭' : '开启'}`;
+                }
+                break;
+        }
+        if (message) {
+            showStatus(message);
+            setTimeout(() => {
+                showStatus('Cesium渲染完成! 支持鼠标拖拽、缩放、点击轨迹。');
+            }, 3000);
+        }
+    });
+}
+
 function initCesiumViewer() {
     const viewer = new Cesium.Viewer('cesiumContainer', {
         baseLayerPicker: false,
@@ -172,6 +270,8 @@ function initCesiumViewer() {
     viewer.scene.globe.enableLighting = true;
     viewer.scene.globe.showGroundAtmosphere = true;
     viewer.camera.setView({ destination: Cesium.Cartesian3.fromDegrees(0, 0, 20000000) });
+    addLegend(viewer);
+    setupKeyboardShortcuts(viewer);
     return viewer;
 }
 

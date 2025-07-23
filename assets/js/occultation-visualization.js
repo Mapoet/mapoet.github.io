@@ -56,7 +56,47 @@ function checkDOM() {
     return true;
 }
 
-// 初始化Cesium地球
+function setupKeyboardShortcuts(viewer) {
+    document.addEventListener('keydown', function(event) {
+        let message = '';
+        if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+            return;
+        }
+        switch(event.key.toLowerCase()) {
+            case 'f':
+                event.preventDefault();
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                    message = '退出全屏模式';
+                } else {
+                    document.getElementById('cesiumContainer').requestFullscreen();
+                    message = '进入全屏模式';
+                }
+                break;
+            case 'h':
+                event.preventDefault();
+                viewer.camera.flyTo({
+                    destination: Cesium.Cartesian3.fromDegrees(0, 0, 20000000),
+                    orientation: {
+                        heading: 0.0,
+                        pitch: -Cesium.Math.PI_OVER_TWO,
+                        roll: 0.0
+                    },
+                    duration: 2.0
+                });
+                message = '回到主页视角';
+                break;
+            // 可按需补充L/T/S/1/0/K等快捷键
+        }
+        if (message) {
+            showStatus(message);
+            setTimeout(() => {
+                showStatus('Cesium渲染完成!支持鼠标拖拽、滚轮缩放、双击定位。');
+            }, 3000);
+        }
+    });
+}
+
 function initCesiumViewer() {
     // 创建Cesium Viewer - 使用最简配置确保地球显示
     const viewer = new Cesium.Viewer('cesiumContainer', {
@@ -79,7 +119,6 @@ function initCesiumViewer() {
     const scene = viewer.scene;
     scene.globe.enableLighting = true;
     scene.globe.showGroundAtmosphere = true;
-    // 可选：关闭大气光照增强参数，保持与groundstation一致
     if ('atmosphereLighting' in scene.globe) scene.globe.atmosphereLighting = false;
     if ('atmosphereLightingIntensity' in scene.globe) scene.globe.atmosphereLightingIntensity = 1.0;
     if ('atmosphereHueShift' in scene.globe) scene.globe.atmosphereHueShift = 0.0;
@@ -90,14 +129,12 @@ function initCesiumViewer() {
     if ('nightFadeOutDistance' in scene.globe) scene.globe.nightFadeOutDistance = 5000000;
     if ('dynamicAtmosphereLighting' in scene.globe) scene.globe.dynamicAtmosphereLighting = false;
     if ('dynamicAtmosphereLightingFromSun' in scene.globe) scene.globe.dynamicAtmosphereLightingFromSun = false;
-    // 设置地形
     try {
         const worldTerrain = Cesium.createWorldTerrain();
         viewer.terrainProvider = worldTerrain;
     } catch (terrainError) {
         console.error('地形添加失败:', terrainError);
     }
-    // 设置初始相机视角
     viewer.camera.setView({
         destination: Cesium.Cartesian3.fromDegrees(0, 0, 20000000),
         orientation: {
@@ -106,8 +143,8 @@ function initCesiumViewer() {
             roll: 0.0
         }
     });
-    // 强制渲染
     scene.requestRender();
+    setupKeyboardShortcuts(viewer);
     return viewer;
 }
 
@@ -655,18 +692,8 @@ function addLegend(viewer, stats, orbitStats) {
             操作: 鼠标拖拽旋转 | 滚轮缩放 | 双击定位 | 点击轨迹显示编号
         </div>
         <div style="border-top: 1px solid #555; margin: 8px 0; padding-top: 6px; font-size: 9px; opacity: 0.8;">
-            <div style="font-weight: bold; margin-bottom: 4px;">时间控制:</div>
-            <div>时间轴: 正常时间流动 (1秒=1秒)</div>
-            <div>循环播放: 自动循环</div>
-            <div>文件监测: 30秒检查更新</div>
-        </div>
-        <div style="border-top: 1px solid #555; margin: 8px 0; padding-top: 6px; font-size: 9px; opacity: 0.8;">
             <div style="font-weight: bold; margin-bottom: 4px;">快捷键:</div>
-            <div>F = 全屏切换 | H = 主页视角 | R = 重置相机</div>
-            <div>T = 地形大气 | L = 光照切换 | S = 阴影切换</div>
-            <div>1 = 显示标签 | 0 = 隐藏标签 | K = 图例切换</div>
-            <div>D = 昼夜测试 | I = 高度信息 | W = 时间暂停</div>
-            <div>A = 调试模式 | 显示所有数据</div>
+            <div>F = 全屏切换 | H = 主页视角 | L = 图例显示/隐藏</div>
         </div>
     `;
     
