@@ -16,6 +16,10 @@ function showStatus(message) {
 
 function addGroundStations(viewer, stations) {
     stations.forEach(st => {
+        if (!isFinite(st.lon) || !isFinite(st.lat) || !isFinite(st.alt)) {
+            console.warn('无效地面站坐标，已跳过:', st);
+            return;
+        }
         viewer.entities.add({
             position: Cesium.Cartesian3.fromDegrees(st.lon, st.lat, st.alt * 1000),
             point: { pixelSize: 7, color: Cesium.Color.RED },
@@ -27,7 +31,13 @@ function addGroundStations(viewer, stations) {
 function addSatelliteOrbits(viewer, orbitData) {
     Object.keys(orbitData.satellites).forEach(satName => {
         const satellite = orbitData.satellites[satName];
-        const positions = satellite.positions.map(pos => Cesium.Cartesian3.fromDegrees(pos.lon, pos.lat, pos.alt * 1000));
+        const positions = (satellite.positions || [])
+            .filter(pos => isFinite(pos.lon) && isFinite(pos.lat) && isFinite(pos.alt))
+            .map(pos => Cesium.Cartesian3.fromDegrees(pos.lon, pos.lat, pos.alt * 1000));
+        if (positions.length < 2) {
+            console.warn('轨道点数不足或存在无效点，已跳过:', satName);
+            return;
+        }
         let color = satellite.type === 'GNSS' ? Cesium.Color.YELLOW.withAlpha(0.7) : Cesium.Color.LIME.withAlpha(0.7);
         viewer.entities.add({
             id: `orbit_${satName}`,
@@ -39,7 +49,13 @@ function addSatelliteOrbits(viewer, orbitData) {
 
 function addVisibilityArcs(viewer, visibilityData) {
     visibilityData.forEach((ev, idx) => {
-        const positions = ev.points.map(p => Cesium.Cartesian3.fromDegrees(p.lon, p.lat, p.alt * 1000));
+        const positions = (ev.points || [])
+            .filter(p => isFinite(p.lon) && isFinite(p.lat) && isFinite(p.alt))
+            .map(p => Cesium.Cartesian3.fromDegrees(p.lon, p.lat, p.alt * 1000));
+        if (positions.length < 2) {
+            console.warn('可见弧段点数不足或存在无效点，已跳过:', ev);
+            return;
+        }
         let color = Cesium.Color.fromRandom({ alpha: 0.8 });
         viewer.entities.add({
             id: `vis_${ev.station}_${ev.satellite}_${idx}`,
