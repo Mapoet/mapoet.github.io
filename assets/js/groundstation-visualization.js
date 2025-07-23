@@ -1,6 +1,6 @@
 const orbitFile = '/assets/traj/satellite_orbits.json';
 const visibilityFile = '/assets/traj/visibility_events.json';
-const stationFile = '/assets/traj/trk-GroundStation.gst';
+// 移除 stationFile 相关内容
 
 const statusDiv = document.getElementById('status');
 
@@ -12,29 +12,14 @@ Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOi
 function showStatus(message) {
     statusDiv.innerHTML = message;
 }
-function parseStationData(txt) {
-    const lines = txt.split('\n').filter(line => line.trim() && !line.startsWith('#'));
-    if (lines.length < 2) return [];
-    const header = lines[0].split(/\s+/);
-    return lines.slice(1).map(line => {
-        const parts = line.split(/\s+/);
-        const obj = {};
-        header.forEach((key, i) => {
-            let val = parts[i];
-            if (["h[m]", "phi[deg]", "lambda[deg]", "betalim[deg]"].includes(key)) val = parseFloat(val);
-            if (key === "Idx") val = parseInt(val);
-            obj[key] = val;
-        });
-        return obj;
-    });
-}
+// 移除 parseStationData 函数
 
 function addGroundStations(viewer, stations) {
     stations.forEach(st => {
         viewer.entities.add({
-            position: Cesium.Cartesian3.fromDegrees(st["lambda[deg]"], st["phi[deg]"], st["h[m]"]),
+            position: Cesium.Cartesian3.fromDegrees(st.lon, st.lat, st.alt * 1000),
             point: { pixelSize: 7, color: Cesium.Color.RED },
-            label: { text: st["EN-Name"], font: '10pt sans-serif', fillColor: Cesium.Color.WHITE, show: true, pixelOffset: new Cesium.Cartesian2(0, -18) }
+            label: { text: st.name || st.station || st["EN-Name"] || st["name"], font: '10pt sans-serif', fillColor: Cesium.Color.WHITE, show: true, pixelOffset: new Cesium.Cartesian2(0, -18) }
         });
     });
 }
@@ -67,16 +52,16 @@ function addVisibilityArcs(viewer, visibilityData) {
 
 async function loadDataForCesium(viewer) {
     try {
-        const [orbitData, visibilityData, stationTxt] = await Promise.all([
+        const [orbitData, visibilityData] = await Promise.all([
             fetch(orbitFile).then(r => r.json()),
-            fetch(visibilityFile).then(r => r.json()),
-            fetch(stationFile).then(r => r.text())
+            fetch(visibilityFile).then(r => r.json())
         ]);
-        const stationData = parseStationData(stationTxt);
+        // 直接使用 visibilityData.stations 作为地面站数据
+        const stationData = visibilityData.stations || [];
         addGroundStations(viewer, stationData);
         addSatelliteOrbits(viewer, orbitData);
-        addVisibilityArcs(viewer, visibilityData);
-        showStatus(`数据加载完成：${stationData.length}地面站, ${Object.keys(orbitData.satellites).length}卫星, ${visibilityData.length}可见弧段`);
+        addVisibilityArcs(viewer, visibilityData.events || visibilityData); // 兼容旧结构
+        showStatus(`数据加载完成：${stationData.length}地面站, ${Object.keys(orbitData.satellites).length}卫星, ${(visibilityData.events ? visibilityData.events.length : visibilityData.length)}可见弧段`);
     } catch (e) {
         showStatus('数据加载失败: ' + e.message);
     }
