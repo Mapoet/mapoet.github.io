@@ -23,27 +23,43 @@ function addGroundStations(viewer, stations) {
         viewer.entities.add({
             position: Cesium.Cartesian3.fromDegrees(st.lon, st.lat, st.alt * 1000),
             point: { pixelSize: 7, color: Cesium.Color.RED },
-            label: { text: st.name || st.station || st["EN-Name"] || st["name"], font: '10pt sans-serif', fillColor: Cesium.Color.WHITE, show: true, pixelOffset: new Cesium.Cartesian2(0, -18) }
+            label: { text: st.name || st["EN-Name"], font: '10pt sans-serif', fillColor: Cesium.Color.WHITE, show: true, pixelOffset: new Cesium.Cartesian2(0, -18) }
         });
     });
 }
 
+// 存储轨道实体和原始轨道点
+let satelliteOrbitEntities = {};
+let satelliteOrbitRawData = {};
+let orbitTimeList = {};
+
 function addSatelliteOrbits(viewer, orbitData) {
+    satelliteOrbitEntities = {};
+    satelliteOrbitRawData = {};
+    orbitTimeList = {};
     Object.keys(orbitData.satellites).forEach(satName => {
         const satellite = orbitData.satellites[satName];
-        const positions = (satellite.positions || [])
-            .filter(pos => isFinite(pos.lon) && isFinite(pos.lat) && isFinite(pos.alt))
-            .map(pos => Cesium.Cartesian3.fromDegrees(pos.lon, pos.lat, pos.alt * 1000));
-        if (positions.length < 2) {
+        // 过滤非法点
+        const validPositions = (satellite.positions || [])
+            .filter(pos => isFinite(pos.lon) && isFinite(pos.lat) && isFinite(pos.alt) && pos.time)
+            .map(pos => ({
+                cart3: Cesium.Cartesian3.fromDegrees(pos.lon, pos.lat, pos.alt * 1000),
+                time: new Date(pos.time)
+            }));
+        if (validPositions.length < 2) {
             console.warn('轨道点数不足或存在无效点，已跳过:', satName);
             return;
         }
         let color = satellite.type === 'GNSS' ? Cesium.Color.YELLOW.withAlpha(0.7) : Cesium.Color.LIME.withAlpha(0.7);
-        viewer.entities.add({
+        // 初始只显示全部轨道，后续onTick动态更新
+        const entity = viewer.entities.add({
             id: `orbit_${satName}`,
             name: `${satellite.type} 轨道 ${satName}`,
-            polyline: { positions, width: 1.5, material: color, clampToGround: false }
+            polyline: { positions: validPositions.map(p => p.cart3), width: 1.5, material: color, clampToGround: false }
         });
+        satelliteOrbitEntities[satName] = entity;
+        satelliteOrbitRawData[satName] = validPositions;
+        orbitTimeList[satName] = validPositions.map(p => p.time);
     });
 }
 
@@ -77,6 +93,32 @@ async function loadDataForCesium(viewer) {
         addGroundStations(viewer, stationData);
         addSatelliteOrbits(viewer, orbitData);
         addVisibilityArcs(viewer, visibilityData.events || visibilityData); // 兼容旧结构
+        // 设置时间系统
+        if (visibilityData.metadata && visibilityData.metadata.start_time && visibilityData.metadata.end_time) {
+            const startTime = Cesium.JulianDate.fromDate(new Date(visibilityData.metadata.start_time));
+            const endTime = Cesium.JulianDate.fromDate(new Date(visibilityData.metadata.end_time));
+            viewer.clock.startTime = startTime;
+            viewer.clock.stopTime = endTime;
+            viewer.clock.currentTime = startTime;
+            viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP;
+            viewer.clock.multiplier = 60; // 1秒=1分钟，可根据需要调整
+        }
+        // 轨道动态更新
+        viewer.clock.onTick.addEventListener(function(clock) {
+            const currentDate = Cesium.JulianDate.toDate(clock.currentTime);
+            const tailStart = new Date(currentDate.getTime() - 2 * 3600 * 1000); // 2小时尾巴
+            Object.keys(satelliteOrbitRawData).forEach(satName => {
+                const raw = satelliteOrbitRawData[satName];
+                // 只保留2小时内的轨迹
+                const tail = raw.filter(p => p.time >= tailStart && p.time <= currentDate);
+                if (tail.length >= 2) {
+                    satelliteOrbitEntities[satName].polyline.positions = tail.map(p => p.cart3);
+                    satelliteOrbitEntities[satName].show = true;
+                } else {
+                    satelliteOrbitEntities[satName].show = false;
+                }
+            });
+        });
         showStatus(`数据加载完成：${stationData.length}地面站, ${Object.keys(orbitData.satellites).length}卫星, ${(visibilityData.events ? visibilityData.events.length : visibilityData.length)}可见弧段`);
     } catch (e) {
         showStatus('数据加载失败: ' + e.message);
