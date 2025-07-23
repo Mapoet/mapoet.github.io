@@ -117,11 +117,11 @@ async function loadDataForCesium(viewer) {
             viewer.clock.stopTime = endTime;
             viewer.clock.currentTime = startTime;
             viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP;
-            viewer.clock.multiplier = 60; // 1秒=1分钟，可根据需要调整
+            viewer.clock.multiplier = 1; // 1秒=1分钟，可根据需要调整
         }
         // 轨道与可视弧段动态更新
         viewer.clock.onTick.addEventListener(function(clock) {
-            const currentDate = Cesium.JulianDate.toDate(clock.currentTime);
+            const currentDate = Cesium.JulianDate.toDate(viewer.clock.currentTime);
             const tailStart = new Date(currentDate.getTime() - 2 * 3600 * 1000); // 2小时尾巴
             // 轨道线动态更新
             Object.keys(satelliteOrbitRawData).forEach(satName => {
