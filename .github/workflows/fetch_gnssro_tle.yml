@@ -50,7 +50,7 @@ jobs:
 
       - name: 提交并推送更新
         run: |
-          git add assets/traj/Rx-YY_*.tle
+          git add assets/traj/Rx-GNSSRO.tle
           if git diff --staged --quiet; then
             echo "没有新的星历文件需要提交"
           else

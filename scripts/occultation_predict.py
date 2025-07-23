@@ -14,13 +14,18 @@ from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 from typing import List, Dict, Tuple
 
-TLE_FILE = "../assets/traj/Rx-YY_20250718.tle"  # TLE文件路径
-OUTPUT_FILE = "../assets/traj/occultation_events.json"  # 输出文件
+TLE_FILE = "../assets/traj/Rx-GNSSRO.tle"  # TLE文件路径
+GST_FILE = "../assets/traj/trk-GroundStation.gst"  # 地面站信息文件路径
 ORBIT_FILE = "../assets/traj/satellite_orbits.json"  # 轨道输出文件
+OCC_FILE = "../assets/traj/occultation_events.json"  # 掩星事件输出文件
+VIS_FILE = "../assets/traj/visibility_events.json"  # 可见性事件输出文件
 AZIM_WIDTH = 50  # 方位角宽度（度）
 TIME_STEP = 30  # 轨道计算采样间隔（秒）
+VIS_STEP = 10  # 可见性细化采样（秒）
 IONO_STEP = 20  # 电离层掩星细化采样（秒）
 ATM_STEP = 5    # 大气掩星细化采样（秒）
+bool_vis = True
+bool_occ = True
 
 # ECEF 转 LLH
 def ecef_to_llh(x: float, y: float, z: float) -> tuple[float, float, float]:
@@ -36,6 +41,19 @@ def ecef_to_llh(x: float, y: float, z: float) -> tuple[float, float, float]:
     alt = r / math.cos(lat) - N
     lon = math.atan2(y, x)
     return lon*r2d, lat*r2d, alt
+# LLH 转 ECEF
+def llh_to_ecef(lon: float, lat: float, alt: float) -> tuple[float, float, float]:
+    """经纬高转换为ECEF坐标"""
+    import math
+    a = 6378137.0 # WGS84 semi-major axis
+    f = 1/298.257223563 # WGS84 flattening
+    r2d=180/np.pi
+    e2 = f * (2 - f)
+    N = a / math.sqrt(1 - e2 * math.sin(lat)**2)
+    x = (N + alt) * math.cos(lat) * math.cos(lon)
+    y = (N + alt) * math.cos(lat) * math.sin(lon)
+    z = (N * (1 - e2) + alt) * math.sin(lat)
+    return x, y, z
 
 # 使用astropy计算GAST（格林尼治视恒星时）
 def gast_approx(dt_utc):
@@ -75,6 +93,37 @@ def read_tle_list(tle_file: str) -> List[Dict]:
             i += 1
     return sats
 
+# =====================
+# 地面站信息读取
+# =====================
+def read_ground_station_list(gst_file: str) -> List[Dict]:
+    """读取地面站信息文件，返回 List[Dict]，字段自动类型转换"""
+    stations = []
+    with open(gst_file, 'r', encoding='utf-8') as f:
+        lines = [line.strip() for line in f if line.strip() and not line.startswith('#')]
+    if not lines:
+        return stations
+    # 解析表头
+    header = lines[0].split()
+    for line in lines[1:]:
+        parts = line.split()
+        if len(parts) < len(header):
+            continue  # 跳过不完整行
+        entry = {}
+        for i, key in enumerate(header):
+            val = parts[i]
+            # 尝试类型转换
+            try:
+                if any(x in key for x in ['h', 'phi', 'lambda', 'betalim']):
+                    entry[key] = float(val)
+                elif key == 'Idx':
+                    entry[key] = int(val)
+                else:
+                    entry[key] = val
+            except Exception:
+                entry[key] = val
+        stations.append(entry)
+    return stations
 # =====================
 # SGP4轨道计算（ECI->ECEF）
 # =====================
@@ -147,6 +196,24 @@ def calc_tangent_point(txv, rxv) -> Tuple[float, float, float, float,float]:
     azim = np.arcsin(np.dot(rv0, drt0)) * 180/np.pi
     return lon, lat, alt, elev,azim
 
+def calc_sat_vis(txv, rx)->Tuple[float,float]:
+    tx=txv[0:3]
+    rv=np.array([-rx[1],rx[0],0])
+    drt=tx-rx
+    lrt=np.sum(drt[:]**2.0)**0.5
+    r0=np.sum(rx[:]**2.0)**0.5
+    v0=np.sum(rv[:]**2.0)**0.5
+    if lrt<1e-3:return np.nan,np.nan
+    if r0<1e-3:return np.nan,np.nan
+    if v0<1e-3:return np.nan,np.nan
+    drt0=drt/lrt # unit vector of sats-link
+    rx0=rx/r0
+    rv0=rv/v0
+    #print(f"[{rx0[0]} {rx0[1]} {rx0[2]}] [{rv0[0]} {rv0[1]} {rv0[2]}] [{drt0[0]} {drt0[1]} {drt0[2]}]")
+    elev=np.arcsin(np.dot(rx0, drt0)) * 180/np.pi
+    azim=np.arcsin(np.dot(rv0, drt0)) * 180/np.pi
+    return elev,azim
+
 # =====================
 # 掩星类型判别
 # =====================
@@ -162,6 +229,13 @@ def classify_occultation(alt: float, elev: float,azim:float) -> str:
     elif alt <= -50:
         return "deep"
     return "none"
+
+def classify_sat_vis(elev: float, azim: float,elev_lim:float) -> str:
+    if np.isnan(elev) or np.isnan(azim):
+        return "none"
+    if elev < elev_lim:
+        return "deep"
+    return "vis"
 
 # =====================
 # 轨道插值
@@ -255,11 +329,50 @@ def process_nav_sat(nav, leo_sats, nav_orbits, leo_orbits, times):
     print(f"[PID {os.getpid()}] 完成导航卫星 {nav_name}", flush=True)
     return events
 
+def process_sat_vis(sat, sat_orbits, stations, times):
+    import os
+    nav_name = sat["name"]
+    print(f"[PID {os.getpid()}] 开始处理卫星 {nav_name}", flush=True)
+    events = []
+    state = {}
+    state_change_time = {}
+    for i, station in enumerate(stations):
+        stname = station["EN-Name"]
+        state[stname] = "none"
+        state_change_time[stname] = times[0]
+        sat_pos_seq = sat_orbits[nav_name]
+        xr,yr,zr = llh_to_ecef(station["lambda"], station["phi"], station["h"])
+        st_pos=np.array([xr,yr,zr])/1e3
+        for i, t in enumerate(times):
+            sat_pos = sat_pos_seq[i]
+            elev,azim = calc_sat_vis(sat_pos, st_pos)
+            vis_type = classify_sat_vis(elev, azim,station["betalim"])
+            if vis_type != state[stname]:
+                if state[stname] == "vis":
+                    t0 = state_change_time[stname]-timedelta(seconds=TIME_STEP)
+                    event_time = t0 + (t - t0)/2
+                    fine_times = [t0 + timedelta(seconds=s) for s in range(0, int((t-t0).total_seconds())+1, VIS_STEP)]
+                    sat_fine = interpolate_orbit(times, sat_pos_seq, fine_times)
+                    points = []
+                    for j in range(len(fine_times)):
+                        elev2,azim2 = calc_sat_vis(sat_fine[j], st_pos)
+                        vis_type = classify_sat_vis(elev2, azim2,station["betalim"])
+                        if vis_type == "vis":
+                            lon,lat,alt = ecef_to_llh(sat_fine[j][0]*1e3,sat_fine[j][1]*1e3,sat_fine[j][2]*1e3)
+                            points.append({"time": fine_times[j].isoformat(), "lon": lon, "lat": lat, "alt": alt/1e3, "elev": elev2,"azim":azim2})
+                    events.append({"type": "vis", "sat": nav_name, "st": stname, 
+                                   "time": event_time.isoformat(), "start": points[0]["time"], "end": points[-1]["time"],
+                                   "points": points})
+                state[stname] = vis_type
+                state_change_time[stname] = t
+    print(f"[PID {os.getpid()}] 完成卫星 {nav_name}", flush=True)
+    return events    
 # =====================
 # 主流程
 # =====================
-def main():
+def occultation_predict():
     satellites = read_tle_list(TLE_FILE)
+    stations = read_ground_station_list(GST_FILE)
     nav_sats = [s for s in satellites if s["type"] == "GNSS"]
     leo_sats = [s for s in satellites if s["type"] != "GNSS"]
 
@@ -338,20 +451,36 @@ def main():
     with open(ORBIT_FILE, "w") as f:
         json.dump(orbit_data, f, indent=2, ensure_ascii=False)
     print(f"[主进程] 轨道数据已保存到 {ORBIT_FILE}", flush=True)
+    if bool_vis:
+        with ProcessPoolExecutor() as executor:
+            nav_vis_events_list = list(executor.map(
+                partial(process_sat_vis,sat_orbits=nav_orbits, stations=stations, times=times),nav_sats))
+        with ProcessPoolExecutor() as executor:
+            leo_vis_events_list = list(executor.map(
+                partial(process_sat_vis,sat_orbits=leo_orbits, stations=stations, times=times),leo_sats))
+        print(f"[主进程] 所有卫星可见性事件判别完成，合并输出...", flush=True)
+        events = []
+        for ev in nav_vis_events_list:
+            events.extend(ev)
+        for ev in leo_vis_events_list:
+            events.extend(ev)
+        with open(VIS_FILE, "w") as f:
+            json.dump(events, f, indent=2, ensure_ascii=False)
+        print(f"[主进程] 结果已保存到 {VIS_FILE}", flush=True)
+    if bool_occ:
+        with ProcessPoolExecutor() as executor:
+            nav_events_list = list(executor.map(
+                partial(process_nav_sat, leo_sats=leo_sats, nav_orbits=nav_orbits, leo_orbits=leo_orbits, times=times),
+                nav_sats
+            ))
+        print(f"[主进程] 所有导航卫星事件判别完成，合并输出...", flush=True)
+        events = []
+        for ev in nav_events_list:
+            events.extend(ev)
 
-    with ProcessPoolExecutor() as executor:
-        nav_events_list = list(executor.map(
-            partial(process_nav_sat, leo_sats=leo_sats, nav_orbits=nav_orbits, leo_orbits=leo_orbits, times=times),
-            nav_sats
-        ))
-    print(f"[主进程] 所有导航卫星事件判别完成，合并输出...", flush=True)
-    events = []
-    for ev in nav_events_list:
-        events.extend(ev)
-
-    with open(OUTPUT_FILE, "w") as f:
-        json.dump(events, f, indent=2, ensure_ascii=False)
-    print(f"[主进程] 结果已保存到 {OUTPUT_FILE}", flush=True)
+        with open(OCC_FILE, "w") as f:
+            json.dump(events, f, indent=2, ensure_ascii=False)
+        print(f"[主进程] 结果已保存到 {OCC_FILE}", flush=True)
 
 if __name__ == "__main__":
-    main() 
+    occultation_predict() 
