@@ -360,7 +360,7 @@ def process_sat_vis(sat, sat_orbits, stations, times):
                         if vis_type == "vis":
                             lon,lat,alt = ecef_to_llh(sat_fine[j][0]*1e3,sat_fine[j][1]*1e3,sat_fine[j][2]*1e3)
                             points.append({"time": fine_times[j].isoformat(), "lon": lon, "lat": lat, "alt": alt/1e3, "elev": elev2,"azim":azim2})
-                    events.append({"type": "vis", "sat": nav_name, "st": stname, 
+                    events.append({"type": "vis", "satellite": nav_name, "station": stname, 
                                    "time": event_time.isoformat(), "start": points[0]["time"], "end": points[-1]["time"],
                                    "points": points})
                 state[stname] = vis_type
