@@ -1,7 +1,6 @@
 const orbitFile = '/assets/traj/satellite_orbits.json';
 const visibilityFile = '/assets/traj/visibility_events.json';
-// 移除 stationFile 相关内容
-
+const timePeriod = 2 * 3600; // 2小时
 const statusDiv = document.getElementById('status');
 
 
@@ -41,23 +40,26 @@ function addSatelliteOrbits(viewer, orbitData) {
     orbitTimeList = {};
     Object.keys(orbitData.satellites).forEach(satName => {
         const satellite = orbitData.satellites[satName];
-        // 过滤非法点
         const validPositions = (satellite.positions || [])
             .filter(pos => isFinite(pos.lon) && isFinite(pos.lat) && isFinite(pos.alt) && pos.time)
-            .map(pos => ({
-                cart3: Cesium.Cartesian3.fromDegrees(pos.lon, pos.lat, pos.alt * 1000),
-                time: new Date(pos.time)
-            }));
+            .map(pos => {
+                let t = pos.time;
+                if (typeof t === 'string') t = new Date(t);
+                return {
+                    cart3: Cesium.Cartesian3.fromDegrees(pos.lon, pos.lat, pos.alt * 1000),
+                    time: t
+                };
+            });
         if (validPositions.length < 2) {
             console.warn('轨道点数不足或存在无效点，已跳过:', satName);
             return;
         }
         let color = satellite.type === 'GNSS' ? Cesium.Color.YELLOW.withAlpha(0.7) : Cesium.Color.LIME.withAlpha(0.7);
-        // 初始化为空，后续updateVisibleEvents动态赋值
+        // 全部点一次性加上，分配唯一id
         const entity = viewer.entities.add({
             id: `orbit_${satName}`,
             name: `${satellite.type} 轨道 ${satName}`,
-            polyline: { positions: [], width: 1.0, material: color, clampToGround: false }
+            polyline: { positions: validPositions.map(p => p.cart3), width: 1.0, material: color, clampToGround: false }
         });
         satelliteOrbitEntities[satName] = entity;
         satelliteOrbitRawData[satName] = validPositions;
@@ -101,24 +103,20 @@ function startTimeFiltering(viewer) {
 
 function updateVisibleEvents(viewer, currentTime) {
     const currentDate = Cesium.JulianDate.toDate(currentTime);
-    const tailStart = new Date(currentDate.getTime() - 2 * 3600 * 1000); // 2小时尾巴
-    // 轨道线动态更新
+    const currentTimeMs = currentDate.getTime();
+    const tailStartMs = currentTimeMs - timePeriod * 1000; // 时间尾巴
+    // 轨道线动态显示/隐藏
     Object.keys(satelliteOrbitRawData).forEach(satName => {
         const raw = satelliteOrbitRawData[satName];
-        const tail = raw.filter(p => p.time >= tailStart && p.time <= currentDate);
-        if (tail.length >= 2) {
-            satelliteOrbitEntities[satName].polyline.positions = tail.map(p => p.cart3);
-            satelliteOrbitEntities[satName].polyline.width = 1.0;
-            satelliteOrbitEntities[satName].show = true;
-        } else {
-            satelliteOrbitEntities[satName].show = false;
-        }
+        // 判断轨道是否有点在2小时窗口内
+        const hasInWindow = raw.some(p => p.time && p.time.getTime() >= tailStartMs && p.time.getTime() <= currentTimeMs);
+        satelliteOrbitEntities[satName].show = hasInWindow;
     });
-    // 可视弧段高亮
-    visibilityArcRawData.forEach(({ entity, startTime, endTime, points }) => {
-        if (startTime && endTime && !(endTime < tailStart || startTime > currentDate)) {
-            entity.polyline.positions = points.map(p => p.cart3);
-            entity.polyline.width = 4.0;
+    // 可视弧段高亮显示/隐藏
+    visibilityArcRawData.forEach(({ entity, startTime, endTime }) => {
+        const startMs = startTime && startTime.getTime ? startTime.getTime() : null;
+        const endMs = endTime && endTime.getTime ? endTime.getTime() : null;
+        if (startMs !== null && endMs !== null && !(endMs < tailStartMs || startMs > currentTimeMs)) {
             entity.polyline.show = true;
         } else {
             entity.polyline.show = false;
@@ -133,25 +131,29 @@ function addVisibilityArcs(viewer, visibilityData) {
     (visibilityData || []).forEach((ev, idx) => {
         const points = (ev.points || [])
             .filter(p => isFinite(p.lon) && isFinite(p.lat) && isFinite(p.alt))
-            .map(p => ({
-                cart3: Cesium.Cartesian3.fromDegrees(p.lon, p.lat, p.alt * 1000),
-                time: p.time ? new Date(p.time) : undefined
-            }));
+            .map(p => {
+                let t = p.time;
+                if (typeof t === 'string') t = new Date(t);
+                return {
+                    cart3: Cesium.Cartesian3.fromDegrees(p.lon, p.lat, p.alt * 1000),
+                    time: t
+                };
+            });
         if (points.length < 2) {
             console.warn('可见弧段点数不足或存在无效点，已跳过:', ev);
             return;
         }
         const startTime = points[0].time;
         const endTime = points[points.length - 1].time;
-        // 初始化为空，后续updateVisibleEvents动态赋值
+        // 全部点一次性加上，分配唯一id
         const entity = viewer.entities.add({
             id: `vis_${ev.station}_${ev.satellite}_${idx}`,
             name: `可见弧段: ${ev.station} - ${ev.satellite}`,
-            polyline: { positions: [], width: 4.0, material: Cesium.Color.fromRandom({ alpha: 0.8 }), clampToGround: false, show: false },
+            polyline: { positions: points.map(p => p.cart3), width: 4.0, material: Cesium.Color.fromRandom({ alpha: 0.8 }), clampToGround: false, show: false },
             description: `地面站: ${ev.station}, 卫星: ${ev.satellite}`
         });
         visibilityArcEntities.push(entity);
-        visibilityArcRawData.push({ entity, startTime, endTime, points });
+        visibilityArcRawData.push({ entity, startTime, endTime });
     });
 }
 
