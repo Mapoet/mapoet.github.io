@@ -28,4 +28,15 @@ tags:
 
 <link href="https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
 <script src="https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Cesium.js"></script>
+
+<script>
+  window.addEventListener('load', function() {
+      console.log('页面加载完成，检查Cesium...');
+      if (typeof Cesium !== 'undefined') {
+          console.log('Cesium已加载，版本:', Cesium.VERSION);
+      } else {
+          console.error('Cesium未加载！');
+      }
+  });
+  </script>
 <script src="/assets/js/groundstation-visualization.js"></script> 

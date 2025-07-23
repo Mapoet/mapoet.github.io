@@ -111,6 +111,7 @@ async function initVisualization() {
     if (typeof Cesium === 'undefined') { showStatus('Cesium未加载'); return; }
     const viewer = initCesiumViewer();
     await loadDataForCesium(viewer);
+    console.log(stationData)
     showStatus('Cesium渲染完成! 支持鼠标拖拽、缩放、点击轨迹。');
 }
 
