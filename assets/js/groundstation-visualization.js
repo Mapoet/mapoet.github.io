@@ -15,6 +15,7 @@ function showStatus(message) {
 // 移除 parseStationData 函数
 
 function addGroundStations(viewer, stations) {
+    viewer.groundStations = stations;
     stations.forEach(st => {
         if (!isFinite(st.lon) || !isFinite(st.lat) || !isFinite(st.alt)) {
             console.warn('无效地面站坐标，已跳过:', st);
@@ -145,9 +146,9 @@ function updateVisibleEvents(viewer, currentTime) {
     const timeAgo = new Date(currentDate.getTime() - timeWindow);
     const timeAhead = new Date(currentDate.getTime());
 
-    // 隐藏所有实体
+    // 只隐藏/显示轨道和弧段相关实体，地面站point不受影响
     viewer.entities.values.forEach(function(entity) {
-        if (entity.polyline || entity.point) {
+        if ((entity.polyline || entity.point) && entity.id && (entity.id.startsWith('orbit_') || entity.id.startsWith('vis_'))) {
             entity.show = false;
         }
     });
