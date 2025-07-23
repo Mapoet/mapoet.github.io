@@ -356,7 +356,9 @@ function addLegend(viewer) {
                 <div style="font-weight: bold; margin-bottom: 4px;">快捷键说明：</div>
                 <div>F = 全屏切换</div>
                 <div>H = 主页视角</div>
-                <div>L = 图例显示/隐藏</div>
+                <div>A = 图例显示/隐藏</div>
+                <div>L = 低轨卫星显示/隐藏</div>
+                <div>G = 导航卫星显示/隐藏</div>
             </div>
             <div style="font-size: 10px; margin-top: 6px; opacity: 0.8; text-align: center;">
                 操作: 鼠标拖拽旋转 | 滚轮缩放 | 双击定位 | 点击轨迹显示编号
@@ -398,13 +400,37 @@ function setupKeyboardShortcuts(viewer) {
                 });
                 message = '回到主页视角';
                 break;
-            case 'l':
+            case 'a':
                 event.preventDefault();
                 let legend = document.getElementById('cesium-legend');
                 if (legend) {
                     legend.style.display = legend.style.display === 'none' ? 'block' : 'none';
                     message = `图例显示: ${legend.style.display === 'none' ? '关闭' : '开启'}`;
                 }
+                break;
+            case 'l': // 切换低轨卫星
+                showLEO = !showLEO;
+                viewer.entities.values.forEach(function(entity) {
+                    if (entity.id && entity.id.includes('_line') && entity.name && entity.name.includes('LEO')) {
+                        entity.show = showLEO;
+                    }
+                    if (entity.id && entity.id.includes('_current') && entity.name && entity.name.includes('LEO')) {
+                        entity.show = showLEO;
+                    }
+                });
+                message = `低轨卫星显示: ${showLEO ? '开启' : '关闭'}`;
+                break;
+            case 'g': // 切换导航卫星
+                showGNSS = !showGNSS;
+                viewer.entities.values.forEach(function(entity) {
+                    if (entity.id && entity.id.includes('_line') && entity.name && entity.name.includes('GNSS')) {
+                        entity.show = showGNSS;
+                    }
+                    if (entity.id && entity.id.includes('_current') && entity.name && entity.name.includes('GNSS')) {
+                        entity.show = showGNSS;
+                    }
+                });
+                message = `导航卫星显示: ${showGNSS ? '开启' : '关闭'}`;
                 break;
         }
         if (message) {
