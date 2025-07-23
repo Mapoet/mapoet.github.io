@@ -397,8 +397,8 @@ def occultation_predict():
             "end_time": end_time.isoformat(),
             "time_step": TIME_STEP,
             "total_satellites": len(satellites),
-            "nav_satellites": len(nav_sats),
-            "leo_satellites": len(leo_sats)
+            "nav_names": [name for name in nav_orbits.keys()],
+            "leo_names": [name for name in leo_orbits.keys()]
         },
         "satellites": {}
     }
@@ -451,7 +451,19 @@ def occultation_predict():
     with open(ORBIT_FILE, "w") as f:
         json.dump(orbit_data, f, indent=2, ensure_ascii=False)
     print(f"[主进程] 轨道数据已保存到 {ORBIT_FILE}", flush=True)
+    
     if bool_vis:
+        vis_data={
+            "metadata": {
+                "start_time": start_time.isoformat(),
+                "end_time": end_time.isoformat(),
+                "time_step": VIS_STEP,
+                "total_satellites": len(satellites),
+                "nav_names": [name for name in nav_orbits.keys()],
+                "leo_names": [name for name in leo_orbits.keys()],
+                "station_names": [st["EN-Name"] for st in stations]
+            }
+        }
         with ProcessPoolExecutor() as executor:
             nav_vis_events_list = list(executor.map(
                 partial(process_sat_vis,sat_orbits=nav_orbits, stations=stations, times=times),nav_sats))
@@ -459,13 +471,25 @@ def occultation_predict():
             leo_vis_events_list = list(executor.map(
                 partial(process_sat_vis,sat_orbits=leo_orbits, stations=stations, times=times),leo_sats))
         print(f"[主进程] 所有卫星可见性事件判别完成，合并输出...", flush=True)
+        grsts=[]
+        for st in stations:
+            grsts.append({
+                "name": st["EN-Name"],
+                "country": st["Country"],
+                "lon": st["lambda"],
+                "lat": st["phi"],
+                "alt": st["h"]/1e3,
+                "betalim": st["betalim"]
+            })
         events = []
         for ev in nav_vis_events_list:
             events.extend(ev)
         for ev in leo_vis_events_list:
             events.extend(ev)
+        vis_data["stations"] = grsts
+        vis_data["events"] = events
         with open(VIS_FILE, "w") as f:
-            json.dump(events, f, indent=2, ensure_ascii=False)
+            json.dump(vis_data, f, indent=2, ensure_ascii=False)
         print(f"[主进程] 结果已保存到 {VIS_FILE}", flush=True)
     if bool_occ:
         with ProcessPoolExecutor() as executor:
