@@ -658,53 +658,58 @@ function updateVisibleEvents(viewer, currentTime) {
 
 // 添加图例
 function addLegend(viewer, stats, orbitStats) {
-    const legend = document.createElement('div');
-    legend.style.position = 'absolute';
-    legend.style.top = '10px';
-    legend.style.right = '10px';
-    legend.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-    legend.style.color = 'white';
-    legend.style.padding = '12px';
-    legend.style.borderRadius = '6px';
-    legend.style.fontSize = '12px';
-    legend.style.fontFamily = 'Arial, sans-serif';
-    legend.style.zIndex = '1000';
-    legend.style.minWidth = '220px';
-    legend.innerHTML = `
-        <div style="margin-bottom: 8px; font-weight: bold; text-align: center;">掩星轨迹与卫星轨道图例</div>
-        <div style="display: flex; align-items: center; margin-bottom: 6px;">
-            <div style="width: 20px; height: 3px; background-color: cyan; margin-right: 8px;"></div>
-            <span>电离层掩星 (${stats.iono}条)</span>
-        </div>
-        <div style="display: flex; align-items: center; margin-bottom: 6px;">
-            <div style="width: 20px; height: 3px; background-color: orange; margin-right: 8px;"></div>
-            <span>大气掩星 (${stats.atm}条)</span>
-        </div>
-        <div style="display: flex; align-items: center; margin-bottom: 6px;">
-            <div style="width: 20px; height: 3px; background-color: yellow; margin-right: 8px;"></div>
-            <span>导航卫星轨道 (${orbitStats.nav}个)</span>
-        </div>
-        <div style="display: flex; align-items: center; margin-bottom: 6px;">
-            <div style="width: 20px; height: 3px; background-color: lime; margin-right: 8px;"></div>
-            <span>低轨卫星轨道 (${orbitStats.leo}个)</span>
-        </div>
-        <div style="border-top: 1px solid #555; margin: 8px 0; padding-top: 6px; font-size: 10px; opacity: 0.9;">
-            <div>标记说明:</div>
-            <div>ionPrf_* = 电离层掩星起点/终点</div>
-            <div>atmPrf_* = 大气掩星起点/终点</div>
-            <div>黄点 = 导航卫星当前位置</div>
-            <div>绿点 = 低轨卫星当前位置</div>
-        </div>
-        <div style="font-size: 10px; margin-top: 6px; opacity: 0.8; text-align: center;">
-            操作: 鼠标拖拽旋转 | 滚轮缩放 | 双击定位 | 点击轨迹显示编号
-        </div>
-        <div style="border-top: 1px solid #555; margin: 8px 0; padding-top: 6px; font-size: 9px; opacity: 0.8;">
-            <div style="font-weight: bold; margin-bottom: 4px;">快捷键:</div>
-            <div>F = 全屏切换 | H = 主页视角 | L = 图例显示/隐藏</div>
-        </div>
-    `;
-    
-    document.getElementById('cesiumContainer').appendChild(legend);
+    let legend = document.getElementById('cesium-legend');
+    if (!legend) {
+        legend = document.createElement('div');
+        legend.id = 'cesium-legend';
+        legend.style.position = 'absolute';
+        legend.style.top = '10px';
+        legend.style.right = '10px';
+        legend.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+        legend.style.color = 'white';
+        legend.style.padding = '12px';
+        legend.style.borderRadius = '6px';
+        legend.style.fontSize = '12px';
+        legend.style.fontFamily = 'Arial, sans-serif';
+        legend.style.zIndex = '1000';
+        legend.style.minWidth = '220px';
+        legend.innerHTML = `
+            <div style="margin-bottom: 8px; font-weight: bold; text-align: center;">掩星轨迹与卫星轨道图例</div>
+            <div style="display: flex; align-items: center; margin-bottom: 6px;">
+                <div style="width: 20px; height: 3px; background-color: cyan; margin-right: 8px;"></div>
+                <span>电离层掩星 (${stats.iono}条)</span>
+            </div>
+            <div style="display: flex; align-items: center; margin-bottom: 6px;">
+                <div style="width: 20px; height: 3px; background-color: orange; margin-right: 8px;"></div>
+                <span>大气掩星 (${stats.atm}条)</span>
+            </div>
+            <div style="display: flex; align-items: center; margin-bottom: 6px;">
+                <div style="width: 20px; height: 3px; background-color: yellow; margin-right: 8px;"></div>
+                <span>导航卫星轨道 (${orbitStats.nav}个)</span>
+            </div>
+            <div style="display: flex; align-items: center; margin-bottom: 6px;">
+                <div style="width: 20px; height: 3px; background-color: lime; margin-right: 8px;"></div>
+                <span>低轨卫星轨道 (${orbitStats.leo}个)</span>
+            </div>
+            <div style="border-top: 1px solid #555; margin: 8px 0; padding-top: 6px; font-size: 10px; opacity: 0.9;">
+                <div>标记说明:</div>
+                <div>ionPrf_* = 电离层掩星起点/终点</div>
+                <div>atmPrf_* = 大气掩星起点/终点</div>
+                <div>黄点 = 导航卫星当前位置</div>
+                <div>绿点 = 低轨卫星当前位置</div>
+            </div>
+            <div style="font-size: 10px; margin-top: 6px; opacity: 0.8; text-align: center;">
+                操作: 鼠标拖拽旋转 | 滚轮缩放 | 双击定位 | 点击轨迹显示编号
+            </div>
+            <div style="border-top: 1px solid #555; margin: 8px 0; padding-top: 6px; font-size: 9px; opacity: 0.8;">
+                <div style="font-weight: bold; margin-bottom: 4px;">快捷键:</div>
+                <div>F = 全屏切换 | H = 主页视角 | L = 图例显示/隐藏</div>
+            </div>
+        `;
+        document.getElementById('cesiumContainer').appendChild(legend);
+    } else {
+        legend.style.display = 'block';
+    }
 }
 
 // 主函数
