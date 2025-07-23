@@ -29,8 +29,12 @@ function addGroundStations(viewer, stations) {
 
 
 function addSatelliteOrbits(viewer, orbitData) {
+    // 存储卫星轨道数据
+    viewer.satelliteOrbits = orbitData;
+
     let navCount = 0;
     let leoCount = 0;
+    // 遍历卫星轨道数据
     Object.keys(orbitData.satellites).forEach((satName, satIndex) => {
         const satellite = orbitData.satellites[satName];
         const validPositions = (satellite.positions || [])
@@ -136,32 +140,80 @@ function startTimeFiltering(viewer) {
 
 function updateVisibleEvents(viewer, currentTime) {
     const currentDate = Cesium.JulianDate.toDate(currentTime);
-    const currentTimeMs = currentDate.getTime();
-    const tailStartMs = currentTimeMs - timePeriod * 1000; // 时间尾巴
-    // 轨道线动态显示/隐藏
-    Object.keys(viewer.entities._entities._array).forEach(key => {
-        // 轨道线和当前点
-        const entity = viewer.entities._entities._array[key];
-        if (entity.id && entity.id.startsWith('orbit_') && (entity.polyline || entity.point)) {
-            // 轨道线id: orbit_${satName}_line，当前点id: orbit_${satName}_current
-            // 这里可根据需要实现轨道点时间窗口判断
-            entity.show = true; // 或根据窗口判断
-        }
-        // 可视弧段
-        if (entity.id && entity.id.startsWith('vis_') && entity.polyline) {
-            const startMs = entity._arcStartTime && entity._arcStartTime.getTime ? entity._arcStartTime.getTime() : null;
-            const endMs = entity._arcEndTime && entity._arcEndTime.getTime ? entity._arcEndTime.getTime() : null;
-            if (startMs !== null && endMs !== null && !(endMs < tailStartMs || startMs > currentTimeMs)) {
-                entity.polyline.show = true;
-            } else {
-                entity.polyline.show = false;
-            }
+    const timeWindow = timePeriod * 1000;
+    const timeAgo = new Date(currentDate.getTime() - timeWindow);
+    const timeAhead = new Date(currentDate.getTime());
+
+    // 隐藏所有实体
+    viewer.entities.values.forEach(function(entity) {
+        if (entity.polyline || entity.point) {
+            entity.show = false;
         }
     });
+
+    let visibleEvents = 0;
+    let visibleOrbits = 0;
+
+    // 可视弧段显示
+    if (viewer.visibilityArcs) {
+        viewer.visibilityArcs.forEach((ev, idx) => {
+            const points = (ev.points || [])
+                .filter(p => isFinite(p.lon) && isFinite(p.lat) && isFinite(p.alt))
+                .map(p => {
+                    let t = p.time;
+                    if (typeof t === 'string') t = new Date(t);
+                    return { lon: p.lon, lat: p.lat, alt: p.alt, time: t };
+                });
+            if (points.length < 2) return;
+            const startTime = points[0].time;
+            const endTime = points[points.length - 1].time;
+            if (startTime >= timeAgo && endTime <= timeAhead) {
+                const entityLine = viewer.entities.getById(`vis_${ev.station}_${ev.satellite}_${idx}_line`);
+                const entityStart = viewer.entities.getById(`vis_${ev.station}_${ev.satellite}_${idx}_start`);
+                const entityEnd = viewer.entities.getById(`vis_${ev.station}_${ev.satellite}_${idx}_end`);
+                if (entityLine) { entityLine.show = true; visibleEvents++; }
+                if (entityStart) entityStart.show = true;
+                if (entityEnd) entityEnd.show = true;
+            }
+        });
+    }
+
+    // 轨道显示
+    if (viewer.satelliteOrbits) {
+        Object.keys(viewer.satelliteOrbits.satellites).forEach(satName => {
+            const satellite = viewer.satelliteOrbits.satellites[satName];
+            const visiblePositions = (satellite.positions || []).filter(pos => {
+                const posTime = new Date(pos.time);
+                return posTime >= timeAgo && posTime <= timeAhead;
+            });
+            if (visiblePositions.length > 1) {
+                const orbitLine = viewer.entities.getById(`orbit_${satName}_line`);
+                if (orbitLine) {
+                    const positions = visiblePositions.map(pos => Cesium.Cartesian3.fromDegrees(pos.lon, pos.lat, pos.alt * 1000));
+                    orbitLine.polyline.positions = new Cesium.CallbackProperty(() => positions, false);
+                    orbitLine.show = true;
+                    visibleOrbits++;
+                }
+                const currentPoint = viewer.entities.getById(`orbit_${satName}_current`);
+                if (currentPoint && visiblePositions.length > 0) {
+                    const lastPos = visiblePositions[visiblePositions.length - 1];
+                    currentPoint.position = Cesium.Cartesian3.fromDegrees(lastPos.lon, lastPos.lat, lastPos.alt * 1000);
+                    currentPoint.show = true;
+                }
+            }
+        });
+    }
+
+    // 更新状态显示
+    const timeStr = currentDate.toISOString().replace('T', ' ').substring(0, 19);
+    showStatus(`当前时间: ${timeStr}, 显示事件: ${visibleEvents}个, 卫星: ${visibleOrbits}个 (时间窗口: ${timePeriod/3600}小时)`);
 }
 
 // 修改addVisibilityArcs，存储points到visibilityArcRawData
 function addVisibilityArcs(viewer, visibilityData) {
+    // 存储可见弧段数据
+    viewer.visibilityArcs = visibilityData;
+    // 遍历可见弧段数据
     (visibilityData || []).forEach((ev, idx) => {
         const points = (ev.points || [])
             .filter(p => isFinite(p.lon) && isFinite(p.lat) && isFinite(p.alt))
@@ -179,15 +231,70 @@ function addVisibilityArcs(viewer, visibilityData) {
             console.warn('可见弧段点数不足或存在无效点，已跳过:', ev);
             return;
         }
+        const positions = points.map(p => Cesium.Cartesian3.fromDegrees(p.lon, p.lat, p.alt * 1000));
         const startTime = points[0].time;
         const endTime = points[points.length - 1].time;
-        viewer.entities.add({
-            id: `vis_${ev.station}_${ev.satellite}_${idx}`,
+        // 轨迹线
+        const polyline = viewer.entities.add({
+            id: `vis_${ev.station}_${ev.satellite}_${idx}_line`,
             name: `可见弧段: ${ev.station} - ${ev.satellite}`,
-            polyline: { positions: points.map(p => Cesium.Cartesian3.fromDegrees(p.lon, p.lat, p.alt * 1000)), width: 4.0, material: Cesium.Color.fromRandom({ alpha: 0.8 }), clampToGround: false, show: false },
+            polyline: {
+                positions: positions,
+                width: 4.0,
+                material: Cesium.Color.fromRandom({ alpha: 0.8 }),
+                clampToGround: false,
+                zIndex: 1000,
+                shadows: Cesium.ShadowMode.ENABLED
+            },
             description: `地面站: ${ev.station}, 卫星: ${ev.satellite}`,
             _arcStartTime: startTime,
             _arcEndTime: endTime
+        });
+        // 起点
+        const startPoint = viewer.entities.add({
+            id: `vis_${ev.station}_${ev.satellite}_${idx}_start`,
+            position: positions[0],
+            point: {
+                pixelSize: 2,
+                color: Cesium.Color.ORANGE,
+                outlineColor: Cesium.Color.WHITE,
+                outlineWidth: 1,
+                heightReference: Cesium.HeightReference.NONE
+            },
+            label: {
+                text: `${ev.station}-${ev.satellite}`,
+                font: '8pt sans-serif',
+                fillColor: Cesium.Color.WHITE,
+                outlineColor: Cesium.Color.BLACK,
+                outlineWidth: 1,
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                pixelOffset: new Cesium.Cartesian2(0, -12),
+                heightReference: Cesium.HeightReference.NONE,
+                show: false
+            }
+        });
+        // 终点
+        const endPoint = viewer.entities.add({
+            id: `vis_${ev.station}_${ev.satellite}_${idx}_end`,
+            position: positions[positions.length - 1],
+            point: {
+                pixelSize: 2,
+                color: Cesium.Color.ORANGE,
+                outlineColor: Cesium.Color.WHITE,
+                outlineWidth: 1,
+                heightReference: Cesium.HeightReference.NONE
+            },
+            label: {
+                text: `${ev.station}-${ev.satellite}`,
+                font: '8pt sans-serif',
+                fillColor: Cesium.Color.WHITE,
+                outlineColor: Cesium.Color.BLACK,
+                outlineWidth: 1,
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                pixelOffset: new Cesium.Cartesian2(0, -12),
+                heightReference: Cesium.HeightReference.NONE,
+                show: false
+            }
         });
     });
 }
@@ -338,8 +445,53 @@ async function initVisualization() {
     if (typeof Cesium === 'undefined') { showStatus('Cesium未加载'); return; }
     const viewer = initCesiumViewer();
     await loadDataForCesium(viewer);
-    console.log(stationData)
+    // 添加点击事件处理
+    viewer.screenSpaceEventHandler.setInputAction(function(click) {
+        const pickedObject = viewer.scene.pick(click.position);
+        if (Cesium.defined(pickedObject)) {
+            const entity = pickedObject.id;
+            // 隐藏所有标签
+            viewer.entities.values.forEach(function(e) {
+                if (e.label) {
+                    e.label.show = false;
+                }
+            });
+            if (entity && entity.id) {
+                if (entity.id.startsWith('vis_')) {
+                    // 处理可视弧段点击
+                    const parts = entity.id.split('_');
+                    const arcId = `vis_${parts[1]}_${parts[2]}_${parts[3]}`;
+                    const startEntity = viewer.entities.getById(`${arcId}_start`);
+                    const endEntity = viewer.entities.getById(`${arcId}_end`);
+                    if (startEntity && startEntity.label) {
+                        startEntity.label.show = true;
+                    }
+                    if (endEntity && endEntity.label) {
+                        endEntity.label.show = true;
+                    }
+                } else if (entity.id.startsWith('orbit_')) {
+                    // 处理卫星轨道点击
+                    const satName = entity.id.split('_')[1];
+                    const currentEntity = viewer.entities.getById(`orbit_${satName}_current`);
+                    if (currentEntity && currentEntity.label) {
+                        currentEntity.label.show = true;
+                    }
+                }
+            }
+        } else {
+            // 点击空白区域，隐藏所有标签
+            viewer.entities.values.forEach(function(e) {
+                if (e.label) {
+                    e.label.show = false;
+                }
+            });
+        }
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+    
     showStatus('Cesium渲染完成! 支持鼠标拖拽、缩放、点击轨迹。');
+    // 启动文件更新监测
+    startFileMonitoring(viewer);
+    console.log(stationData)
 }
 
 if (document.readyState === 'loading') {
