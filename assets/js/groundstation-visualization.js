@@ -105,6 +105,7 @@ async function loadDataForCesium(viewer) {
         addGroundStations(viewer, stationData);
         addSatelliteOrbits(viewer, orbitData);
         addVisibilityArcs(viewer, visibilityData.events || visibilityData); // 兼容旧结构
+        addLegend(viewer);
         // 设置时间系统
         let simStart, simEnd;
         if (visibilityData.metadata && visibilityData.metadata.start_time && visibilityData.metadata.end_time) {
@@ -270,7 +271,6 @@ function initCesiumViewer() {
     viewer.scene.globe.enableLighting = true;
     viewer.scene.globe.showGroundAtmosphere = true;
     viewer.camera.setView({ destination: Cesium.Cartesian3.fromDegrees(0, 0, 20000000) });
-    addLegend(viewer);
     setupKeyboardShortcuts(viewer);
     return viewer;
 }

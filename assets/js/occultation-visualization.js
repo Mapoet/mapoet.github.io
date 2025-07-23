@@ -86,6 +86,14 @@ function setupKeyboardShortcuts(viewer) {
                 });
                 message = '回到主页视角';
                 break;
+            case 'l':
+                event.preventDefault();
+                let legend = document.getElementById('cesium-legend');
+                if (legend) {
+                    legend.style.display = legend.style.display === 'none' ? 'block' : 'none';
+                    message = `图例显示: ${legend.style.display === 'none' ? '关闭' : '开启'}`;
+                }
+                break;
             // 可按需补充L/T/S/1/0/K等快捷键
         }
         if (message) {
@@ -662,7 +670,6 @@ function addLegend(viewer, stats, orbitStats) {
     legend.style.fontFamily = 'Arial, sans-serif';
     legend.style.zIndex = '1000';
     legend.style.minWidth = '220px';
-    
     legend.innerHTML = `
         <div style="margin-bottom: 8px; font-weight: bold; text-align: center;">掩星轨迹与卫星轨道图例</div>
         <div style="display: flex; align-items: center; margin-bottom: 6px;">
