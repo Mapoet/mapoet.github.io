@@ -27,11 +27,18 @@ function addGroundStations(viewer, stations) {
     });
 }
 
+// 存储轨道实体和原始轨道点
+let satelliteOrbitEntities = {};
+let satelliteOrbitRawData = {};
+let orbitTimeList = {};
+let visibilityArcEntities = [];
+let visibilityArcRawData = [];
 
 function addSatelliteOrbits(viewer, orbitData) {
-    let navCount = 0;
-    let leoCount = 0;
-    Object.keys(orbitData.satellites).forEach((satName, satIndex) => {
+    satelliteOrbitEntities = {};
+    satelliteOrbitRawData = {};
+    orbitTimeList = {};
+    Object.keys(orbitData.satellites).forEach(satName => {
         const satellite = orbitData.satellites[satName];
         const validPositions = (satellite.positions || [])
             .filter(pos => isFinite(pos.lon) && isFinite(pos.lat) && isFinite(pos.alt) && pos.time)
@@ -39,9 +46,7 @@ function addSatelliteOrbits(viewer, orbitData) {
                 let t = pos.time;
                 if (typeof t === 'string') t = new Date(t);
                 return {
-                    lon: pos.lon,
-                    lat: pos.lat,
-                    alt: pos.alt,
+                    cart3: Cesium.Cartesian3.fromDegrees(pos.lon, pos.lat, pos.alt * 1000),
                     time: t
                 };
             });
@@ -49,54 +54,16 @@ function addSatelliteOrbits(viewer, orbitData) {
             console.warn('轨道点数不足或存在无效点，已跳过:', satName);
             return;
         }
-        let lineColor, lineMaterial, pointColor;
-        if (satellite.type === 'GNSS') {
-            lineColor = Cesium.Color.YELLOW;
-            lineMaterial = Cesium.Color.YELLOW.withAlpha(0.6);
-            pointColor = Cesium.Color.YELLOW;
-            navCount++;
-        } else {
-            lineColor = Cesium.Color.LIME;
-            lineMaterial = Cesium.Color.LIME.withAlpha(0.6);
-            pointColor = Cesium.Color.LIME;
-            leoCount++;
-        }
-        // 轨道线
-        const orbitLine = viewer.entities.add({
-            id: `orbit_${satName}_line`,
+        let color = satellite.type === 'GNSS' ? Cesium.Color.YELLOW.withAlpha(0.7) : Cesium.Color.LIME.withAlpha(0.7);
+        // 全部点一次性加上，分配唯一id
+        const entity = viewer.entities.add({
+            id: `orbit_${satName}`,
             name: `${satellite.type} 轨道 ${satName}`,
-            polyline: {
-                positions: validPositions.map(p => Cesium.Cartesian3.fromDegrees(p.lon, p.lat, p.alt * 1000)),
-                width: 1.0,
-                material: lineMaterial,
-                clampToGround: false,
-                zIndex: 1000,
-                shadows: Cesium.ShadowMode.ENABLED
-            }
+            polyline: { positions: validPositions.map(p => p.cart3), width: 1.0, material: color, clampToGround: false }
         });
-        // 当前点
-        const currentPoint = viewer.entities.add({
-            id: `orbit_${satName}_current`,
-            position: Cesium.Cartesian3.fromDegrees(validPositions[validPositions.length - 1].lon, validPositions[validPositions.length - 1].lat, validPositions[validPositions.length - 1].alt * 1000),
-            point: {
-                pixelSize: 2,
-                color: pointColor,
-                outlineColor: Cesium.Color.WHITE,
-                outlineWidth: 1,
-                heightReference: Cesium.HeightReference.NONE
-            },
-            label: {
-                text: satName,
-                font: '9pt sans-serif',
-                fillColor: Cesium.Color.WHITE,
-                outlineColor: Cesium.Color.BLACK,
-                outlineWidth: 1,
-                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                pixelOffset: new Cesium.Cartesian2(0, -15),
-                heightReference: Cesium.HeightReference.NONE,
-                show: false
-            }
-        });
+        satelliteOrbitEntities[satName] = entity;
+        satelliteOrbitRawData[satName] = validPositions;
+        orbitTimeList[satName] = validPositions.map(p => p.time);
     });
 }
 
@@ -139,29 +106,28 @@ function updateVisibleEvents(viewer, currentTime) {
     const currentTimeMs = currentDate.getTime();
     const tailStartMs = currentTimeMs - timePeriod * 1000; // 时间尾巴
     // 轨道线动态显示/隐藏
-    Object.keys(viewer.entities._entities._array).forEach(key => {
-        // 轨道线和当前点
-        const entity = viewer.entities._entities._array[key];
-        if (entity.id && entity.id.startsWith('orbit_') && (entity.polyline || entity.point)) {
-            // 轨道线id: orbit_${satName}_line，当前点id: orbit_${satName}_current
-            // 这里可根据需要实现轨道点时间窗口判断
-            entity.show = true; // 或根据窗口判断
-        }
-        // 可视弧段
-        if (entity.id && entity.id.startsWith('vis_') && entity.polyline) {
-            const startMs = entity._arcStartTime && entity._arcStartTime.getTime ? entity._arcStartTime.getTime() : null;
-            const endMs = entity._arcEndTime && entity._arcEndTime.getTime ? entity._arcEndTime.getTime() : null;
-            if (startMs !== null && endMs !== null && !(endMs < tailStartMs || startMs > currentTimeMs)) {
-                entity.polyline.show = true;
-            } else {
-                entity.polyline.show = false;
-            }
+    Object.keys(satelliteOrbitRawData).forEach(satName => {
+        const raw = satelliteOrbitRawData[satName];
+        // 判断轨道是否有点在2小时窗口内
+        const hasInWindow = raw.some(p => p.time && p.time.getTime() >= tailStartMs && p.time.getTime() <= currentTimeMs);
+        satelliteOrbitEntities[satName].show = hasInWindow;
+    });
+    // 可视弧段高亮显示/隐藏
+    visibilityArcRawData.forEach(({ entity, startTime, endTime }) => {
+        const startMs = startTime && startTime.getTime ? startTime.getTime() : null;
+        const endMs = endTime && endTime.getTime ? endTime.getTime() : null;
+        if (startMs !== null && endMs !== null && !(endMs < tailStartMs || startMs > currentTimeMs)) {
+            entity.polyline.show = true;
+        } else {
+            entity.polyline.show = false;
         }
     });
 }
 
 // 修改addVisibilityArcs，存储points到visibilityArcRawData
 function addVisibilityArcs(viewer, visibilityData) {
+    visibilityArcEntities = [];
+    visibilityArcRawData = [];
     (visibilityData || []).forEach((ev, idx) => {
         const points = (ev.points || [])
             .filter(p => isFinite(p.lon) && isFinite(p.lat) && isFinite(p.alt))
@@ -169,9 +135,7 @@ function addVisibilityArcs(viewer, visibilityData) {
                 let t = p.time;
                 if (typeof t === 'string') t = new Date(t);
                 return {
-                    lon: p.lon,
-                    lat: p.lat,
-                    alt: p.alt,
+                    cart3: Cesium.Cartesian3.fromDegrees(p.lon, p.lat, p.alt * 1000),
                     time: t
                 };
             });
@@ -181,14 +145,15 @@ function addVisibilityArcs(viewer, visibilityData) {
         }
         const startTime = points[0].time;
         const endTime = points[points.length - 1].time;
-        viewer.entities.add({
+        // 全部点一次性加上，分配唯一id
+        const entity = viewer.entities.add({
             id: `vis_${ev.station}_${ev.satellite}_${idx}`,
             name: `可见弧段: ${ev.station} - ${ev.satellite}`,
-            polyline: { positions: points.map(p => Cesium.Cartesian3.fromDegrees(p.lon, p.lat, p.alt * 1000)), width: 4.0, material: Cesium.Color.fromRandom({ alpha: 0.8 }), clampToGround: false, show: false },
-            description: `地面站: ${ev.station}, 卫星: ${ev.satellite}`,
-            _arcStartTime: startTime,
-            _arcEndTime: endTime
+            polyline: { positions: points.map(p => p.cart3), width: 4.0, material: Cesium.Color.fromRandom({ alpha: 0.8 }), clampToGround: false, show: false },
+            description: `地面站: ${ev.station}, 卫星: ${ev.satellite}`
         });
+        visibilityArcEntities.push(entity);
+        visibilityArcRawData.push({ entity, startTime, endTime });
     });
 }
 
