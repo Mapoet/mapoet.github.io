@@ -514,6 +514,30 @@ async function initVisualization() {
             });
         }
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+    // 添加双击事件处理：飞到卫星或地面站视角
+    viewer.screenSpaceEventHandler.setInputAction(function(click) {
+        const pickedObject = viewer.scene.pick(click.position);
+        if (Cesium.defined(pickedObject)) {
+            const entity = pickedObject.id;
+            if (entity && entity.position) {
+                // 卫星当前点
+                if (entity.id && entity.id.startsWith('orbit_') && entity.id.endsWith('_current')) {
+                    viewer.camera.flyTo({
+                        destination: entity.position.getValue(viewer.clock.currentTime),
+                        duration: 2.0
+                    });
+                }
+                // 地面站
+                else if (entity.point && entity.label) {
+                    viewer.camera.flyTo({
+                        destination: entity.position.getValue(viewer.clock.currentTime),
+                        duration: 2.0
+                    });
+                }
+            }
+        }
+    }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
     
     showStatus('Cesium渲染完成! 支持鼠标拖拽、缩放、点击轨迹。');
     // 启动文件更新监测
