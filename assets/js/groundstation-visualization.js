@@ -53,11 +53,11 @@ function addSatelliteOrbits(viewer, orbitData) {
             return;
         }
         let color = satellite.type === 'GNSS' ? Cesium.Color.YELLOW.withAlpha(0.7) : Cesium.Color.LIME.withAlpha(0.7);
-        // 初始显示全部轨道，后续onTick动态更新
+        // 初始化为空，后续updateVisibleEvents动态赋值
         const entity = viewer.entities.add({
             id: `orbit_${satName}`,
             name: `${satellite.type} 轨道 ${satName}`,
-            polyline: { positions: validPositions.map(p => p.cart3), width: 1.0, material: color, clampToGround: false }
+            polyline: { positions: [], width: 1.0, material: color, clampToGround: false }
         });
         satelliteOrbitEntities[satName] = entity;
         satelliteOrbitRawData[satName] = validPositions;
@@ -82,12 +82,12 @@ function setupTimeSystem(viewer, orbitData, visibilityData) {
     }
     viewer.clock.startTime = Cesium.JulianDate.fromDate(startTime);
     viewer.clock.stopTime = Cesium.JulianDate.fromDate(endTime);
-    viewer.clock.currentTime = Cesium.JulianDate.fromDate(startTime);
+    viewer.clock.currentTime = Cesium.JulianDate.fromDate(startTime); // 只初始化时设置
     viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP;
     viewer.clock.multiplier = 1;
     viewer.dataStartTime = startTime;
     viewer.dataEndTime = endTime;
-    // 启动时间过滤
+    // 启动时间过滤（不再主动设置currentTime）
     startTimeFiltering(viewer);
 }
 
@@ -95,7 +95,7 @@ function startTimeFiltering(viewer) {
     viewer.clock.onTick.addEventListener(function(clock) {
         updateVisibleEvents(viewer, viewer.clock.currentTime);
     });
-    // 初始更新
+    // 初始更新（不设置currentTime）
     updateVisibleEvents(viewer, viewer.clock.currentTime);
 }
 
@@ -143,10 +143,11 @@ function addVisibilityArcs(viewer, visibilityData) {
         }
         const startTime = points[0].time;
         const endTime = points[points.length - 1].time;
+        // 初始化为空，后续updateVisibleEvents动态赋值
         const entity = viewer.entities.add({
             id: `vis_${ev.station}_${ev.satellite}_${idx}`,
             name: `可见弧段: ${ev.station} - ${ev.satellite}`,
-            polyline: { positions: points.map(p => p.cart3), width: 4.0, material: Cesium.Color.fromRandom({ alpha: 0.8 }), clampToGround: false, show: false },
+            polyline: { positions: [], width: 4.0, material: Cesium.Color.fromRandom({ alpha: 0.8 }), clampToGround: false, show: false },
             description: `地面站: ${ev.station}, 卫星: ${ev.satellite}`
         });
         visibilityArcEntities.push(entity);
