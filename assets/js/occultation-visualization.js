@@ -58,277 +58,56 @@ function checkDOM() {
 
 // 初始化Cesium地球
 function initCesiumViewer() {
-    //console.log('初始化Cesium Viewer...');
-    
     // 创建Cesium Viewer - 使用最简配置确保地球显示
     const viewer = new Cesium.Viewer('cesiumContainer', {
-        baseLayerPicker: false, // 暂时关闭图层选择器
-        geocoder: true, // 启用地理编码器
-        homeButton: true, // 启用主页按钮
-        sceneModePicker: true, // 启用场景模式选择器
-        navigationHelpButton: true, // 启用导航帮助按钮
-        animation: true, // 启用动画控件
-        timeline: true, // 启用时间轴
-        fullscreenButton: true, // 启用全屏按钮
-        infoBox: true, // 启用信息框
-        selectionIndicator: true, // 启用选择指示器
-        shadows: false, // 关闭阴影
-        shouldAnimate: true, // 动画
-        requestRenderMode: false, // 关闭请求渲染模式
-        targetFrameRate: 60, // 目标帧率
-        keyboardInputEvent: false // 启用Cesium的键盘输入处理，使用我们自己的
+        baseLayerPicker: false,
+        geocoder: true,
+        homeButton: true,
+        sceneModePicker: true,
+        navigationHelpButton: true,
+        animation: true,
+        timeline: true,
+        fullscreenButton: true,
+        infoBox: true,
+        selectionIndicator: true,
+        shadows: false,
+        shouldAnimate: true,
+        requestRenderMode: false,
+        targetFrameRate: 60
     });
-    
-    // 配置时间轴样式
-    const timeline = viewer.timeline;
-    timeline.container.style.height = '80px';
-    timeline.container.style.fontSize = '12px';
-    
-    // 增强大气和光照真实感
+    // 同步地球显示参数
     const scene = viewer.scene;
     scene.globe.enableLighting = true;
-    scene.globe.atmosphereLighting = true;
-    scene.globe.atmosphereLightingIntensity = 5.0;
-    scene.globe.atmosphereHueShift = 0.1;
-    scene.globe.atmosphereSaturationShift = 0.1;
-    scene.globe.atmosphereBrightnessShift = 1.0;
     scene.globe.showGroundAtmosphere = true;
-    scene.globe.atmosphereAlpha = 1.0;
-    scene.globe.nightFadeInDistance = 1000000;
-    scene.globe.nightFadeOutDistance = 5000000;
-    scene.globe.dynamicAtmosphereLighting = true;
-    scene.globe.dynamicAtmosphereLightingFromSun = true;
-
-    scene.sun = new Cesium.Sun();
-    scene.moon = new Cesium.Moon();
-    scene.skyBox = new Cesium.SkyBox({
-        sources: {
-            positiveX: 'https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Assets/Textures/SkyBox/tycho2t3_80_px.jpg',
-            negativeX: 'https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Assets/Textures/SkyBox/tycho2t3_80_mx.jpg',
-            positiveY: 'https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Assets/Textures/SkyBox/tycho2t3_80_py.jpg',
-            negativeY: 'https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Assets/Textures/SkyBox/tycho2t3_80_my.jpg',
-            positiveZ: 'https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Assets/Textures/SkyBox/tycho2t3_80_pz.jpg',
-            negativeZ: 'https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Assets/Textures/SkyBox/tycho2t3_80_mz.jpg'
-        }
-    });
-
-    viewer.clock.shouldAnimate = true;
-    
-    // 添加键盘快捷键支持
-    document.addEventListener('keydown', function(event) {
-        let message = '';
-        
-        // 调试信息：记录按键
-        //console.log('按键按下:', event.key, 'keyCode:', event.keyCode);
-        
-        // 检查是否在输入框中，如果是则不处理快捷键
-        if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
-            return;
-        }
-        
-        switch(event.key.toLowerCase()) {
-            case 'f':
-                // F键：切换全屏
-                event.preventDefault();
-                if (document.fullscreenElement) {
-                    document.exitFullscreen();
-                    message = '退出全屏模式';
-                } else {
-                    document.getElementById('cesiumContainer').requestFullscreen();
-                    message = '进入全屏模式';
-                }
-                //console.log('全屏模式切换');
-                break;
-                
-            case 'h':
-                // H键：回到主页视角
-                event.preventDefault();
-                viewer.camera.flyTo({
-                    destination: Cesium.Cartesian3.fromDegrees(0, 0, 20000000),
-                    orientation: {
-                        heading: 0.0,
-                        pitch: -Cesium.Math.PI_OVER_TWO,
-                        roll: 0.0
-                    },
-                    duration: 2.0
-                });
-                message = '回到主页视角';
-                //console.log('回到主页视角');
-                break;
-                
-            case 'i':
-                // I键：显示高度信息
-                event.preventDefault();
-                let heightInfo = '高度信息:\n';
-                viewer.entities.values.forEach(function(e, idx) {
-                    if (e.position && idx < 10) { // 只显示前10个
-                        const cartesian = e.position.getValue(viewer.clock.currentTime);
-                        if (cartesian) {
-                            const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
-                            const heightKm = cartographic.height / 1000;
-                            heightInfo += `事件${idx + 1}: ${heightKm.toFixed(1)}km\n`;
-                        }
-                    }
-                });
-                //console.log(heightInfo);
-                message = '高度信息已输出到Console';
-                break;
-                
-            case 'r':
-                // R键：重置相机
-                event.preventDefault();
-                viewer.camera.reset();
-                message = '重置相机';
-                //console.log('重置相机');
-                break;
-                
-            case 't':
-                // T键：切换地形显示
-                event.preventDefault();
-                viewer.scene.globe.showGroundAtmosphere = !viewer.scene.globe.showGroundAtmosphere;
-                message = `地形大气: ${viewer.scene.globe.showGroundAtmosphere ? '开启' : '关闭'}`;
-                //console.log('地形大气显示:', viewer.scene.globe.showGroundAtmosphere);
-                break;
-                
-            case 'l':
-                // L键：切换光照
-                event.preventDefault();
-                viewer.scene.globe.enableLighting = !viewer.scene.globe.enableLighting;
-                message = `光照效果: ${viewer.scene.globe.enableLighting ? '开启' : '关闭'}`;
-                //console.log('光照效果:', viewer.scene.globe.enableLighting);
-                break;
-                
-            case 's':
-                // S键：切换阴影
-                event.preventDefault();
-                viewer.scene.shadowMap.enabled = !viewer.scene.shadowMap.enabled;
-                message = `阴影效果: ${viewer.scene.shadowMap.enabled ? '开启' : '关闭'}`;
-                //console.log('阴影效果:', viewer.scene.shadowMap.enabled);
-                break;
-                
-            case '1':
-                // 1键：显示所有标签
-                event.preventDefault();
-                viewer.entities.values.forEach(function(e) {
-                    if (e.label) {
-                        e.label.show = true;
-                    }
-                });
-                message = '显示所有标签';
-                //console.log('显示所有标签');
-                break;
-                
-            case '0':
-                // 0键：隐藏所有标签
-                event.preventDefault();
-                viewer.entities.values.forEach(function(e) {
-                    if (e.label) {
-                        e.label.show = false;
-                    }
-                });
-                message = '隐藏所有标签';
-                //console.log('隐藏所有标签');
-                break;
-                
-            case 'k':
-                // K键：切换图例显示
-                event.preventDefault();
-                // 查找图例元素（通过多个选择器确保找到）
-                let legend = document.querySelector('#cesiumContainer > div[style*="position: absolute"][style*="top: 10px"][style*="right: 10px"]');
-                if (!legend) {
-                    legend = document.querySelector('#cesiumContainer > div[style*="background-color: rgba(0, 0, 0, 0.8)"]');
-                }
-                if (!legend) {
-                    legend = document.querySelector('#cesiumContainer > div:last-child');
-                }
-                
-                if (legend && legend.innerHTML.includes('掩星轨迹图例')) {
-                    legend.style.display = legend.style.display === 'none' ? 'block' : 'none';
-                    message = `图例显示: ${legend.style.display === 'none' ? '关闭' : '开启'}`;
-                    //console.log('图例显示切换:', legend.style.display);
-                } else {
-                    message = '未找到图例元素';
-                    //console.log('未找到图例元素');
-                }
-                break;
-                
-            case 'w':
-                // W键：测试时间过滤
-                event.preventDefault();
-                if (viewer.clock.shouldAnimate) {
-                    viewer.clock.shouldAnimate = false;
-                    message = '时间动画已暂停';
-                } else {
-                    viewer.clock.shouldAnimate = true;
-                    message = '时间动画已恢复';
-                }
-                break;
-                
-            case 'a':
-                // A键：显示所有数据（调试模式）
-                event.preventDefault();
-                viewer.showAllData = !viewer.showAllData;
-                if (viewer.showAllData) {
-                    // 显示所有实体
-                    viewer.entities.values.forEach(function(entity) {
-                        if (entity.polyline || entity.point) {
-                            entity.show = true;
-                        }
-                    });
-                    message = '调试模式：显示所有数据';
-                } else {
-                    // 恢复时间过滤
-                    updateVisibleEvents(viewer, viewer.clock.currentTime);
-                    message = '恢复正常时间过滤';
-                }
-                break;
-                
-            case 'escape':
-                // ESC键：退出全屏
-                if (document.fullscreenElement) {
-                    document.exitFullscreen();
-                    message = '退出全屏模式';
-                }
-                break;
-        }
-        
-        // 显示快捷键提示
-        if (message) {
-            showStatus(message);
-            // 3秒后清除提示
-            setTimeout(() => {
-                showStatus(`Cesium渲染完成!支持鼠标拖拽、滚轮缩放、双击定位。`);
-            }, 3000);
-        }
-    });
-    
-    // 启用地形
+    // 可选：关闭大气光照增强参数，保持与groundstation一致
+    if ('atmosphereLighting' in scene.globe) scene.globe.atmosphereLighting = false;
+    if ('atmosphereLightingIntensity' in scene.globe) scene.globe.atmosphereLightingIntensity = 1.0;
+    if ('atmosphereHueShift' in scene.globe) scene.globe.atmosphereHueShift = 0.0;
+    if ('atmosphereSaturationShift' in scene.globe) scene.globe.atmosphereSaturationShift = 0.0;
+    if ('atmosphereBrightnessShift' in scene.globe) scene.globe.atmosphereBrightnessShift = 0.0;
+    if ('atmosphereAlpha' in scene.globe) scene.globe.atmosphereAlpha = 1.0;
+    if ('nightFadeInDistance' in scene.globe) scene.globe.nightFadeInDistance = 1000000;
+    if ('nightFadeOutDistance' in scene.globe) scene.globe.nightFadeOutDistance = 5000000;
+    if ('dynamicAtmosphereLighting' in scene.globe) scene.globe.dynamicAtmosphereLighting = false;
+    if ('dynamicAtmosphereLightingFromSun' in scene.globe) scene.globe.dynamicAtmosphereLightingFromSun = false;
+    // 设置地形
     try {
         const worldTerrain = Cesium.createWorldTerrain();
         viewer.terrainProvider = worldTerrain;
-        //console.log('世界地形添加成功');
     } catch (terrainError) {
         console.error('地形添加失败:', terrainError);
     }
-    
-    // 启用阴影
-    scene.shadowMap.enabled = true;
-    scene.shadowMap.size = 2048; // 阴影贴图大小
-    
-    // 设置相机初始位置
+    // 设置初始相机视角
     viewer.camera.setView({
-        destination: Cesium.Cartesian3.fromDegrees(0, 0, 20000000), // 从赤道上方看地球
+        destination: Cesium.Cartesian3.fromDegrees(0, 0, 20000000),
         orientation: {
             heading: 0.0,
             pitch: -Cesium.Math.PI_OVER_TWO,
             roll: 0.0
         }
     });
-    
     // 强制渲染
     scene.requestRender();
-    
-    //console.log('Cesium Viewer初始化完成');
     return viewer;
 }
 
