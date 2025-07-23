@@ -65,6 +65,68 @@ function addSatelliteOrbits(viewer, orbitData) {
     });
 }
 
+function setupTimeSystem(viewer, orbitData, visibilityData) {
+    let startTime = null;
+    let endTime = null;
+    // 优先从visibilityData.metadata获取
+    if (visibilityData && visibilityData.metadata) {
+        startTime = new Date(visibilityData.metadata.start_time);
+        endTime = new Date(visibilityData.metadata.end_time);
+    } else if (orbitData && orbitData.metadata) {
+        startTime = new Date(orbitData.metadata.start_time);
+        endTime = new Date(orbitData.metadata.end_time);
+    }
+    if (!startTime || !endTime) {
+        startTime = new Date();
+        endTime = new Date(startTime.getTime() + 24 * 60 * 60 * 1000);
+    }
+    viewer.clock.startTime = Cesium.JulianDate.fromDate(startTime);
+    viewer.clock.stopTime = Cesium.JulianDate.fromDate(endTime);
+    viewer.clock.currentTime = Cesium.JulianDate.fromDate(startTime);
+    viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP;
+    viewer.clock.multiplier = 1;
+    viewer.dataStartTime = startTime;
+    viewer.dataEndTime = endTime;
+    // 启动时间过滤
+    startTimeFiltering(viewer);
+}
+
+function startTimeFiltering(viewer) {
+    viewer.clock.onTick.addEventListener(function(clock) {
+        updateVisibleEvents(viewer, viewer.clock.currentTime);
+    });
+    // 初始更新
+    updateVisibleEvents(viewer, viewer.clock.currentTime);
+}
+
+function updateVisibleEvents(viewer, currentTime) {
+    const currentDate = Cesium.JulianDate.toDate(currentTime);
+    const tailStart = new Date(currentDate.getTime() - 2 * 3600 * 1000); // 2小时尾巴
+    // 轨道线动态更新
+    Object.keys(satelliteOrbitRawData).forEach(satName => {
+        const raw = satelliteOrbitRawData[satName];
+        const tail = raw.filter(p => p.time >= tailStart && p.time <= currentDate);
+        if (tail.length >= 2) {
+            satelliteOrbitEntities[satName].polyline.positions = tail.map(p => p.cart3);
+            satelliteOrbitEntities[satName].polyline.width = 1.0;
+            satelliteOrbitEntities[satName].show = true;
+        } else {
+            satelliteOrbitEntities[satName].show = false;
+        }
+    });
+    // 可视弧段高亮
+    visibilityArcRawData.forEach(({ entity, startTime, endTime, points }) => {
+        if (startTime && endTime && !(endTime < tailStart || startTime > currentDate)) {
+            entity.polyline.positions = points.map(p => p.cart3);
+            entity.polyline.width = 4.0;
+            entity.polyline.show = true;
+        } else {
+            entity.polyline.show = false;
+        }
+    });
+}
+
+// 修改addVisibilityArcs，存储points到visibilityArcRawData
 function addVisibilityArcs(viewer, visibilityData) {
     visibilityArcEntities = [];
     visibilityArcRawData = [];
@@ -79,10 +141,8 @@ function addVisibilityArcs(viewer, visibilityData) {
             console.warn('可见弧段点数不足或存在无效点，已跳过:', ev);
             return;
         }
-        // 事件时间区间
         const startTime = points[0].time;
         const endTime = points[points.length - 1].time;
-        // 初始隐藏，后续onTick动态控制
         const entity = viewer.entities.add({
             id: `vis_${ev.station}_${ev.satellite}_${idx}`,
             name: `可见弧段: ${ev.station} - ${ev.satellite}`,
@@ -90,7 +150,7 @@ function addVisibilityArcs(viewer, visibilityData) {
             description: `地面站: ${ev.station}, 卫星: ${ev.satellite}`
         });
         visibilityArcEntities.push(entity);
-        visibilityArcRawData.push({ entity, startTime, endTime });
+        visibilityArcRawData.push({ entity, startTime, endTime, points });
     });
 }
 
@@ -100,53 +160,13 @@ async function loadDataForCesium(viewer) {
             fetch(orbitFile).then(r => r.json()),
             fetch(visibilityFile).then(r => r.json())
         ]);
-        // 直接使用 visibilityData.stations 作为地面站数据
         const stationData = visibilityData.stations || [];
         addGroundStations(viewer, stationData);
         addSatelliteOrbits(viewer, orbitData);
-        addVisibilityArcs(viewer, visibilityData.events || visibilityData); // 兼容旧结构
+        addVisibilityArcs(viewer, visibilityData.events || visibilityData);
         addLegend(viewer);
-        // 设置时间系统
-        let simStart, simEnd;
-        if (visibilityData.metadata && visibilityData.metadata.start_time && visibilityData.metadata.end_time) {
-            simStart = new Date(visibilityData.metadata.start_time);
-            simEnd = new Date(visibilityData.metadata.end_time);
-            const startTime = Cesium.JulianDate.fromDate(simStart);
-            const endTime = Cesium.JulianDate.fromDate(simEnd);
-            viewer.clock.startTime = startTime;
-            viewer.clock.stopTime = endTime;
-            viewer.clock.currentTime = startTime;
-            viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP;
-            viewer.clock.multiplier = 1; // 1秒=1分钟，可根据需要调整
-        }
-        // 轨道与可视弧段动态更新
-        viewer.clock.onTick.addEventListener(function(clock) {
-            const currentDate = Cesium.JulianDate.toDate(viewer.clock.currentTime);
-            const tailStart = new Date(currentDate.getTime() - 2 * 3600 * 1000); // 2小时尾巴
-            // 轨道线动态更新
-            Object.keys(satelliteOrbitRawData).forEach(satName => {
-                const raw = satelliteOrbitRawData[satName];
-                // 只保留2小时内的轨迹
-                const tail = raw.filter(p => p.time >= tailStart && p.time <= currentDate);
-                if (tail.length >= 2) {
-                    satelliteOrbitEntities[satName].polyline.positions = tail.map(p => p.cart3);
-                    satelliteOrbitEntities[satName].polyline.width = 1.0;
-                    satelliteOrbitEntities[satName].show = true;
-                } else {
-                    satelliteOrbitEntities[satName].show = false;
-                }
-            });
-            // 可视弧段高亮
-            visibilityArcRawData.forEach(({ entity, startTime, endTime }) => {
-                // 判断弧段时间区间与当前2小时轨道尾巴是否有重叠
-                if (startTime && endTime && !(endTime < tailStart || startTime > currentDate)) {
-                    entity.polyline.show = true;
-                    entity.polyline.width = 4.0;
-                } else {
-                    entity.polyline.show = false;
-                }
-            });
-        });
+        setupTimeSystem(viewer, orbitData, visibilityData);
+
         showStatus(`数据加载完成：${stationData.length}地面站, ${Object.keys(orbitData.satellites).length}卫星, ${(visibilityData.events ? visibilityData.events.length : visibilityData.length)}可见弧段`);
     } catch (e) {
         showStatus('数据加载失败: ' + e.message);
