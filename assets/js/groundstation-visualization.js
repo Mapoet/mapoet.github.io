@@ -2,7 +2,8 @@ const orbitFile = '/assets/traj/satellite_orbits.json';
 const visibilityFile = '/assets/traj/visibility_events.json';
 const timePeriod = 2 * 3600; // 2小时
 const statusDiv = document.getElementById('status');
-
+let showLEO=true;
+let showGNSS=true;
 
 // 设置Cesium Ion访问令牌 - 使用用户申请的token
 Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIzOTZhYjUxMy0yM2RhLTQzYTQtYjVmNy1hNTI1NjZiNGI5NDgiLCJpZCI6MzIyODkzLCJpYXQiOjE3NTI4ODExMTd9.ZW3143EaO-0r7H7Tr9Q0rfboNl2FjBWUzm2JgcEKj5g';
