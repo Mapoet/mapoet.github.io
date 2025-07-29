@@ -378,7 +378,7 @@ def occultation_predict():
     #leo_sats = [s for s in satellites if s["type"] == "YunYao"]
 
     end_time = datetime.now(timezone.utc)
-    start_time = end_time - timedelta(hours=2)
+    start_time = end_time - timedelta(hours=6)
     times = [start_time + timedelta(seconds=i) for i in range(0, int((end_time-start_time).total_seconds())+1, TIME_STEP)]
     jd_fr_list = [jday(t.year, t.month, t.day, t.hour, t.minute, t.second + t.microsecond*1e-6) for t in times]
 
