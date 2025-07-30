@@ -67,7 +67,7 @@ def ecef_to_llh(x, y, z):
 
     lat_deg = np.degrees(lat)
     lon_deg = np.degrees(lon)
-    return lat_deg, lon_deg, h
+    return lon_deg,lat_deg, h
 
 # LLH 转 ECEF
 def llh_to_ecef(lon: float, lat: float, alt: float) -> tuple[float, float, float]:
