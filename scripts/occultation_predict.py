@@ -28,27 +28,55 @@ bool_vis = True
 bool_occ = True
 
 # ECEF 转 LLH
-def ecef_to_llh(x: float, y: float, z: float) -> tuple[float, float, float]:
-    """ECEF坐标转换为经纬高"""
-    import math
-    a = 6378137.0 # WGS84 semi-major axis
-    f = 1/298.257223563 # WGS84 flattening
-    r2d=180/np.pi
-    e2 = f * (2 - f)
-    r = math.sqrt(x**2 + y**2)
-    lat = math.atan2(z, r * (1 - e2))
-    N = a / math.sqrt(1 - e2 * math.sin(lat)**2)
-    alt = r / math.cos(lat) - N
-    lon = math.atan2(y, x)
-    return lon*r2d, lat*r2d, alt
+# def ecef_to_llh(x: float, y: float, z: float) -> tuple[float, float, float]:
+#     """ECEF坐标转换为经纬高"""
+#     import math
+#     a = 6378137.0 # WGS84 semi-major axis
+#     f = 1/298.257223563 # WGS84 flattening
+#     r2d=180/np.pi
+#     e2 = f * (2 - f)
+#     r = math.sqrt(x**2 + y**2)
+#     lat = math.atan2(z, r * (1 - e2))
+#     N = a / math.sqrt(1 - e2 * math.sin(lat)**2)
+#     alt = r / math.cos(lat) - N
+#     lon = math.atan2(y, x)
+#     return lon*r2d, lat*r2d, alt
+# WGS84 椭球参数（单位：km）
+
+def ecef_to_llh(x, y, z):
+    a = 6378137.0               # 长半轴
+    f = 1 / 298.257223563       # 扁率
+    b = a * (1 - f)             # 短半轴
+    e2 = 1 - (b**2 / a**2)      # 第一偏心率平方
+    r = np.sqrt(x**2 + y**2)
+    lon = np.arctan2(y, x)
+    # 初始纬度估计
+    lat = np.arctan2(z, r * (1 - e2))
+    lat_prev = 0
+    eps = 1e-12
+    it=0
+    # 迭代求解纬度
+    while np.abs(lat - lat_prev) > eps and it<10:
+        lat_prev = lat
+        N = a / np.sqrt(1 - e2 * np.sin(lat)**2)
+        h = r / np.cos(lat) - N
+        lat = np.arctan2(z, r * (1 - e2 * N / (N + h)))
+        it+=1
+    N = a / np.sqrt(1 - e2 * np.sin(lat)**2)
+    h = r / np.cos(lat) - N
+
+    lat_deg = np.degrees(lat)
+    lon_deg = np.degrees(lon)
+    return lat_deg, lon_deg, h
+
 # LLH 转 ECEF
 def llh_to_ecef(lon: float, lat: float, alt: float) -> tuple[float, float, float]:
     """经纬高转换为ECEF坐标"""
     import math
     a = 6378137.0 # WGS84 semi-major axis
     f = 1/298.257223563 # WGS84 flattening
-    r2d=180/np.pi
     e2 = f * (2 - f)
+    lat, lon = np.radians(lat), np.radians(lon)
     N = a / math.sqrt(1 - e2 * math.sin(lat)**2)
     x = (N + alt) * math.cos(lat) * math.cos(lon)
     y = (N + alt) * math.cos(lat) * math.sin(lon)
@@ -196,23 +224,25 @@ def calc_tangent_point(txv, rxv) -> Tuple[float, float, float, float,float]:
     azim = np.arcsin(np.dot(rv0, drt0)) * 180/np.pi
     return lon, lat, alt, elev,azim
 
-def calc_sat_vis(txv, rx)->Tuple[float,float]:
+def ecef_to_enu(sta_lon,sta_lat):
+    lat, lon = np.radians(sta_lat), np.radians(sta_lon)
+    slat, clat = np.sin(lat), np.cos(lat)
+    slon, clon = np.sin(lon), np.cos(lon)
+    R = np.array([
+        [-slon,       clon,       0],
+        [-slat*clon, -slat*slon, clat],
+        [clat*clon,  clat*slon,  slat]
+    ])
+    return R
+
+def calc_sat_vis(txv, rx,R)->Tuple[float,float]:
     tx=txv[0:3]
-    rv=np.array([-rx[1],rx[0],0])
-    drt=tx-rx
-    lrt=np.sum(drt[:]**2.0)**0.5
-    r0=np.sum(rx[:]**2.0)**0.5
-    v0=np.sum(rv[:]**2.0)**0.5
-    if lrt<1e-3:return np.nan,np.nan
-    if r0<1e-3:return np.nan,np.nan
-    if v0<1e-3:return np.nan,np.nan
-    drt0=drt/lrt # unit vector of sats-link
-    rx0=rx/r0
-    rv0=rv/v0
-    #print(f"[{rx0[0]} {rx0[1]} {rx0[2]}] [{rv0[0]} {rv0[1]} {rv0[2]}] [{drt0[0]} {drt0[1]} {drt0[2]}]")
-    elev=np.arcsin(np.dot(rx0, drt0)) * 180/np.pi
-    azim=np.arcsin(np.dot(rv0, drt0)) * 180/np.pi
-    return elev,azim
+    enu=R@(tx-rx)
+    e, n, u = enu
+    horiz_dist = np.sqrt(e**2 + n**2)
+    az = np.degrees(np.arctan2(e, n)) % 360
+    el = np.degrees(np.arctan2(u, horiz_dist))
+    return el,az
 
 # =====================
 # 掩星类型判别
@@ -222,9 +252,9 @@ def classify_occultation(alt: float, elev: float,azim:float) -> str:
         return "none"
     if elev > 0 or abs(azim)>AZIM_WIDTH:
         return "none"
-    if alt > 60:
+    if alt > 60 and alt < 500:
         return "iono"
-    elif -50 < alt <= 60:
+    elif -50 < alt and alt <= 60:
         return "atm"
     elif alt <= -50:
         return "deep"
@@ -343,9 +373,10 @@ def process_sat_vis(sat, sat_orbits, stations, times):
         sat_pos_seq = sat_orbits[nav_name]
         xr,yr,zr = llh_to_ecef(station["lambda"], station["phi"], station["h"])
         st_pos=np.array([xr,yr,zr])/1e3
+        R_pos=ecef_to_enu(station["lambda"], station["phi"])
         for i, t in enumerate(times):
             sat_pos = sat_pos_seq[i]
-            elev,azim = calc_sat_vis(sat_pos, st_pos)
+            elev,azim = calc_sat_vis(sat_pos, st_pos,R_pos)
             vis_type = classify_sat_vis(elev, azim,station["betalim"])
             if vis_type != state[stname]:
                 if state[stname] == "vis":
@@ -355,7 +386,7 @@ def process_sat_vis(sat, sat_orbits, stations, times):
                     sat_fine = interpolate_orbit(times, sat_pos_seq, fine_times)
                     points = []
                     for j in range(len(fine_times)):
-                        elev2,azim2 = calc_sat_vis(sat_fine[j], st_pos)
+                        elev2,azim2 = calc_sat_vis(sat_fine[j], st_pos,R_pos)
                         vis_type = classify_sat_vis(elev2, azim2,station["betalim"])
                         if vis_type == "vis":
                             lon,lat,alt = ecef_to_llh(sat_fine[j][0]*1e3,sat_fine[j][1]*1e3,sat_fine[j][2]*1e3)
@@ -508,4 +539,4 @@ def occultation_predict():
         print(f"[主进程] 结果已保存到 {OCC_FILE}", flush=True)
 
 if __name__ == "__main__":
-    occultation_predict() 
+    occultation_predict()
