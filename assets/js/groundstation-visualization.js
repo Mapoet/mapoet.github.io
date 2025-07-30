@@ -169,7 +169,7 @@ function updateVisibleEvents(viewer, currentTime) {
             if (points.length < 2) return;
             const startTime = points[0].time;
             const endTime = points[points.length - 1].time;
-            if (startTime >= timeAgo && endTime <= timeAhead) {
+            if (startTime <= timeAhead && endTime >= timeAgo) {
                 const entityLine = viewer.entities.getById(`vis_${ev.station}_${ev.satellite}_${idx}_line`);
                 const entityStart = viewer.entities.getById(`vis_${ev.station}_${ev.satellite}_${idx}_start`);
                 const entityEnd = viewer.entities.getById(`vis_${ev.station}_${ev.satellite}_${idx}_end`);
