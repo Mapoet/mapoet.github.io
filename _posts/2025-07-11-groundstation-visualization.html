@@ -1,0 +1,42 @@
+---
+title: "三维地球卫星-地面站可视性可视化"
+date: 2025-07-11
+permalink: /posts/2025/07/groundstation-visualization
+excerpt: '基于Cesium的三维地球卫星-地面站可视性动态可视化'
+tags:
+    - Satellite
+    - GroundStation
+    - Visibility
+    - Visualization
+---
+
+<style>
+.groundstation-card { max-width: 100%; margin: 0 auto; padding: 20px; box-sizing: border-box; }
+.groundstation-card h1 { margin-bottom: 15px; color: #333; }
+.groundstation-card p { margin-bottom: 20px; line-height: 1.6; color: #666; }
+#cesiumContainer { width: 100% !important; height: 600px !important; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; position: relative; margin-bottom: 15px; background: #000011; }
+#status { margin-top: 10px; color: #666; font-size: 14px; text-align: center; }
+@media (max-width: 768px) { .groundstation-card { padding: 10px; } #cesiumContainer { height: 400px !important; } }
+</style>
+
+<div class="groundstation-card">
+  <h1>三维地球卫星-地面站可视性可视化</h1>
+  <p>本页面基于 Cesium 动态渲染卫星轨道及可见弧段，展示所有卫星相对于地面站的可视弧段与轨道。</p>
+  <div id="cesiumContainer"></div>
+  <div id="status"></div>
+</div>
+
+<link href="https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+<script src="https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Cesium.js"></script>
+
+<script>
+  window.addEventListener('load', function() {
+      console.log('页面加载完成，检查Cesium...');
+      if (typeof Cesium !== 'undefined') {
+          console.log('Cesium已加载，版本:', Cesium.VERSION);
+      } else {
+          console.error('Cesium未加载！');
+      }
+  });
+  </script>
+<script src="/assets/js/groundstation-visualization.js"></script> 

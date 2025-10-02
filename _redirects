@@ -1,0 +1,9 @@
+# 重定向旧出版物链接到新的出版物页面
+/publication/2019-10-01-paper-title-number-3 /publications/
+/publication/2019-05-12-paper-title-number-2 /publications/
+/publication/2016-10-01-paper-title-number-1 /publications/
+ 
+# 重定向其他可能的旧链接
+/publications/2019-10-01-paper-title-number-3 /publications/
+/publications/2019-05-12-paper-title-number-2 /publications/
+/publications/2016-10-01-paper-title-number-1 /publications/ 

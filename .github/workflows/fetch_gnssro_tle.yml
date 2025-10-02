@@ -1,0 +1,59 @@
+name: GNSSRO TLE 自动下载
+
+on:
+  schedule:
+    - cron: "0 3 * * *"   # 每天UTC时间2点运行一次
+  workflow_dispatch:      # 支持手动触发
+
+jobs:
+  fetch-gnssro-tle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 拉取仓库
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.14.0-beta.4
+
+      - name: 安装系统依赖
+        run: |
+          echo "开始安装系统依赖..."
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            gcc \
+            g++ 
+          echo "系统依赖安装完成"
+
+      - name: 安装 Python 依赖
+        run: |
+          echo "开始安装 Python 依赖..."
+          python -m pip install --upgrade pip
+          pip install requests
+          echo "Python 依赖安装完成"
+
+      - name: 运行 fetch_gnssro_tle.py
+        run: |
+          echo "开始运行 fetch_gnssro_tle.py..."
+          cd scripts
+          python fetch_gnssro_tle.py
+
+      - name: 配置 Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: 提交并推送更新
+        run: |
+          git add assets/traj/Rx-GNSSRO.tle
+          if git diff --staged --quiet; then
+            echo "没有新的星历文件需要提交"
+          else
+            git commit -m "🤖 Auto update GNSSRO TLE $(date '+%Y-%m-%d %H:%M:%S UTC')"
+            git push
+          fi 

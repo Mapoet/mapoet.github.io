@@ -1,0 +1,127 @@
+/**
+ * Mermaid图表自定义样式
+ * 优化mermaid图表在Jekyll站点中的显示效果
+ */
+
+/* Mermaid图表样式优化 */
+
+/* 基础容器样式 */
+.mermaid {
+  text-align: center;
+  margin: 20px 0;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  overflow-x: auto;
+}
+
+/* SVG样式优化 */
+.mermaid svg {
+  max-width: 100% !important;
+  height: auto !important;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+}
+
+/* 流程图样式 */
+.mermaid .flowchart {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+}
+
+/* 序列图样式 */
+.mermaid .sequence {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+}
+
+/* 甘特图样式 */
+.mermaid .gantt {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+}
+
+/* 类图样式 */
+.mermaid .classDiagram {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+}
+
+/* 状态图样式 */
+.mermaid .stateDiagram {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+}
+
+/* 实体关系图样式 */
+.mermaid .erDiagram {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+}
+
+/* 用户旅程图样式 */
+.mermaid .userJourney {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+}
+
+/* Git图样式 */
+.mermaid .gitGraph {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+}
+
+/* 饼图样式 */
+.mermaid .pie {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+}
+
+/* 需求图样式 */
+.mermaid .requirement {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .mermaid {
+    margin: 15px 0;
+    padding: 10px;
+  }
+  
+  .mermaid svg {
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .mermaid {
+    margin: 10px 0;
+    padding: 8px;
+  }
+  
+  .mermaid svg {
+    font-size: 10px !important;
+  }
+}
+
+/* 深色主题支持 */
+@media (prefers-color-scheme: dark) {
+  .mermaid {
+    background: #2d3748;
+    border-color: #4a5568;
+  }
+  
+  .mermaid svg {
+    filter: invert(1) hue-rotate(180deg);
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .mermaid {
+    background: white;
+    border: 1px solid #ccc;
+    page-break-inside: avoid;
+  }
+  
+  .mermaid svg {
+    filter: none;
+  }
+}
+
+/* 确保Mermaid图表在所有主题下都能正确显示 */
+.mermaid * {
+  box-sizing: border-box;
+} 

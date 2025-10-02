@@ -1,0 +1,13 @@
+---
+title: "Dynamic Characterization of Equatorial Plasma Bubble Based on Triangle Network-Joint Slope Approach"
+collection: publications
+permalink: /publication/2024-01-01-Dynamic-Characterization-of-Equatorial-Plasma-Bubble-Based-on-Triangle-Network-Joint-Slope-Approach
+date: 2024-01-01
+venue: 'Journal of Geophysical Research: Space Physics'
+citation: 'Xirui Mia, Rong Yang, **Naifeng Fu**, Xingqun Zhan, Y.Jade Morton &quot;Dynamic Characterization of Equatorial Plasma Bubble Based on Triangle Network-Joint Slope Approach.&quot; Journal of Geophysical Research: Space Physics, 2024.'
+---
+## 摘要
+
+This paper introduces a Triangle Network‐Joint Slope (TN‐JS) approach to characterize the spatial and temporal dynamics of Equatorial Plasma Bubbles (EPBs) during geomagnetic storms. To collaboratively determine the EPB drift directions from multiple stations, a Delaunay triangle network is constructed, utilizing the distribution of Ionospheric Piercing Points (IPPs). The Time Difference of Arrival (TDOA) is extracted through cross‐correlating the Rate of Total Electron Content (ROT). The EPB drift direction can be approximately calculated by considering TDOA and IPP distances within each individual triangle of the network. This calculation is then refined through a joint statistical analysis. Using a reference station as the origin, the remaining stations within the network are projected along the estimated EPB drift direction. A spatial‐temporal color map illustrating regional ionospheric anomaly ROT observations is constructed. The EPB drift velocity among multiple stations can be collectively estimated by fitting the slope of this map, facilitating outlier exclusion. Accounting for satellite dynamic effects and the diverse orbit characteristics of GPS and BDS, corresponding IPP scan velocity compensation is performed and analyzed for EPB dynamic estimation. Using the geomagnetic storm event that occurred on September 8 as a case study, the spatial‐temporal kinetic properties of EPBs is characterized by analyzing Global Navigation Satellite System (GNSS) observations from 17 Hong Kong monitoring stations with the proposed TN‐JS approach. The results indicate during this magnetic event, that EPBs exhibit a westward drift trend with velocities ranging from a few tens to hundreds of meters per second in GPS and BDS observations.
+
+Use [Google Scholar](https://scholar.google.com/scholar?q=Dynamic+Characterization+of+Equatorial+Plasma+Bubble+Based+on+Triangle+Network+Joint+Slope+Approach){:target="_blank"} for full citation
