@@ -277,7 +277,7 @@ def interpolate_orbit(times, pos, new_times) -> np.ndarray:
         # 将所有 interp1d([(t - times[0]).total_seconds() for t in times], pos[:, i], kind='linear', fill_value='extrapolate')
         # 替换为 linear_interp1d([(t - times[0]).total_seconds() for t in times], pos[:, i], x_new)
         # 其中 x_new 为你需要插值的点
-        new_pos[:, i] = linear_interp1d([(t - times[0]).total_seconds() for t in times], pos[:, i], [(t - times[0]).total_seconds() for t in new_times])
+        new_pos[:, i] = linear_interp1d([(t - times[0]).total_seconds() for t in times], pos[:, i], [(t - times[0]).total_seconds() for t in new_times]) if len(times)>1 else pos[:, i]
     return new_pos
 
 def linear_interp1d(x, y, x_new):
@@ -378,8 +378,8 @@ def process_sat_vis(sat, sat_orbits, stations, times):
             sat_pos = sat_pos_seq[i]
             elev,azim = calc_sat_vis(sat_pos, st_pos,R_pos)
             vis_type = classify_sat_vis(elev, azim,station["betalim"])
-            if vis_type != state[stname]:
-                if state[stname] == "vis":
+            if vis_type != state[stname] or i==len(times)-1:
+                if state[stname] == "vis" or (vis_type=="vis" and i==len(times)-1):
                     t0 = state_change_time[stname]-timedelta(seconds=TIME_STEP)
                     event_time = t0 + (t - t0)/2
                     fine_times = [t0 + timedelta(seconds=s) for s in range(0, int((t-t0).total_seconds())+1, VIS_STEP)]
