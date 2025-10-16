@@ -132,9 +132,9 @@ function initCesiumViewer() {
     if ('atmosphereHueShift' in scene.globe) scene.globe.atmosphereHueShift = 0.0;
     if ('atmosphereSaturationShift' in scene.globe) scene.globe.atmosphereSaturationShift = 0.0;
     if ('atmosphereBrightnessShift' in scene.globe) scene.globe.atmosphereBrightnessShift = 0.0;
-    if ('atmosphereAlpha' in scene.globe) scene.globe.atmosphereAlpha = 1.0;
-    if ('nightFadeInDistance' in scene.globe) scene.globe.nightFadeInDistance = 1000000;
-    if ('nightFadeOutDistance' in scene.globe) scene.globe.nightFadeOutDistance = 5000000;
+    if ('atmosphereAlpha' in scene.globe) scene.globe.atmosphereAlpha = 0.5;
+    if ('nightFadeInDistance' in scene.globe) scene.globe.nightFadeInDistance = 2000000;
+    if ('nightFadeOutDistance' in scene.globe) scene.globe.nightFadeOutDistance = 1000000;
     if ('dynamicAtmosphereLighting' in scene.globe) scene.globe.dynamicAtmosphereLighting = false;
     if ('dynamicAtmosphereLightingFromSun' in scene.globe) scene.globe.dynamicAtmosphereLightingFromSun = false;
     try {
