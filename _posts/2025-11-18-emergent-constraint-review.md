@@ -2,7 +2,6 @@
 title: "涌现约束算法：从统计技巧到系统方法论的研究现状与未来展望"
 date: 2025-11-18
 permalink: /posts/2025/11/emergent-constraint-review
-author: Mapoet
 excerpt: '涌现约束（Emergent Constraint）作为气候科学中减少模式预测不确定性的重要统计方法，已从Cox 2013的简单线性回归范式演进为包含贝叶斯层次模型、空间型约束、多变量合成的系统方法论。本文系统梳理涌现约束算法的发展脉络、研究现状与未来趋势。'
 tags:
    - 气候科学

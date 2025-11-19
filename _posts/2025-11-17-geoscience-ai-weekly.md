@@ -1,15 +1,14 @@
 ---
 title: "地学、遥感与人工智能交叉领域最新进展（2025-11-10 至 2025-11-17）"
 date: 2025-11-17
-author: 自由意志与人工智能
+permalink: /posts/2025/11/geoscience-remote-ai-weekly
 excerpt: '结合近七天 798 篇论文与权威网络资料，系统综述地学、遥感与人工智能交叉研究的最新现状，聚焦气候极端解析、遥感智能观测、水体质量监测、地学大模型与安全治理等方向，并研判未来技术演进路径。'
 tags:
-  - 地球系统科学
-  - 遥感技术
-  - GeoAI
-  - 气候风险
-  - 数据治理
-permalink: /posts/2025/11/geoscience-remote-ai-weekly
+   - 地球系统科学
+   - 遥感技术
+   - GeoAI
+   - 气候风险
+   - 数据治理
 ---
 
 随着 17 年轨道资料的积累、CMIP6-HighResMIP 对极端事件的刻画能力增强，以及遥感影像处理进入扩散模型时代，地学研究正从“被动诊断”转向“智能驱动决策”。本期基于 Nature、Science、Journal of Geophysical Research: Atmospheres、Journal of Climate、Remote Sensing、International Journal of Digital Earth 等期刊 798 篇论文，并参考地理信息智能化与遥感自动化的权威解读（ebiotrade，2025；csgpc，2025），梳理气候系统科学、智能遥感、水生态监测与地学 AI 工程的最新突破，并提出未来一季的技术观察要点。
