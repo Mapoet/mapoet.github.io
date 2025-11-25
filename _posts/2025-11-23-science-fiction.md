@@ -2,6 +2,7 @@
 title: "时空的刀刃"
 date: 2025-11-23
 author: Mapoet
+permalink: /posts/2025/11/science-fiction
 excerpt: '一个关于成长、选择与意义的科幻故事。一个孩子通过一把神秘的刀，在宇宙中穿梭，经历了"看山是山，看山不是山，看山又是山"的三重境界，最终理解了意义的本质。'
 tags:
    - 科幻小说
