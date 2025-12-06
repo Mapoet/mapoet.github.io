@@ -17,7 +17,7 @@ tags:
 
 在气象领域，以 ERA5 等长时段再分析资料、卫星与地面观测为基础，一系列基于 Transformer 与图神经网络的 AI 天气大模型（FourCastNet、Pangu-Weather、GraphCast、FuXi、FengWu 等）已经在 10 日以内中期预报的常规指标上，实现对传统数值预报系统的"并驾甚至超越"（Bi 等，2023；Lam 等，2023）。然而，多篇对这些模型的系统评估指出，**极端天气、分辨率外推、数据分布漂移以及可解释性**{color:#ff4500}，仍然是端到端模型的明显短板（Lütjens 等，2024；Bouallegue 等，2024）。
 
-与之形成鲜明对比的是，以 **JEDI**{color:#0066cc}（Joint Effort for Data assimilation Integration）为代表的新一代同化框架在大气、海洋、陆面与空间天气系统中的扩展，强调的是统一的物理方程组、观测算子与误差统计框架下，将机器学习用作观测运算加速、复杂物理过程替代以及质量控制自动化的"内嵌模块"（NOAA，2024）。在电离层与空间天气方向，由于三维电子密度实况数据稀缺、误差水平高、太阳风和高能粒子输入具有强烈非平稳性，当前主流更倾向于使用深度学习增强物理模型或构造混合同化系统，而不是完全替代物理模式的端到端大模型（Yue 等，2024；Jin 等，2024）。
+与之形成鲜明对比的是，以 **JEDI**{color:#0066cc}（Joint Effort for Data assimilation Integration）为代表的新一代同化框架在大气、海洋、陆面与空间天气系统中的扩展，强调的是统一的物理方程组、观测算子与误差统计框架下，将机器学习用作观测运算加速、复杂物理过程替代以及质量控制自动化的"内嵌模块"（NOAA，2024）。在电离层与空间天气方向，由于三维电子密度实况数据稀缺、误差水平高、太阳风和高能粒子输入具有强烈非平稳性，当前主流更倾向于使用深度学习增强物理模型或构造混合同化系统，而不是完全替代物理模式的端到端大模型。
 
 ![zt](/images/sai-0.jpg)
 
@@ -51,7 +51,7 @@ tags:
 - **太阳活动周期与随机性**。太阳活动具有约 11 年的周期性，但具体的太阳风暴或高能粒子事件的发生时间和方向具有极强的随机性。现有观测序列不足以覆盖多个完整太阳活动周期（高精度的电离层观测可能也没有 4 个太阳活动周期），这使得端到端模型难以通过一次训练就获得对未来新型极端事件的稳定刻画。
 - **外强迫的非平稳性**。太阳风、高能粒子和磁暴等随机外强迫的主导作用，使得电离层演化过程呈现出强烈的非平稳性。使用一个瞬时权重机器学习模式很难长时间尺度刻画电离层的演化过程。
 
-近年来，基于 IGS TEC 与多源观测的深度学习三维 Ne 模型，如 IGS-3D Ne 模型和利用 19 年 GNSS 掩星构建的顶侧电离层神经网络模型，在平均误差上显著优于传统经验模型，但在强扰动事件和太阳活动极值期仍存在明显不确定性（Yue 等，2024；Jin 等，2024）。这类模型一方面印证了深度学习在复杂非线性空间天气场上的潜力，另一方面也暴露出 **短时间序列、强外强迫与高噪声观测**{color:#ff4500} 下端到端路径的脆弱性：模型更容易过拟合少数事件，难以形成具有普适性的机理表征。
+近年来，基于 IGS TEC 与多源观测的深度学习三维 Ne 模型，如 IGS-3D Ne 模型（见参考文献8）和利用 19 年 GNSS 掩星构建的顶侧电离层神经网络模型，在平均误差上显著优于传统经验模型，但在强扰动事件和太阳活动极值期仍存在明显不确定性。这类模型一方面印证了深度学习在复杂非线性空间天气场上的潜力，另一方面也暴露出 **短时间序列、强外强迫与高噪声观测**{color:#ff4500} 下端到端路径的脆弱性：模型更容易过拟合少数事件，难以形成具有普适性的机理表征。
 
 ![电离层三维电子密度场可视化](/images/sai-2.jpg)
 
@@ -103,8 +103,8 @@ Transformer 的出现将序列建模能力大幅提升，并为高维场的全�
 
 在电离层领域，近年出现的几个代表性工作包括：
 
-- 基于 IGS TEC 和 COSMIC 掩星数据训练的全球三维电子密度模型（如 IGS-3D Ne），在平均意义上明显优于 IRI 等传统经验模型（Yue 等，2024）。
-- 使用 19 年 GNSS 掩星构建的顶侧电离层神经网络模型 NET，为顶侧 Ne 结构提供了更细致的刻画（Jin 等，2024）。
+- 基于 IGS TEC 和 COSMIC 掩星数据训练的全球三维电子密度模型（如 IGS-3D Ne，见参考文献8），在平均意义上明显优于 IRI 等传统经验模型。
+- 使用 19 年 GNSS 掩星构建的顶侧电离层神经网络模型 NET，为顶侧 Ne 结构提供了更细致的刻画（见参考文献9）。
 - 利用深度网络、决策树与支持向量机预测关键电离层参数和 TEC，展示了数据驱动模型在特定台站和区域预测中的优势，但在强扰动事件和太阳活动极值期仍存在明显不确定性。
 
 这类研究虽然多为"端到端"形式，即直接从驱动指数、历史观测映射到电离层参数，但受制于太阳活动周期长度、观测误差和覆盖度，其泛化能力依然有限，更适合与物理模式和数据同化系统联合使用，而非独立承担"全空间天气预报"。
@@ -411,13 +411,13 @@ graph TD
 5. Chen, L., Zhong, X., Zhang, F., Cheng, Y., Xu, Y., Zhang, Y., & Wang, F. (2024). FuXi: A cascade machine learning forecasting system for 15-day global weather forecast. *npj Climate and Atmospheric Science*, 7(1), 1-11. https://doi.org/10.1038/s41612-024-00649-7
 6. Hersbach, H., Bell, B., Berrisford, P., Hirahara, S., Horányi, A., Muñoz-Sabater, J., ... & Thépaut, J. N. (2020). The ERA5 global reanalysis. *Quarterly Journal of the Royal Meteorological Society*, 146(730), 1999-2049. https://doi.org/10.1002/qj.3803
 7. JCSDA. (2024). *Joint Effort for Data assimilation Integration (JEDI) Framework*. Joint Center for Satellite Data Assimilation. https://github.com/JCSDA-internal/je
-8. Jin, S., Jin, Y., & Li, D. (2024). A machine learning approach to modeling global ionospheric electron density. *Space Weather*, 22(3), e2023SW003680. https://doi.org/10.1029/2023SW003680
-9. Lam, R., Sanchez-Gonzalez, A., Willson, M., Wirnsberger, P., Fortunato, M., Pritzel, A., ... & Battaglia, P. (2023). GraphCast: Learning skillful medium-range global weather forecasting. *Science*, 382(6677), 1416-1421. https://doi.org/10.1126/science.adi233
-10. Lütjens, B., Leshchinskiy, B., Requena-Mesa, C., Chishtie, F., Díaz, J. O., Andela, B., ... & Rätsch, C. (2024). Physics-informed deep learning for climate downscaling. *Nature Machine Intelligence*, 6(5), 495-507. https://doi.org/10.1038/s42256-024-00811-9
-11. NOAA. (2024). *JEDI: The Future of Data Assimilation*. NOAA Weather Program Office. https://wpo.noaa.gov/jedi-the-future-of-data-assimilatio
-12. Palmer, T. (2019). The ECMWF ensemble prediction system: Looking back (more than) 25 years and projecting forward 25 years. *Quarterly Journal of the Royal Meteorological Society*, 145(S1), 12-24. https://doi.org/10.1002/qj.3383
-13. Wang, Z., Cheng, J., Xu, L., Hao, L., & Peng, Y. (2024). Hybrid Physics-ML Modeling for Marine Vehicle Maneuvering Motions in the Presence of Environmental Disturbances. *arXiv preprint arXiv:2411.13908*. https://arxiv.org/abs/2411.13908
-14. Yue, X., Schreiner, W. S., Pedatella, N. M., Kuo, Y. H., & Hunt, D. C. (2024). Global ionospheric specification with data assimilation: Recent advances and future directions. *Space Weather*, 22(2), e2023SW003680. https://doi.org/10.1029/2023SW003680
+8. Eun-Young Ji, Yong-Jae Moon, Young-Sil Kwak, Kangwoo Yi, Jeong-Heon Kim.(2024),Construction of global IGS-3D electron density (Ne) model by deep learning,*Journal of Atmospheric and Solar-Terrestrial Physics*,265,106370. https://www.sciencedirect.com/science/article/abs/pii/S1364682624001986
+9. Smirnov, A., Shprits, Y., Prol, F., Lühr, H., Berrendorf, M., & Zhelavskaya, I. (2023). A novel neural network model of Earth's topside ionosphere. Scientific Reports, 13(1), 1654. https://doi.org/10.1038/s41598-023-28034-z
+10. Lam, R., Sanchez-Gonzalez, A., Willson, M., Wirnsberger, P., Fortunato, M., Pritzel, A., ... & Battaglia, P. (2023). GraphCast: Learning skillful medium-range global weather forecasting. *Science*, 382(6677), 1416-1421. https://doi.org/10.1126/science.adi233
+11. Lütjens, B., Leshchinskiy, B., Requena-Mesa, C., Chishtie, F., Díaz, J. O., Andela, B., ... & Rätsch, C. (2024). Physics-informed deep learning for climate downscaling. *Nature Machine Intelligence*, 6(5), 495-507. https://doi.org/10.1038/s42256-024-00811-9
+12. NOAA. (2024). *JEDI: The Future of Data Assimilation*. NOAA Weather Program Office. https://wpo.noaa.gov/jedi-the-future-of-data-assimilatio
+13. Palmer, T. (2019). The ECMWF ensemble prediction system: Looking back (more than) 25 years and projecting forward 25 years. *Quarterly Journal of the Royal Meteorological Society*, 145(S1), 12-24. https://doi.org/10.1002/qj.3383
+14. Wang, Z., Cheng, J., Xu, L., Hao, L., & Peng, Y. (2024). Hybrid Physics-ML Modeling for Marine Vehicle Maneuvering Motions in the Presence of Environmental Disturbances. *arXiv preprint arXiv:2411.13908*. https://arxiv.org/abs/2411.13908
 
 15. Raissi, M., Perdikaris, P., & Karniadakis, G. E. (2019). Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations. *Journal of Computational Physics*, 378, 686-707. https://doi.org/10.1016/j.jcp.2018.10.045
 
