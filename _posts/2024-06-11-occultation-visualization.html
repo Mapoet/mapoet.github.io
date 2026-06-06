@@ -1,0 +1,82 @@
+---
+title: "三维地球掩星事件可视化"
+date: 2024-06-11
+permalink: /posts/2024/06/occultation-visualization
+excerpt: '基于Cesium的三维地球掩星事件轨迹动态可视化'
+tags:
+    - Occultation
+    - GNSS
+    - Atmosphere
+    - Visualization
+---
+
+<style>
+.occultation-card {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.occultation-card h1 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.occultation-card p {
+    margin-bottom: 20px;
+    line-height: 1.6;
+    color: #666;
+}
+
+#cesiumContainer {
+    width: 100% !important;
+    height: 600px !important;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 15px;
+    background: #000011; /* 深蓝色背景 */
+}
+
+#status {
+    margin-top: 10px;
+    color: #666;
+    font-size: 14px;
+    text-align: center;
+}
+
+/* 确保在小屏幕上也能正常显示 */
+@media (max-width: 768px) {
+    .occultation-card {
+        padding: 10px;
+    }
+    
+    #cesiumContainer {
+        height: 400px !important;
+    }
+}
+</style>
+
+<div class="occultation-card">
+  <h1>三维地球掩星事件可视化</h1>
+  <p>本页面基于 Cesium 动态渲染掩星事件数据，展示大气与电离层掩星轨迹在真实三维地球上的分布。</p>
+  <div id="cesiumContainer"></div>
+  <div id="status"></div>
+</div>
+
+<link href="https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+<script src="https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Cesium.js"></script>
+
+<script>
+window.addEventListener('load', function() {
+    console.log('页面加载完成，检查Cesium...');
+    if (typeof Cesium !== 'undefined') {
+        console.log('Cesium已加载，版本:', Cesium.VERSION);
+    } else {
+        console.error('Cesium未加载！');
+    }
+});
+</script>
+<script src="/assets/js/occultation-visualization.js"></script> 

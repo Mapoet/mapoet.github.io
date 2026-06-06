@@ -1,0 +1,5 @@
+# 为 images/ 目录下的所有文件启用CORS，允许来自 gnss.ac.cn 的请求
+/images/*
+  Access-Control-Allow-Origin: https://gnss.ac.cn
+/assets/*
+  Access-Control-Allow-Origin: https://gnss.ac.cn

@@ -1,0 +1,108 @@
+name: 掩星预报数据更新
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+  push:
+    paths:
+      - scripts/occultation_predict.py
+      - assets/traj/Rx-GNSSRO.tle
+      - assets/traj/trk-GroundStation.gst
+      - requirements.txt
+      - .github/workflows/occultation_update.yml
+
+permissions:
+  contents: write
+
+jobs:
+  occultation-predict:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: 拉取仓库
+        uses: actions/checkout@v4
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.14.0-beta.4
+
+      - name: 安装系统依赖
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            gcc g++ libproj-dev proj-data proj-bin \
+            build-essential libopenblas-dev liblapack-dev
+
+      - name: 安装 Python 依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir -r requirements.txt
+
+      - name: 检查输入文件
+        run: |
+          test -f scripts/occultation_predict.py
+          test -f assets/traj/Rx-GNSSRO.tle
+          test -f assets/traj/trk-GroundStation.gst
+
+      - name: 运行掩星预报脚本
+        run: |
+          cd scripts
+          python occultation_predict.py
+
+      - name: 检查并验证输出文件
+        run: |
+          for f in occultation_events.json satellite_orbits.json visibility_events.json; do
+            test -f "assets/traj/$f" || (echo "missing $f" && exit 1)
+            python -m json.tool "assets/traj/$f" > /dev/null
+            echo "✓ $f ($(du -h "assets/traj/$f" | cut -f1))"
+          done
+
+      - name: 生成 manifest
+        run: |
+          UPDATED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          manifest = {
+              "updated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+              "files": {
+                  "occultation_events": "occultation_events.json",
+                  "satellite_orbits": "satellite_orbits.json",
+                  "visibility_events": "visibility_events.json",
+              },
+          }
+          path = Path("assets/traj/manifest.json")
+          path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+          print(path.read_text(encoding="utf-8"))
+          PY
+
+      - name: 上传到 GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="occultation-data-latest"
+          NOTES="Auto-updated $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+
+          gh release delete "$TAG" -y 2>/dev/null || true
+          git tag -d "$TAG" 2>/dev/null || true
+          git push origin ":refs/tags/$TAG" 2>/dev/null || true
+
+          gh release create "$TAG" \
+            --title "Occultation data (auto-updated)" \
+            --notes "$NOTES" \
+            assets/traj/manifest.json \
+            assets/traj/occultation_events.json \
+            assets/traj/satellite_orbits.json \
+            assets/traj/visibility_events.json
+
+          echo "Release URL: https://github.com/${{ github.repository }}/releases/tag/$TAG"
+
+      - name: 显示更新状态
+        run: |
+          echo "掩星预报数据已发布到 Release: occultation-data-latest"
+          ls -lh assets/traj/*.json

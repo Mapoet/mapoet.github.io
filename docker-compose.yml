@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  jekyll:
+    build: .
+    ports:
+      - "4000:4000"
+    volumes:
+      - .:/app
+      - /app/_site
+      - /app/.sass-cache
+      - /app/.jekyll-cache
+    environment:
+      - JEKYLL_ENV=development
+    command: bundle exec jekyll serve --host 0.0.0.0 --port 4000 --livereload --livereload-port 35729
+    stdin_open: true
+    tty: true
+
+  # Optional: Add a service for building static files
+  build:
+    build: .
+    volumes:
+      - .:/app
+    command: bundle exec jekyll build
+    profiles:
+      - build 

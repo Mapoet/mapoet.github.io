@@ -1,0 +1,16 @@
+# main links links
+main:
+  - title: "学术论文"
+    url: /publications/
+
+  - title: "会议报告"
+    url: /talks/    
+    
+  - title: "研究经历"
+    url: /portfolio/
+        
+  - title: "技术博客"
+    url: /year-archive/
+    
+  - title: "简历"
+    url: /cv/
