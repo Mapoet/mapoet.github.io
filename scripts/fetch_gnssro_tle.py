@@ -148,37 +148,39 @@ SATELLITE_DICT = {
 
 def fetch_tle(satellite_id):
     """Fetch TLE data for a given NORAD ID from Celestrak."""
-    url = f"https://celestrak.org/NORAD/elements/gp.php?CATNR={satellite_id}"
+    url = f"https://celestrak.org/NORAD/elements/gp.php?CATNR={satellite_id}&FORMAT=TLE"
     try:
-        r = requests.get(url)
+        r = requests.get(url, timeout=30)
         r.raise_for_status()
         lines = r.text.strip().split('\n')
-        if len(lines) >= 3:
+        if len(lines) >= 3 and lines[1].startswith('1 ') and lines[2].startswith('2 '):
             return lines[0], lines[1], lines[2]
     except Exception as e:
         print(f"[ERROR] {satellite_id}: {e}")
     return None
 
 def main():
-    # 输出文件名：Rx-YY_YYYYMMDD.tle
-    today = datetime.now().strftime("%Y%m%d")
-    fname = f"../assets/traj/Rx-GNSSRO.tle"
+    fname = "../assets/traj/Rx-GNSSRO.tle"
+    entries = []
+
+    for norad, info in SATELLITE_DICT.items():
+        name, typ = info['name'], info['type']
+        print(f"Fetching {typ} {name} (NORAD {norad})...")
+        tle = fetch_tle(norad)
+        if tle:
+            entries.append(f"# {name} ({typ})\n{tle[1]}\n{tle[2]}\n")
+            print(f"  ✔ {name}")
+        else:
+            print(f"  ✖ {name}")
+        time.sleep(1)
+
+    if not entries:
+        raise SystemExit("No TLE entries fetched; keeping existing file unchanged.")
 
     with open(fname, 'w') as fp:
-        for norad, info in SATELLITE_DICT.items():
-            name, typ = info['name'], info['type']
-            print(f"Fetching {typ} {name} (NORAD {norad})...")
-            tle = fetch_tle(norad)
-            if tle:
-                # 用简洁注释写入
-                fp.write(f"# {name} ({typ})\n")
-                fp.write(f"{tle[1]}\n{tle[2]}\n\n")
-                print(f"  ✔ {name}")
-            else:
-                print(f"  ✖ {name}")
-            time.sleep(1)
+        fp.write("\n".join(entries).rstrip() + "\n")
 
-    print(f"\nDone. Saved TLE → {fname}")
+    print(f"\nDone. Saved {len(entries)} TLE entries → {fname}")
 
 if __name__ == "__main__":
     main()

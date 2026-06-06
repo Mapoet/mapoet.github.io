@@ -5,6 +5,8 @@ occultation_predict.py
 输入：TLE文件、卫星类型表、时间区间
 输出：掩星事件的经纬高序列（JSON），便于python或javascripts读取
 """
+from __future__ import annotations
+
 import os
 import json
 import numpy as np
@@ -70,7 +72,7 @@ def ecef_to_llh(x, y, z):
     return lon_deg,lat_deg, h
 
 # LLH 转 ECEF
-def llh_to_ecef(lon: float, lat: float, alt: float) -> tuple[float, float, float]:
+def llh_to_ecef(lon: float, lat: float, alt: float) -> Tuple[float, float, float]:
     """经纬高转换为ECEF坐标"""
     import math
     a = 6378137.0 # WGS84 semi-major axis
