@@ -4,7 +4,7 @@ _site/
 .jekyll-cache/
 .jekyll-metadata
 .bundle/
-vendor/
+/vendor/
 # data/  # Commented out to allow assets/data/ directory
 # Ruby
 *.gem
