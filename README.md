@@ -1,6 +1,6 @@
 # 🌍 付乃锋学术个人网站
 
-**付乃锋 (Naifeng Fu)** - 理学博士，天津大学博士后，GNSS-R/-RO技术设备研制及数据应用专家
+**付乃锋 (Naifeng Fu)** - 理学博士，海洋科学与技术博士后，GNSS-R/-RO技术设备研制及数据应用专家
 
 [![Website](https://img.shields.io/badge/Website-mapoet.github.io-blue)](https://mapoet.github.io)
 [![GitHub](https://img.shields.io/badge/GitHub-mapoet-green)](https://github.com/mapoet)

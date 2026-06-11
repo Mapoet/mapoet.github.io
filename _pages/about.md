@@ -1,6 +1,6 @@
 ---
 permalink: /
-title: "付乃锋 (Naifeng Fu), 理学博士, 天津大学博士后"
+title: "付乃锋 (Naifeng Fu), 理学博士, 海洋科学与技术博士后"
 excerpt: "关于我"
 author_profile: true
 redirect_from: 
@@ -8,7 +8,7 @@ redirect_from:
   - /about.html
 ---
 
-您好！我是付乃锋，理学博士，目前为天津大学博士后研究员，专注于GNSS-R/-RO技术设备研制及数据应用研究。
+您好！我是付乃锋，理学博士，目前为海洋科学与技术博士后研究员，专注于GNSS-R/-RO技术设备研制及数据应用研究。
 
 ## 个人简介
 
