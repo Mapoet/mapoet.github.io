@@ -8,19 +8,32 @@
 /publications/2019-05-12-paper-title-number-2 /publications/
 /publications/2016-10-01-paper-title-number-1 /publications/ 
 # 出版物日期更正重定向
-/publication/2016-01-01-Retrieval-Processing-Technique-For-LEO-LEO-Radio-Occultation-Atmospheric-Data-and-Error-Sources-Analysis /publication/2016-09-01-Retrieval-Processing-Technique-For-LEO-LEO-Radio-Occultation-Atmospheric-Data-and-Error-Sources-Analysis
+/publication/2016-01-01-Retrieval-Processing-Technique-For-LEO-LEO-Radio-Occultation-Atmospheric-Data-and-Error-Sources-Analysis /publication/2016-12-23-Retrieval-Processing-Technique-For-LEO-LEO-Radio-Occultation-Atmospheric-Data-and-Error-Sources-Analysis
+/publication/2016-09-01-Retrieval-Processing-Technique-For-LEO-LEO-Radio-Occultation-Atmospheric-Data-and-Error-Sources-Analysis /publication/2016-12-23-Retrieval-Processing-Technique-For-LEO-LEO-Radio-Occultation-Atmospheric-Data-and-Error-Sources-Analysis
 /publication/2016-01-01-Topside-correction-of-IRI-by-global-modeling-of-ionospheric-scale-height-using-COSMIC-radio-occultation-data /publication/2016-06-17-Topside-correction-of-IRI-by-global-modeling-of-ionospheric-scale-height-using-COSMIC-radio-occultation-data
 /publication/2018-01-01-Improvement-of-the-IRI-Model-Using-F2-Layer-Parameters-Derived-From-GPSCOSMIC-Radio-Occultation-Observations /publication/2018-11-22-Improvement-of-the-IRI-Model-Using-F2-Layer-Parameters-Derived-From-GPSCOSMIC-Radio-Occultation-Observations
 /publication/2019-01-01-Evaluation-of-Abel-Inversion-Method-Assisted-By-an-Improved-IRI-Model /publication/2019-07-12-Evaluation-of-Abel-Inversion-Method-Assisted-By-an-Improved-IRI-Model
 /publication/2019-01-01-The-two-parts-step-by-step-ionospheric-assimilation-based-on-ground-basedspaceborne-observations-and-its-verification /publication/2019-05-16-The-two-parts-step-by-step-ionospheric-assimilation-based-on-ground-basedspaceborne-observations-and-its-verification
-/publication/2020-01-01-The-analysis-of-assumptions-error-sources-on-assimilating-ground-basedspaceborne-ionospheric-observations /publication/2020-10-01-The-analysis-of-assumptions-error-sources-on-assimilating-ground-basedspaceborne-ionospheric-observations
+/publication/2020-01-01-The-analysis-of-assumptions-error-sources-on-assimilating-ground-basedspaceborne-ionospheric-observations /publication/2020-06-10-The-analysis-of-assumptions-error-sources-on-assimilating-ground-basedspaceborne-ionospheric-observations
+/publication/2020-10-01-The-analysis-of-assumptions-error-sources-on-assimilating-ground-basedspaceborne-ionospheric-observations /publication/2020-06-10-The-analysis-of-assumptions-error-sources-on-assimilating-ground-basedspaceborne-ionospheric-observations
 /publication/2020-01-01-New-Vary-Chap-Scale-Height-Profile-Retrieved-From-COSMIC-Radio-Occultation-Data /publication/2020-03-03-New-Vary-Chap-Scale-Height-Profile-Retrieved-From-COSMIC-Radio-Occultation-Data
-/publication/2020-01-01-Sea-Surface-Height-Estimation-by-Ground-Based-BDS-GEO-Satellite-Reflectometry /publication/2020-03-01-Sea-Surface-Height-Estimation-by-Ground-Based-BDS-GEO-Satellite-Reflectometry
+/publication/2020-01-01-Sea-Surface-Height-Estimation-by-Ground-Based-BDS-GEO-Satellite-Reflectometry /publication/2020-09-18-Sea-Surface-Height-Estimation-by-Ground-Based-BDS-GEO-Satellite-Reflectometry
+/publication/2020-03-01-Sea-Surface-Height-Estimation-by-Ground-Based-BDS-GEO-Satellite-Reflectometry /publication/2020-09-18-Sea-Surface-Height-Estimation-by-Ground-Based-BDS-GEO-Satellite-Reflectometry
 /publication/2020-01-01-Mountain-Top-Based-Atmospheric-Radio-Occultation-Observations-with-OpenClosed-Loop-Tracking-Experiment-and-Validation /publication/2020-12-13-Mountain-Top-Based-Atmospheric-Radio-Occultation-Observations-with-OpenClosed-Loop-Tracking-Experiment-and-Validation
-/publication/2020-01-01-GNSS /publication/2021-01-04-GNSS
+/publication/2020-01-01-GNSS /publication/2021-03-30-GNSS
+/publication/2021-01-04-GNSS /publication/2021-03-30-GNSS
 /publication/2022-01-01-Assessment-of-ZTD-Derived-from-COSMIC-Occultation-Data-with-ECWMF-Radiosondes-and-GNSS /publication/2022-07-12-Assessment-of-ZTD-Derived-from-COSMIC-Occultation-Data-with-ECWMF-Radiosondes-and-GNSS
-/publication/2022-01-01-Vertical-characterization-on-global-ionospheric-variations-during-the-magnetic-storm-in-September-2017-with-hierarchical-subtraction-method /publication/2022-03-01-Vertical-characterization-on-global-ionospheric-variations-during-the-magnetic-storm-in-September-2017-with-hierarchical-subtraction-method
+/publication/2022-01-01-Vertical-characterization-on-global-ionospheric-variations-during-the-magnetic-storm-in-September-2017-with-hierarchical-subtraction-method /publication/2021-12-02-Vertical-characterization-on-global-ionospheric-variations-during-the-magnetic-storm-in-September-2017-with-hierarchical-subtraction-method
+/publication/2022-03-01-Vertical-characterization-on-global-ionospheric-variations-during-the-magnetic-storm-in-September-2017-with-hierarchical-subtraction-method /publication/2021-12-02-Vertical-characterization-on-global-ionospheric-variations-during-the-magnetic-storm-in-September-2017-with-hierarchical-subtraction-method
 /publication/2023-01-01-GPSPWV /publication/2023-07-01-GPSPWV
 /publication/2023-12-01-The-Ionospheric-Exploration-Based-on-TJU01-Meteorological-Microsatellite-Mission-Initial-Results /publication/2023-12-18-The-Ionospheric-Exploration-Based-on-TJU01-Meteorological-Microsatellite-Mission-Initial-Results
 /publication/2024-01-01-Dynamic-Characterization-of-Equatorial-Plasma-Bubble-Based-on-Triangle-Network-Joint-Slope-Approach /publication/2024-08-01-Dynamic-Characterization-of-Equatorial-Plasma-Bubble-Based-on-Triangle-Network-Joint-Slope-Approach
 /publication/2025-01-01-Quality-assessment-of-YUNYAO-radio-occultation-data-in-the-neutral-atmosphere /publication/2025-03-19-Quality-assessment-of-YUNYAO-radio-occultation-data-in-the-neutral-atmosphere
+
+# 出版物日期二次校正（Crossref / 期刊官网）
+/publication/2016-09-01-Retrieval-Processing-Technique-For-LEO-LEO-Radio-Occultation-Atmospheric-Data-and-Error-Sources-Analysis /publication/2016-12-23-Retrieval-Processing-Technique-For-LEO-LEO-Radio-Occultation-Atmospheric-Data-and-Error-Sources-Analysis
+/publication/2020-10-01-The-analysis-of-assumptions-error-sources-on-assimilating-ground-basedspaceborne-ionospheric-observations /publication/2020-06-10-The-analysis-of-assumptions-error-sources-on-assimilating-ground-basedspaceborne-ionospheric-observations
+/publication/2020-03-01-Sea-Surface-Height-Estimation-by-Ground-Based-BDS-GEO-Satellite-Reflectometry /publication/2020-09-18-Sea-Surface-Height-Estimation-by-Ground-Based-BDS-GEO-Satellite-Reflectometry
+/publication/2021-01-04-GNSS /publication/2021-03-30-GNSS
+/publication/2022-04-01-Sea-Surface-Wind-Speed-Retrieval-Based-on-Empirical-Orthogonal-Function-Analysis-Using-20192020-CYGNSS-Data /publication/2022-04-26-Sea-Surface-Wind-Speed-Retrieval-Based-on-Empirical-Orthogonal-Function-Analysis-Using-20192020-CYGNSS-Data
+/publication/2022-03-01-Vertical-characterization-on-global-ionospheric-variations-during-the-magnetic-storm-in-September-2017-with-hierarchical-subtraction-method /publication/2021-12-02-Vertical-characterization-on-global-ionospheric-variations-during-the-magnetic-storm-in-September-2017-with-hierarchical-subtraction-method
