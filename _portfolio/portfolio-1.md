@@ -1,6 +1,22 @@
 ---
-title: "Research Assistant， Shanghai Astronomical Observatory"
-excerpt: "Assisting teachers in completing reports and experiments."
+title: "研究助理，中国科学院上海天文台"
+excerpt: "参与中国航天 503 所掩星数据仿真与反演系统、东方红公司电离层反掩星探测载荷仿真等横向项目，负责核心算法模块开发与软件交付。"
+date: 2014-09-01
 collection: portfolio
 ---
-Assisting teachers in completing reports and experiments. At the same time, I participated in the teacher project and completed the topic of “The Development of the Occultation Data Simulation and Inversion System Software of China Aerospace 503”, the topic of “Ionospheric Anti-mask Detection Payload Simulation Task Analysis and Simulation System” by Dongfanghong Company and other projects.
+
+在上海天文台攻读博士期间担任研究助理，协助导师完成多项国家级与横向课题的报告撰写、实验设计与软件实现。
+
+**中国航天 503 所掩星数据仿真与反演系统**
+
+参与"掩星数据仿真与反演系统软件"研制，面向 LEO-LEO 无线电掩星观测场景，完成仿真流程搭建、反演算法验证与批处理功能开发，为掩星数据处理业务化提供软件平台支撑。
+
+**东方红公司电离层反掩星探测载荷仿真**
+
+参与"电离层反掩星探测载荷任务分析与仿真系统"项目，模拟卫星信标电离层探测弧段及信号在卫星—地面站路径上的传播过程，提取相对 TEC，并分析不同观测几何、网格划分与台站布设对电离层剖面层析探测的影响。
+
+**主要贡献**
+
+- 以 Fortran 实现并调试核心数值模块，保证仿真与反演计算精度
+- 使用 Shell、C/C++ 开发批处理与接口模块，配合完成软件界面集成
+- 撰写软件交付与验收材料，参与项目验收

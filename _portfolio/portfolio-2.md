@@ -1,6 +1,19 @@
 ---
-title: "Teacher Assistant， Shanghai Astronomical Observatory"
-excerpt: "In the Shanghai Youth Science Innovation Practice, I assisted Li Ligang, a researcher to complete the project <i>Light Speed Measurement Based on Io eclipse</i>."
+title: "科研助教，上海市青少年科学创新实践"
+excerpt: "协助上海天文台李立刚研究员完成《基于木卫一日食的光速测量》项目，负责观测方案设计、学生指导与论文撰写辅导。"
+date: 2015-03-01
 collection: portfolio
 ---
-In the Shanghai Youth Science Innovation Practice, I assisted Li Ligang, a researcher to complete the project “Light Speed Measurement Based on Io eclipse”. At work, I surveyed the materials, planned and instructed students to conduct Io eclipse observations,  and taught the project to the high school students and assisted them to complete the project reports and papers.
+
+在上海市青少年科学创新实践活动中担任科研助教，协助上海天文台李立刚研究员开展"<i>基于木卫一日食的光速测量</i>"（Light Speed Measurement Based on Io Eclipse）课题。
+
+**项目内容**
+
+利用木卫一（Io）凌木星形成日食的天文现象，通过地面望远镜观测光变曲线，结合轨道力学与几何关系估算光速。项目面向高中生，强调从观测设计到数据分析的完整科研流程。
+
+**主要工作**
+
+- 调研文献与观测资料，制定木卫一日食观测方案
+- 规划并组织观测活动，指导中学生完成数据采集
+- 向参赛学生讲解项目原理与数据处理流程
+- 协助学生撰写项目报告与参赛论文
