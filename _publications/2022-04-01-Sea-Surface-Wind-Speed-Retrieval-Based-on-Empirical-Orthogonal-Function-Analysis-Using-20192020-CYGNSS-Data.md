@@ -5,5 +5,6 @@ permalink: /publication/2022-04-01-Sea-Surface-Wind-Speed-Retrieval-Based-on-Emp
 date: 2022-04-01
 venue: 'IEEE Transactions on Geoscience and Remote Sensing'
 citation: 'Jianming Wu, YanLing Chen, Peng Guo, Xiaoya Wang, Xiaogong Hu, Mengjie Wu, Fenghui Li, **Naifeng Fu**, Yanzhen Hao &quot;Sea Surface Wind Speed Retrieval Based on Empirical Orthogonal Function Analysis Using 2019–2020 CYGNSS Data.&quot; IEEE Transactions on Geoscience and Remote Sensing, 2022.'
+paperurl: 'https://doi.org/10.1109/TGRS.2022.3169832'
 ---
 Use [Google Scholar](https://scholar.google.com/scholar?q=Sea+Surface+Wind+Speed+Retrieval+Based+on+Empirical+Orthogonal+Function+Analysis+Using+2019–2020+CYGNSS+Data){:target="_blank"} for full citation

@@ -1,10 +1,11 @@
 ---
 title: "Evaluation of Abel Inversion Method Assisted By an Improved IRI Model"
 collection: publications
-permalink: /publication/2019-01-01-Evaluation-of-Abel-Inversion-Method-Assisted-By-an-Improved-IRI-Model
-date: 2019-01-01
+permalink: /publication/2019-07-12-Evaluation-of-Abel-Inversion-Method-Assisted-By-an-Improved-IRI-Model
+date: 2019-07-12
 venue: 'Journal of Geophysical Research: Space Physics'
 citation: 'M. Wu, P. Guo, **Naifeng Fu**, X. Hu, Z. Hong &quot;Evaluation of Abel Inversion Method Assisted By an Improved IRI Model.&quot; Journal of Geophysical Research: Space Physics, 2019.'
+paperurl: 'https://doi.org/10.1029/2019JA026880'
 ---
 ## 摘要
 
