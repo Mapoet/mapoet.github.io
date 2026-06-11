@@ -1,4 +1,4 @@
-const DATA_BASE = 'https://github.com/Mapoet/mapoet.github.io/releases/download/occultation-data-latest';
+const DATA_BASE = '/assets/traj';
 const manifestFile = `${DATA_BASE}/manifest.json`;
 const eventFile = `${DATA_BASE}/occultation_events.json`;
 const orbitFile = `${DATA_BASE}/satellite_orbits.json`;

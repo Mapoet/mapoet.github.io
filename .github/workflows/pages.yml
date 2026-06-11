@@ -1,0 +1,132 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      force_regenerate:
+        description: "强制重新生成 traj JSON（忽略缓存）"
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: 拉取仓库
+        uses: actions/checkout@v4
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装系统依赖
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            gcc g++ libproj-dev proj-data proj-bin \
+            build-essential libopenblas-dev liblapack-dev
+
+      - name: 安装 Python 依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir -r requirements.txt
+
+      - name: 缓存 traj JSON
+        id: cache-traj
+        uses: actions/cache@v4
+        with:
+          path: |
+            assets/traj/occultation_events.json
+            assets/traj/satellite_orbits.json
+            assets/traj/visibility_events.json
+            assets/traj/manifest.json
+          key: traj-${{ hashFiles('assets/traj/Rx-GNSSRO.tle', 'assets/traj/trk-GroundStation.gst', 'scripts/occultation_predict.py', 'requirements.txt') }}
+          restore-keys: |
+            traj-
+
+      - name: 决定是否重新生成 traj 数据
+        id: traj
+        run: |
+          regenerate=false
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            regenerate=true
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.force_regenerate }}" = "true" ]; then
+            regenerate=true
+          elif [ "${{ steps.cache-traj.outputs.cache-hit }}" != "true" ]; then
+            regenerate=true
+          fi
+          echo "regenerate=$regenerate" >> "$GITHUB_OUTPUT"
+          echo "regenerate=$regenerate"
+
+      - name: 生成 traj 数据
+        if: steps.traj.outputs.regenerate == 'true'
+        run: |
+          test -f scripts/occultation_predict.py
+          test -f assets/traj/Rx-GNSSRO.tle
+          test -f assets/traj/trk-GroundStation.gst
+          cd scripts
+          python occultation_predict.py
+          cd ..
+          python scripts/generate_traj_manifest.py
+
+      - name: 验证 traj JSON
+        run: |
+          for f in occultation_events.json satellite_orbits.json visibility_events.json manifest.json; do
+            test -f "assets/traj/$f" || (echo "missing assets/traj/$f" && exit 1)
+            python -m json.tool "assets/traj/$f" > /dev/null
+            echo "✓ $f ($(du -h "assets/traj/$f" | cut -f1))"
+          done
+
+      - name: 设置 Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: 构建 Jekyll 站点
+        run: bundle exec jekyll build
+        env:
+          JEKYLL_ENV: production
+
+      - name: 确认 traj 已写入 _site
+        run: |
+          for f in occultation_events.json satellite_orbits.json visibility_events.json manifest.json; do
+            test -f "_site/assets/traj/$f" || (echo "missing _site/assets/traj/$f" && exit 1)
+          done
+          ls -lh _site/assets/traj/*.json
+
+      - name: 上传 Pages 构建产物
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: 部署到 GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

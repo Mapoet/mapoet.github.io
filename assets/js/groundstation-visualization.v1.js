@@ -1,4 +1,4 @@
-const DATA_BASE = 'https://github.com/Mapoet/mapoet.github.io/releases/download/occultation-data-latest';
+const DATA_BASE = '/assets/traj';
 const orbitFile = `${DATA_BASE}/satellite_orbits.json`;
 const visibilityFile = `${DATA_BASE}/visibility_events.json`;
 const timePeriod = 2 * 3600; // 2小时
