@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Markdown 转图片</title>
+  <title>Markdown 转图片与 PDF</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <link rel="stylesheet" href="md-to-image.css">
 </head>
 <body>
   <header class="page-header">
-    <h1>Markdown 转图片</h1>
-    <p>纯前端工具：Notion 风格排版，支持代码高亮、表格、LaTeX（KaTeX）、Mermaid 与高清 PNG 导出，数据不离开浏览器。</p>
+    <h1>Markdown 转图片与 PDF</h1>
+    <p>纯前端工具：Notion 风格排版，支持代码高亮、表格、LaTeX（KaTeX）、Mermaid；可导出高清 PNG 或矢量 PDF，数据不离开浏览器。</p>
   </header>
 
   <main class="workspace">
-    <section class="panel">
+    <section class="panel panel--editor">
       <h2>输入 Markdown</h2>
       <textarea id="markdown-input" spellcheck="false" aria-label="Markdown 输入"></textarea>
       <div class="toolbar">
@@ -24,15 +24,17 @@
       <p class="hint">外链图片需目标服务器允许 CORS，否则截图时可能缺失。</p>
     </section>
 
-    <section class="panel">
+    <section class="panel panel--preview">
       <h2>预览</h2>
       <div id="preview-wrap">
         <div id="preview"></div>
       </div>
       <div class="toolbar">
+        <button type="button" id="pdf-btn">导出矢量 PDF</button>
         <button type="button" id="download-btn">下载 PNG 图片</button>
       </div>
       <p class="hint" id="status"></p>
+      <p class="hint hint--pdf">导出 PDF：在打印对话框选择「另存为 PDF」，并勾选「背景图形」以保留代码块与表格配色。</p>
     </section>
   </main>
 

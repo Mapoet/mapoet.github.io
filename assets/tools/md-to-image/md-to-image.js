@@ -54,6 +54,9 @@ graph TD
   const MERMAID_FONT =
     '"PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif';
 
+  /** 窄视口（手机等）导出时使用的桌面级内容宽度 */
+  const DESKTOP_EXPORT_WIDTH = 920;
+
   mermaid.initialize({
     startOnLoad: false,
     theme: "base",
@@ -100,6 +103,7 @@ graph TD
   const input = document.getElementById("markdown-input");
   const preview = document.getElementById("preview");
   const downloadBtn = document.getElementById("download-btn");
+  const pdfBtn = document.getElementById("pdf-btn");
   const renderBtn = document.getElementById("render-btn");
   const statusEl = document.getElementById("status");
 
@@ -251,6 +255,129 @@ graph TD
     el.style.display = prev || "block";
   }
 
+  function savePreviewLayout() {
+    return {
+      width: preview.style.width,
+      maxWidth: preview.style.maxWidth,
+      minWidth: preview.style.minWidth,
+      boxSizing: preview.style.boxSizing,
+    };
+  }
+
+  function pinPreviewLayout(width) {
+    preview.style.width = width + "px";
+    preview.style.maxWidth = width + "px";
+    preview.style.minWidth = width + "px";
+    preview.style.boxSizing = "border-box";
+  }
+
+  function restorePreviewLayout(saved) {
+    preview.style.width = saved.width;
+    preview.style.maxWidth = saved.maxWidth;
+    preview.style.minWidth = saved.minWidth;
+    preview.style.boxSizing = saved.boxSizing;
+  }
+
+  /**
+   * 导出布局宽度：以当前预览区实际像素宽度为准；
+   * 过窄（手机/极小 iframe）时改用桌面内容宽度，避免导出成手机窄条图。
+   */
+  function getExportLayoutWidth() {
+    const measured = Math.round(preview.getBoundingClientRect().width);
+    if (measured < 640) {
+      return DESKTOP_EXPORT_WIDTH;
+    }
+    return measured;
+  }
+
+  async function capturePreviewCanvas() {
+    const savedLayout = await prepareExportLayout();
+    const exportWidth = getExportLayoutWidth();
+    const exportHeight = Math.ceil(preview.scrollHeight);
+    const scale = 2;
+
+    try {
+      return await html2canvas(preview, {
+        backgroundColor: "#ffffff",
+        scale: scale,
+        width: exportWidth,
+        height: exportHeight,
+        windowWidth: exportWidth,
+        windowHeight: exportHeight,
+        useCORS: true,
+        logging: false,
+        scrollX: 0,
+        scrollY: 0,
+        onclone: function (clonedDoc) {
+          const style = clonedDoc.createElement("style");
+          style.textContent =
+            "#preview{width:" +
+            exportWidth +
+            "px!important;max-width:" +
+            exportWidth +
+            "px!important;min-width:" +
+            exportWidth +
+            "px!important;box-sizing:border-box!important;}";
+          clonedDoc.head.appendChild(style);
+        },
+      });
+    } finally {
+      restorePreviewLayout(savedLayout);
+      await renderAll();
+    }
+  }
+
+  async function prepareExportLayout() {
+    await renderAll();
+    await document.fonts.ready;
+    const savedLayout = savePreviewLayout();
+    const exportWidth = getExportLayoutWidth();
+    pinPreviewLayout(exportWidth);
+    await renderAll();
+    await document.fonts.ready;
+    forceReflow(preview);
+    return savedLayout;
+  }
+
+  async function exportPDF() {
+    if (!pdfBtn) {
+      return;
+    }
+
+    const originalText = pdfBtn.textContent;
+    pdfBtn.disabled = true;
+    downloadBtn.disabled = true;
+    setStatus("正在准备 PDF…");
+
+    let savedLayout = null;
+    const originalTitle = document.title;
+
+    function cleanup() {
+      document.title = originalTitle;
+      if (savedLayout) {
+        restorePreviewLayout(savedLayout);
+        renderAll();
+      }
+      pdfBtn.disabled = false;
+      downloadBtn.disabled = false;
+      pdfBtn.textContent = originalText;
+      window.removeEventListener("afterprint", cleanup);
+    }
+
+    try {
+      savedLayout = await prepareExportLayout();
+      document.title = "markdown-document-" + Date.now();
+      window.addEventListener("afterprint", cleanup);
+      setStatus("请在对话框中选择「另存为 PDF」并开启「背景图形」");
+      window.print();
+    } catch (err) {
+      console.error("PDF 导出失败:", err);
+      setStatus("PDF 准备失败，请查看控制台");
+      alert("PDF 导出失败：" + err.message);
+      cleanup();
+    }
+  }
+
   let debounceTimer;
   input.addEventListener("input", function () {
     clearTimeout(debounceTimer);
@@ -259,25 +386,24 @@ graph TD
 
   renderBtn.addEventListener("click", renderAll);
 
+  if (pdfBtn) {
+    pdfBtn.addEventListener("click", exportPDF);
+  }
+
   downloadBtn.addEventListener("click", async function () {
     const originalText = downloadBtn.textContent;
     downloadBtn.textContent = "生成中…";
     downloadBtn.disabled = true;
+    if (pdfBtn) {
+      pdfBtn.disabled = true;
+    }
     setStatus("正在生成图片…");
 
     try {
-      await renderAll();
-      await document.fonts.ready;
-      forceReflow(preview);
-
-      const canvas = await html2canvas(preview, {
-        backgroundColor: "#ffffff",
-        scale: Math.max(3, window.devicePixelRatio || 1),
-        useCORS: true,
-        logging: false,
-        windowWidth: preview.scrollWidth,
-        windowHeight: preview.scrollHeight,
-      });
+      setStatus(
+        "正在生成图片（宽度 " + getExportLayoutWidth() + "px）…"
+      );
+      const canvas = await capturePreviewCanvas();
 
       const link = document.createElement("a");
       link.download = "markdown-export-" + Date.now() + ".png";
@@ -291,6 +417,9 @@ graph TD
     } finally {
       downloadBtn.textContent = originalText;
       downloadBtn.disabled = false;
+      if (pdfBtn) {
+        pdfBtn.disabled = false;
+      }
     }
   });
 
