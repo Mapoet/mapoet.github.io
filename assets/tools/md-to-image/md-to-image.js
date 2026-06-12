@@ -77,13 +77,23 @@ graph TD
       padding: 20,
       nodeSpacing: 50,
       rankSpacing: 60,
+      useMaxWidth: true,
+      htmlLabels: true,
     },
     sequence: {
       diagramMarginX: 20,
       diagramMarginY: 20,
       actorMargin: 60,
       messageMargin: 40,
+      useMaxWidth: true,
     },
+    gantt: { useMaxWidth: true },
+    journey: { useMaxWidth: true },
+    timeline: { useMaxWidth: true },
+    class: { useMaxWidth: true },
+    state: { useMaxWidth: true },
+    er: { useMaxWidth: true },
+    pie: { useMaxWidth: true },
     securityLevel: "loose",
   });
 
@@ -141,6 +151,73 @@ graph TD
     });
   }
 
+  /** 预览区正文可用宽度（扣除 #preview 内边距） */
+  function getPreviewContentWidth(root) {
+    const style = window.getComputedStyle(root);
+    const padding =
+      (parseFloat(style.paddingLeft) || 0) +
+      (parseFloat(style.paddingRight) || 0);
+    return Math.max(320, root.clientWidth - padding);
+  }
+
+  /** 渲染前让 Mermaid 容器占满预览宽度，便于按页面宽度布局 */
+  function prepareMermaidContainers(root) {
+    const contentWidth = getPreviewContentWidth(root);
+    root.querySelectorAll(".mermaid-wrapper").forEach(function (wrapper) {
+      wrapper.style.width = "100%";
+      wrapper.style.maxWidth = contentWidth + "px";
+    });
+  }
+
+  /** 渲染后将 SVG 缩放到容器像素宽度，避免小图被 CSS 拉伸导致模糊 */
+  function fitMermaidSvgsToWidth(root) {
+    const fallbackWidth = getPreviewContentWidth(root);
+    root.querySelectorAll(".mermaid-wrapper").forEach(function (wrapper) {
+      const svg = wrapper.querySelector("svg");
+      if (!svg) {
+        return;
+      }
+
+      const style = window.getComputedStyle(wrapper);
+      const horizontalPadding =
+        (parseFloat(style.paddingLeft) || 0) +
+        (parseFloat(style.paddingRight) || 0);
+      let available = wrapper.clientWidth - horizontalPadding;
+      if (available <= 0) {
+        available = fallbackWidth - horizontalPadding;
+      }
+      available = Math.max(280, available);
+
+      resizeSvgToWidth(svg, available);
+    });
+  }
+
+  function resizeSvgToWidth(svg, targetWidth) {
+    const viewBox = svg.getAttribute("viewBox");
+    if (!viewBox) {
+      svg.setAttribute("width", String(targetWidth));
+      svg.style.width = targetWidth + "px";
+      svg.style.height = "auto";
+      return;
+    }
+
+    const parts = viewBox.trim().split(/[\s,]+/).map(Number);
+    if (parts.length < 4 || !parts[2] || !parts[3]) {
+      return;
+    }
+
+    const vbWidth = parts[2];
+    const vbHeight = parts[3];
+    const targetHeight = Math.ceil((targetWidth * vbHeight) / vbWidth);
+
+    svg.setAttribute("width", String(targetWidth));
+    svg.setAttribute("height", String(targetHeight));
+    svg.style.width = targetWidth + "px";
+    svg.style.height = targetHeight + "px";
+    svg.style.maxWidth = "100%";
+    svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+  }
+
   async function renderAll() {
     setStatus("正在渲染…");
     preview.innerHTML = marked.parse(input.value, { gfm: true, breaks: false });
@@ -148,6 +225,7 @@ graph TD
     highlightCodeBlocks(preview);
     wrapTables(preview);
     wrapMermaidBlocks(preview);
+    prepareMermaidContainers(preview);
 
     renderMathInElement(preview, {
       delimiters: [
@@ -160,6 +238,7 @@ graph TD
     const mermaidNodes = preview.querySelectorAll("code.language-mermaid");
     if (mermaidNodes.length) {
       await mermaid.run({ nodes: mermaidNodes });
+      fitMermaidSvgsToWidth(preview);
     }
 
     setStatus("渲染完成");
@@ -216,4 +295,16 @@ graph TD
   });
 
   renderAll();
+
+  if (typeof ResizeObserver !== "undefined") {
+    let resizeTimer;
+    const previewObserver = new ResizeObserver(function () {
+      if (!preview.querySelector(".mermaid svg")) {
+        return;
+      }
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(renderAll, 300);
+    });
+    previewObserver.observe(preview);
+  }
 })();

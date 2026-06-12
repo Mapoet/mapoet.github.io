@@ -344,6 +344,8 @@ button {
 
 /* Mermaid 卡片容器 */
 #preview .mermaid-wrapper {
+  width: 100%;
+  max-width: 100%;
   background: #ffffff;
   border: 1px solid var(--border-color);
   border-radius: 10px;
@@ -354,6 +356,7 @@ button {
   align-items: center;
   overflow-x: auto;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
 }
 
 #preview .mermaid-wrapper .mermaid,
@@ -365,6 +368,8 @@ button {
 
 #preview .mermaid svg {
   font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif !important;
+  display: block;
+  margin: 0 auto;
   max-width: 100%;
   height: auto;
 }
