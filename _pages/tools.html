@@ -1,0 +1,15 @@
+---
+layout: archive
+title: "科研工具"
+permalink: /tools/
+author_profile: true
+---
+
+<p>面向 GNSS 掩星、可视性与科研写作的在线交互工具，均在浏览器中运行。</p>
+
+{% include base_path %}
+
+{% assign tools_sorted = site.tools | sort: 'date' | reverse %}
+{% for post in tools_sorted %}
+  {% include archive-single.html %}
+{% endfor %}

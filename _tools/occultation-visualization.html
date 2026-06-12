@@ -1,13 +1,15 @@
 ---
 title: "三维地球掩星事件可视化"
 date: 2024-06-11
-permalink: /posts/2024/06/occultation-visualization
-excerpt: '基于Cesium的三维地球掩星事件轨迹动态可视化'
+permalink: /tools/occultation-visualization/
+excerpt: "基于 Cesium 的三维地球掩星事件轨迹动态可视化"
 tags:
-    - Occultation
-    - GNSS
-    - Atmosphere
-    - Visualization
+  - Occultation
+  - GNSS
+  - Atmosphere
+  - Visualization
+redirect_from:
+  - /posts/2024/06/occultation-visualization
 ---
 
 <style>
@@ -37,7 +39,7 @@ tags:
     overflow: hidden;
     position: relative;
     margin-bottom: 15px;
-    background: #000011; /* 深蓝色背景 */
+    background: #000011;
 }
 
 #status {
@@ -47,12 +49,11 @@ tags:
     text-align: center;
 }
 
-/* 确保在小屏幕上也能正常显示 */
 @media (max-width: 768px) {
     .occultation-card {
         padding: 10px;
     }
-    
+
     #cesiumContainer {
         height: 400px !important;
     }
@@ -79,4 +80,4 @@ window.addEventListener('load', function() {
     }
 });
 </script>
-<script src="/assets/js/occultation-visualization.js"></script> 
+<script src="/assets/js/occultation-visualization.js"></script>

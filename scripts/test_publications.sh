@@ -34,7 +34,7 @@ echo "总出版物数量: $total_pubs"
 # 按年份统计
 echo ""
 echo "📅 按年份分布:"
-for year in {2016..2024}; do
+for year in {2016..2026}; do
     count=$(grep -l "date: $year" _publications/*.md 2>/dev/null | wc -l)
     if [ "$count" -gt 0 ]; then
         echo "   $year年: $count篇"

@@ -8,7 +8,10 @@ main:
     
   - title: "研究经历"
     url: /portfolio/
-        
+
+  - title: "科研工具"
+    url: /tools/
+
   - title: "技术博客"
     url: /year-archive/
     

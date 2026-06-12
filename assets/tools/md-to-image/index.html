@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown 转图片</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <link rel="stylesheet" href="md-to-image.css">
+</head>
+<body>
+  <header class="page-header">
+    <h1>Markdown 转图片</h1>
+    <p>纯前端工具：支持表格、LaTeX（KaTeX）、Mermaid 与高清 PNG 导出，数据不离开浏览器。</p>
+  </header>
+
+  <main class="workspace">
+    <section class="panel">
+      <h2>输入 Markdown</h2>
+      <textarea id="markdown-input" spellcheck="false" aria-label="Markdown 输入"></textarea>
+      <div class="toolbar">
+        <button type="button" id="render-btn">重新渲染</button>
+      </div>
+      <p class="hint">外链图片需目标服务器允许 CORS，否则截图时可能缺失。</p>
+    </section>
+
+    <section class="panel">
+      <h2>预览</h2>
+      <div id="preview-wrap">
+        <div id="preview"></div>
+      </div>
+      <div class="toolbar">
+        <button type="button" id="download-btn">下载 PNG 图片</button>
+      </div>
+      <p class="hint" id="status"></p>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="md-to-image.js"></script>
+</body>
+</html>
