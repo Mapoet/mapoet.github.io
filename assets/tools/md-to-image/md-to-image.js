@@ -1,41 +1,53 @@
 (function () {
   "use strict";
 
-  const DEFAULT_MARKDOWN = `# Markdown 转图片
+  const DEFAULT_MARKDOWN = `# 深度美化 Markdown 演示
 
-支持 **表格**、**LaTeX 公式** 与 **Mermaid 流程图**，在浏览器本地完成渲染与导出。
+这是一段**正文文字**。现代排版注重\`呼吸感\`，行高 1.75，阅读更舒适。
 
-## 表格示例
+> **引用块**：左侧主题色边框、柔和背景，适合放置提示或重要引言。
+
+## 1. 优雅的数据表格
 
 | 能力 | 库 | 说明 |
 | --- | --- | --- |
 | Markdown | marked | 解析为 HTML |
 | 公式 | KaTeX | 行内与块级 LaTeX |
-| 图表 | Mermaid | 内联 SVG |
-| 截图 | html2canvas | 导出 PNG |
+| 图表 | Mermaid | 流程图与序列图 |
+| 代码 | Highlight.js | Atom One Dark 高亮 |
+| 截图 | html2canvas | 高清 PNG 导出 |
 
-## LaTeX
+## 2. 专业的代码高亮
 
-行内：质能方程 $E = mc^2$。
+\`\`\`javascript
+function calculateFactorial(n) {
+  if (n <= 1) return 1;
+  return n * calculateFactorial(n - 1);
+}
+console.log(\`5! = \${calculateFactorial(5)}\`);
+\`\`\`
 
-块级：
+## 3. 精美的数学公式
+
+行内公式 $E = mc^2$ 融入文本基线。
+
+块级公式获得浅色背景与虚线边框：
 $$
 \\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}
 $$
 
-## Mermaid
+## 4. 深度定制的 Mermaid 图表
 
 \`\`\`mermaid
 graph TD
-  A([输入 Markdown]) --> B{解析与渲染}
-  B -->|公式| C[KaTeX]
-  B -->|图表| D[Mermaid]
-  C --> E([预览])
-  D --> E
-  E --> F([导出 PNG])
+  A([用户请求]) --> B{身份验证}
+  B -->|Token 有效| C[获取数据]
+  B -->|Token 无效| D([返回 401])
+  C --> E[渲染视图]
+  E --> F([响应成功])
 
-  style A fill:#e6f7ff,stroke:#1890ff,stroke-width:2px
-  style F fill:#f6ffed,stroke:#52c41a,stroke-width:2px
+  style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+  style F fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
 \`\`\`
 `;
 
@@ -46,23 +58,19 @@ graph TD
     startOnLoad: false,
     theme: "base",
     themeVariables: {
-      primaryColor: "#e6f7ff",
-      primaryTextColor: "#003a8c",
-      primaryBorderColor: "#1890ff",
-      lineColor: "#595959",
-      secondaryColor: "#fff7e6",
+      primaryColor: "#e3f2fd",
+      primaryTextColor: "#0d47a1",
+      primaryBorderColor: "#1976d2",
+      lineColor: "#5c6bc0",
+      secondaryColor: "#fff3e0",
       secondaryTextColor: "#873800",
-      secondaryBorderColor: "#fa8c16",
-      tertiaryColor: "#f6ffed",
+      secondaryBorderColor: "#f57c00",
+      tertiaryColor: "#e8f5e9",
       tertiaryTextColor: "#135200",
-      tertiaryBorderColor: "#52c41a",
+      tertiaryBorderColor: "#388e3c",
       fontFamily: MERMAID_FONT,
       fontSize: "15px",
       edgeLabelBackground: "#ffffff",
-      nodeBorder: "#1890ff",
-      clusterBkg: "#f6f8fa",
-      clusterBorder: "#d0d7de",
-      titleColor: "#24292f",
     },
     flowchart: {
       curve: "basis",
@@ -93,11 +101,37 @@ graph TD
     }
   }
 
-  /** 为 Mermaid 代码块包裹卡片容器，便于 CSS 美化与 html2canvas 截图 */
+  function highlightCodeBlocks(root) {
+    if (typeof hljs === "undefined") {
+      return;
+    }
+    root.querySelectorAll("pre code").forEach(function (block) {
+      if (block.classList.contains("language-mermaid")) {
+        return;
+      }
+      hljs.highlightElement(block);
+    });
+  }
+
+  function wrapTables(root) {
+    root.querySelectorAll("table").forEach(function (table) {
+      if (
+        table.parentElement &&
+        table.parentElement.classList.contains("table-wrapper")
+      ) {
+        return;
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "table-wrapper";
+      table.replaceWith(wrapper);
+      wrapper.appendChild(table);
+    });
+  }
+
   function wrapMermaidBlocks(root) {
     root.querySelectorAll("pre > code.language-mermaid").forEach(function (block) {
       const pre = block.parentElement;
-      if (!pre || pre.parentElement.classList.contains("mermaid-wrapper")) {
+      if (!pre) {
         return;
       }
       const wrapper = document.createElement("div");
@@ -111,6 +145,10 @@ graph TD
     setStatus("正在渲染…");
     preview.innerHTML = marked.parse(input.value, { gfm: true, breaks: false });
 
+    highlightCodeBlocks(preview);
+    wrapTables(preview);
+    wrapMermaidBlocks(preview);
+
     renderMathInElement(preview, {
       delimiters: [
         { left: "$$", right: "$$", display: true },
@@ -119,14 +157,19 @@ graph TD
       throwOnError: false,
     });
 
-    wrapMermaidBlocks(preview);
-
     const mermaidNodes = preview.querySelectorAll("code.language-mermaid");
     if (mermaidNodes.length) {
       await mermaid.run({ nodes: mermaidNodes });
     }
 
     setStatus("渲染完成");
+  }
+
+  function forceReflow(el) {
+    const prev = el.style.display;
+    el.style.display = "none";
+    void el.offsetHeight;
+    el.style.display = prev || "block";
   }
 
   let debounceTimer;
@@ -146,6 +189,7 @@ graph TD
     try {
       await renderAll();
       await document.fonts.ready;
+      forceReflow(preview);
 
       const canvas = await html2canvas(preview, {
         backgroundColor: "#ffffff",

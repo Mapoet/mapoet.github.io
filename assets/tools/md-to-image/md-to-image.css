@@ -4,35 +4,52 @@
   box-sizing: border-box;
 }
 
+:root {
+  --bg-color: #ffffff;
+  --text-primary: #37352f;
+  --text-secondary: #787774;
+  --accent-color: #2eaadc;
+  --border-color: #e9e9e7;
+  --code-bg: #f7f6f3;
+  --code-text: #eb5757;
+  --quote-bg: #f9f9f8;
+  --quote-border: #e9e9e7;
+  --panel-bg: #f0f2f5;
+  --input-bg: #fafafa;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
-    "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
-  background: #f4f4f9;
-  color: #24292f;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
+    sans-serif;
+  background: var(--panel-bg);
+  color: var(--text-primary);
   line-height: 1.6;
 }
 
 .page-header {
   padding: 16px 20px;
-  background: #fff;
-  border-bottom: 1px solid #e1e4e8;
+  background: var(--bg-color);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .page-header h1 {
   margin: 0 0 6px;
   font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a1a1a;
 }
 
 .page-header p {
   margin: 0;
-  color: #57606a;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
 .workspace {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   padding: 16px 20px 20px;
   min-height: calc(100vh - 88px);
 }
@@ -47,20 +64,29 @@ body {
 .panel h2 {
   margin: 0 0 10px;
   font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
 }
 
 #markdown-input {
   width: 100%;
   flex: 1;
   min-height: 420px;
-  padding: 14px;
+  padding: 18px 20px;
   font-size: 14px;
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+  line-height: 1.6;
+  font-family: "SFMono-Regular", ui-monospace, SFMono-Regular, Menlo, Consolas,
     "Liberation Mono", monospace;
-  border: 1px solid #d0d7de;
+  border: 1px solid #d9d9d9;
   border-radius: 8px;
   resize: vertical;
-  background: #fff;
+  background: var(--input-bg);
+  color: var(--text-primary);
+}
+
+#markdown-input:focus {
+  outline: 2px solid rgba(46, 170, 220, 0.35);
+  border-color: var(--accent-color);
 }
 
 .toolbar {
@@ -77,26 +103,28 @@ button {
   border: none;
   border-radius: 6px;
   font-weight: 600;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.15s;
 }
 
 #download-btn {
-  background: #0969da;
+  background: #1a1a1a;
   color: #fff;
 }
 
 #download-btn:hover:not(:disabled) {
-  background: #0550ae;
+  background: #333;
+  transform: translateY(-1px);
 }
 
 #download-btn:disabled {
-  background: #afb8c1;
+  background: #ccc;
   cursor: not-allowed;
+  transform: none;
 }
 
 #render-btn {
   background: #eaeef2;
-  color: #24292f;
+  color: var(--text-primary);
 }
 
 #render-btn:hover {
@@ -106,103 +134,226 @@ button {
 .hint {
   margin-top: 10px;
   font-size: 12px;
-  color: #57606a;
+  color: var(--text-secondary);
 }
 
 #preview-wrap {
   flex: 1;
   overflow: auto;
-  border: 1px solid #d0d7de;
-  border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 4px 12px rgba(27, 31, 36, 0.08);
+  border-radius: 12px;
+  background: transparent;
+  box-shadow: none;
+  border: none;
 }
 
 #preview {
-  padding: 28px 32px;
   min-height: 420px;
-  background: #fff;
+  padding: 40px 44px;
+  background-color: var(--bg-color);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  line-height: 1.75;
+  font-size: 16px;
+  color: var(--text-primary);
 }
+
+/* ========== Markdown 元素深度美化 ========== */
 
 #preview h1,
 #preview h2,
-#preview h3 {
-  margin-top: 1.2em;
-  margin-bottom: 0.6em;
-  line-height: 1.25;
+#preview h3,
+#preview h4 {
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  color: #1a1a1a;
+  line-height: 1.3;
 }
 
 #preview h1:first-child {
   margin-top: 0;
 }
 
-#preview p,
+#preview h1 {
+  font-size: 2em;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+#preview h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.2em;
+}
+
+#preview h3 {
+  font-size: 1.25em;
+}
+
+#preview h4 {
+  font-size: 1.1em;
+}
+
+#preview p {
+  margin: 0 0 1.2em;
+  text-align: justify;
+}
+
 #preview ul,
-#preview ol,
-#preview table,
+#preview ol {
+  margin: 0 0 1.2em;
+  padding-left: 1.5em;
+}
+
+#preview li {
+  margin-bottom: 0.4em;
+}
+
+#preview li::marker {
+  color: var(--accent-color);
+}
+
+#preview strong {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+#preview a {
+  color: var(--accent-color);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(46, 170, 220, 0.35);
+}
+
+#preview hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 2em 0;
+}
+
+#preview blockquote {
+  margin: 1.5em 0;
+  padding: 16px 20px;
+  background-color: var(--quote-bg);
+  border-left: 4px solid var(--accent-color);
+  border-radius: 0 8px 8px 0;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+#preview blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* 行内代码 */
+#preview :not(pre) > code {
+  font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+  background-color: var(--code-bg);
+  color: var(--code-text);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+/* 代码块 + Highlight.js Atom One Dark */
 #preview pre {
-  margin: 0 0 1em;
+  background-color: #282c34;
+  border-radius: 8px;
+  padding: 20px;
+  overflow-x: auto;
+  margin: 1.5em 0;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+#preview pre code {
+  background-color: transparent;
+  color: #abb2bf;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+}
+
+#preview pre code.hljs {
+  display: block;
+  overflow-x: auto;
+}
+
+/* 表格圆角容器 */
+#preview .table-wrapper {
+  overflow: hidden;
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  margin: 1.5em 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 #preview table {
-  border-collapse: collapse;
   width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95em;
+  margin: 0;
 }
 
 #preview th,
 #preview td {
-  border: 1px solid #d0d7de;
-  padding: 8px 10px;
+  padding: 12px 16px;
   text-align: left;
+  border-bottom: 1px solid var(--border-color);
 }
 
 #preview th {
-  background: #f6f8fa;
+  background-color: #f7f6f3;
+  font-weight: 600;
+  color: #1a1a1a;
+  white-space: nowrap;
 }
 
-#preview code {
-  background: #f6f8fa;
-  padding: 0.15em 0.35em;
-  border-radius: 4px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.9em;
+#preview tr:last-child td {
+  border-bottom: none;
 }
 
-#preview pre {
-  background: #f6f8fa;
-  padding: 14px;
+#preview tr:nth-child(even) {
+  background-color: #fcfcfc;
+}
+
+#preview tr:hover {
+  background-color: #f0f7ff;
+}
+
+/* KaTeX 公式 */
+#preview .katex {
+  font-size: 1.1em;
+}
+
+#preview .katex-display {
+  margin: 1.5em 0;
+  padding: 16px;
+  background-color: #f8f9fa;
   border-radius: 8px;
+  border: 1px dashed var(--border-color);
   overflow-x: auto;
-}
-
-#preview pre code {
-  background: transparent;
-  padding: 0;
-}
-
-#preview blockquote {
-  margin: 0 0 1em;
-  padding: 0 1em;
-  color: #57606a;
-  border-left: 4px solid #d0d7de;
+  overflow-y: hidden;
 }
 
 #preview img {
   max-width: 100%;
+  border-radius: 8px;
+  margin: 1em 0;
 }
 
-/* Mermaid 卡片容器（层级 4：外层阴影由 html2canvas 可靠截取） */
+/* Mermaid 卡片容器 */
 #preview .mermaid-wrapper {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border: 1px solid #e1e4e8;
-  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
   padding: 24px;
-  margin: 1.25em 0;
-  box-shadow: 0 8px 24px rgba(149, 157, 165, 0.12);
+  margin: 1.5em 0;
   display: flex;
   justify-content: center;
   align-items: center;
   overflow-x: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 #preview .mermaid-wrapper .mermaid,
@@ -222,10 +373,7 @@ button {
   stroke-width: 2px;
 }
 
-#preview .mermaid .edgeLabel {
-  font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif !important;
-}
-
+#preview .mermaid .edgeLabel,
 #preview .mermaid .nodeLabel,
 #preview .mermaid .label {
   font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif !important;
@@ -239,5 +387,9 @@ button {
   #markdown-input,
   #preview {
     min-height: 280px;
+  }
+
+  #preview {
+    padding: 24px 20px;
   }
 }
