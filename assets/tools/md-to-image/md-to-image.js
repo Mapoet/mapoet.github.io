@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const DEFAULT_MARKDOWN = `# 深度美化 Markdown 演示
+  const DEFAULT_MARKDOWN = `# Markdown 演示
 
 这是一段**正文文字**。现代排版注重\`呼吸感\`，行高 1.75，阅读更舒适。
 
