@@ -26,15 +26,56 @@ $$
 ## Mermaid
 
 \`\`\`mermaid
-graph LR
-  A[输入 Markdown] --> B[渲染预览]
-  B --> C[导出 PNG]
+graph TD
+  A([输入 Markdown]) --> B{解析与渲染}
+  B -->|公式| C[KaTeX]
+  B -->|图表| D[Mermaid]
+  C --> E([预览])
+  D --> E
+  E --> F([导出 PNG])
+
+  style A fill:#e6f7ff,stroke:#1890ff,stroke-width:2px
+  style F fill:#f6ffed,stroke:#52c41a,stroke-width:2px
 \`\`\`
 `;
 
+  const MERMAID_FONT =
+    '"PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif';
+
   mermaid.initialize({
     startOnLoad: false,
-    theme: "default",
+    theme: "base",
+    themeVariables: {
+      primaryColor: "#e6f7ff",
+      primaryTextColor: "#003a8c",
+      primaryBorderColor: "#1890ff",
+      lineColor: "#595959",
+      secondaryColor: "#fff7e6",
+      secondaryTextColor: "#873800",
+      secondaryBorderColor: "#fa8c16",
+      tertiaryColor: "#f6ffed",
+      tertiaryTextColor: "#135200",
+      tertiaryBorderColor: "#52c41a",
+      fontFamily: MERMAID_FONT,
+      fontSize: "15px",
+      edgeLabelBackground: "#ffffff",
+      nodeBorder: "#1890ff",
+      clusterBkg: "#f6f8fa",
+      clusterBorder: "#d0d7de",
+      titleColor: "#24292f",
+    },
+    flowchart: {
+      curve: "basis",
+      padding: 20,
+      nodeSpacing: 50,
+      rankSpacing: 60,
+    },
+    sequence: {
+      diagramMarginX: 20,
+      diagramMarginY: 20,
+      actorMargin: 60,
+      messageMargin: 40,
+    },
     securityLevel: "loose",
   });
 
@@ -52,6 +93,20 @@ graph LR
     }
   }
 
+  /** 为 Mermaid 代码块包裹卡片容器，便于 CSS 美化与 html2canvas 截图 */
+  function wrapMermaidBlocks(root) {
+    root.querySelectorAll("pre > code.language-mermaid").forEach(function (block) {
+      const pre = block.parentElement;
+      if (!pre || pre.parentElement.classList.contains("mermaid-wrapper")) {
+        return;
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "mermaid-wrapper";
+      pre.replaceWith(wrapper);
+      wrapper.appendChild(block);
+    });
+  }
+
   async function renderAll() {
     setStatus("正在渲染…");
     preview.innerHTML = marked.parse(input.value, { gfm: true, breaks: false });
@@ -64,9 +119,9 @@ graph LR
       throwOnError: false,
     });
 
-    const mermaidNodes = preview.querySelectorAll(
-      "pre > code.language-mermaid, code.language-mermaid"
-    );
+    wrapMermaidBlocks(preview);
+
+    const mermaidNodes = preview.querySelectorAll("code.language-mermaid");
     if (mermaidNodes.length) {
       await mermaid.run({ nodes: mermaidNodes });
     }
@@ -94,7 +149,7 @@ graph LR
 
       const canvas = await html2canvas(preview, {
         backgroundColor: "#ffffff",
-        scale: Math.max(2, window.devicePixelRatio || 1),
+        scale: Math.max(3, window.devicePixelRatio || 1),
         useCORS: true,
         logging: false,
         windowWidth: preview.scrollWidth,
@@ -103,7 +158,7 @@ graph LR
 
       const link = document.createElement("a");
       link.download = "markdown-export-" + Date.now() + ".png";
-      link.href = canvas.toDataURL("image/png");
+      link.href = canvas.toDataURL("image/png", 1.0);
       link.click();
       setStatus("图片已下载");
     } catch (err) {

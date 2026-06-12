@@ -191,9 +191,44 @@ button {
   max-width: 100%;
 }
 
+/* Mermaid 卡片容器（层级 4：外层阴影由 html2canvas 可靠截取） */
+#preview .mermaid-wrapper {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: 1px solid #e1e4e8;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 1.25em 0;
+  box-shadow: 0 8px 24px rgba(149, 157, 165, 0.12);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: auto;
+}
+
+#preview .mermaid-wrapper .mermaid,
 #preview .mermaid {
   text-align: center;
-  margin: 1em 0;
+  margin: 0;
+  width: 100%;
+}
+
+#preview .mermaid svg {
+  font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif !important;
+  max-width: 100%;
+  height: auto;
+}
+
+#preview .mermaid .edgePath .path {
+  stroke-width: 2px;
+}
+
+#preview .mermaid .edgeLabel {
+  font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif !important;
+}
+
+#preview .mermaid .nodeLabel,
+#preview .mermaid .label {
+  font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif !important;
 }
 
 @media (max-width: 900px) {
