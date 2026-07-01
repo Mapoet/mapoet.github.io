@@ -228,3 +228,5 @@ _bin/
 
 # Local development
 _config.dev.yml
+
+others/
