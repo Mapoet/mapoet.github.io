@@ -11,7 +11,7 @@ title                    : "付乃锋"
 #theme                    : "minimal-mistakes-jekyll"
 title_separator          : "-"
 name                     : &name "付乃锋 (Naifeng Fu)"
-description              : &description "理学博士，海洋科学与技术博士后，GNSS-R/-RO技术设备研制及数据应用专家"
+description              : &description "理学博士，海洋科学与技术博士后，航空航天领域正高级工程师，GNSS-R/-RO技术设备研制及数据应用专家"
 url                      : https://mapoet.github.io # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
 repository               : "mapoet/mapoet.github.io"
@@ -83,7 +83,7 @@ analytics:
 author:
   name             : "付乃锋 (Naifeng Fu)"
   avatar           : "Me.png"
-  bio              : "理学博士，海洋科学与技术博士后，GNSS-R/-RO技术设备研制及数据应用专家。研究方向：数值优化，GNSS掩星，电离层建模及同化，大气反演，机器学习，计算机可视化。"
+  bio              : "理学博士，海洋科学与技术博士后，航空航天领域正高级工程师（2022年3月）。研究方向：GNSS-R/-RO技术设备研制及数据应用，数值优化，GNSS掩星，电离层建模及同化，大气反演，机器学习，计算机可视化。"
   location         : "天津市，中国"
   employer         : "云遥宇航科技有限公司"
   pubmed           : 
