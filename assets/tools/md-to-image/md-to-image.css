@@ -358,21 +358,42 @@ button {
   margin: 1em 0;
 }
 
-/* Mermaid 卡片容器 */
+/* Mermaid 卡片容器 —— 与站点学术青灰主题一致 */
 #preview .mermaid-wrapper {
+  position: relative;
   width: 100%;
   max-width: 100%;
-  background: #ffffff;
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 24px;
+  background: linear-gradient(165deg, #fbfcfd 0%, #f4f7f9 100%);
+  border: 1px solid #dce4ea;
+  border-radius: 12px;
+  padding: 1.35rem 1.25rem 1.15rem;
   margin: 1.5em 0;
   display: flex;
   justify-content: center;
   align-items: center;
   overflow-x: auto;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 2px rgba(36, 52, 71, 0.04),
+    0 8px 24px rgba(36, 52, 71, 0.05);
   box-sizing: border-box;
+}
+
+#preview .mermaid-wrapper::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    #52adc8 35%,
+    #7a9eab 65%,
+    transparent 100%
+  );
+  opacity: 0.55;
+  pointer-events: none;
 }
 
 #preview .mermaid-wrapper .mermaid,
@@ -380,24 +401,38 @@ button {
   text-align: center;
   margin: 0;
   width: 100%;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+#preview .mermaid-wrapper .mermaid::before,
+#preview .mermaid::before {
+  display: none;
 }
 
 #preview .mermaid svg {
-  font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif !important;
   display: block;
   margin: 0 auto;
   max-width: 100%;
   height: auto;
+  shape-rendering: geometricPrecision;
+  text-rendering: optimizeLegibility;
 }
 
 #preview .mermaid .edgePath .path {
-  stroke-width: 2px;
+  stroke-width: 1.6px;
+  stroke-linecap: round;
 }
 
 #preview .mermaid .edgeLabel,
 #preview .mermaid .nodeLabel,
 #preview .mermaid .label {
-  font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif !important;
 }
 
 .hint--pdf {

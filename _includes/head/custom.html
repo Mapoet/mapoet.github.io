@@ -36,36 +36,6 @@
 </script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/latest.js?config=TeX-MML-AM_CHTML' async></script>
 
-<script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
-<script>
-  mermaid.initialize({ 
-    startOnLoad: true,
-    theme: 'default'
-  });
-  
-  document.addEventListener('DOMContentLoaded', function() {
-    const mermaidCodeBlocks = document.querySelectorAll('code.language-mermaid');
-    
-    mermaidCodeBlocks.forEach(function(codeBlock, index) {
-      const mermaidDiv = document.createElement('div');
-      mermaidDiv.className = 'mermaid';
-      
-      let code = codeBlock.textContent;
-      const textarea = document.createElement('textarea');
-      textarea.innerHTML = code;
-      code = textarea.value;
-      
-      mermaidDiv.textContent = code;
-      
-      const preBlock = codeBlock.parentElement;
-      preBlock.parentNode.replaceChild(mermaidDiv, preBlock);
-    });
-    
-    if (mermaidCodeBlocks.length > 0) {
-      setTimeout(function() {
-        mermaid.run();
-      }, 100);
-    }
-  });
-</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js" defer></script>
+<script src="{{ base_path }}/assets/js/mermaid-init.js" defer></script>
 

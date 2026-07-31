@@ -1,127 +1,181 @@
 /**
- * Mermaid图表自定义样式
- * 优化mermaid图表在Jekyll站点中的显示效果
+ * Mermaid 图表展示样式
+ * 纸面卡片 + 青灰学术调性，与站点 $info-color (#52adc8) 对齐
  */
 
-/* Mermaid图表样式优化 */
-
-/* 基础容器样式 */
-.mermaid {
-  text-align: center;
-  margin: 20px 0;
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-  overflow-x: auto;
+:root {
+  --mermaid-card-bg: linear-gradient(165deg, #fbfcfd 0%, #f4f7f9 100%);
+  --mermaid-card-border: #dce4ea;
+  --mermaid-card-shadow: 0 1px 2px rgba(36, 52, 71, 0.04),
+    0 8px 24px rgba(36, 52, 71, 0.05);
+  --mermaid-accent: #52adc8;
+  --mermaid-ink: #243447;
 }
 
-/* SVG样式优化 */
+/* 基础容器：纸面卡片，与正文留白协调 */
+.mermaid {
+  position: relative;
+  display: block;
+  text-align: center;
+  margin: 1.75rem 0;
+  padding: 1.35rem 1.25rem 1.15rem;
+  background: var(--mermaid-card-bg);
+  border: 1px solid var(--mermaid-card-border);
+  border-radius: 12px;
+  box-shadow: var(--mermaid-card-shadow);
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  line-height: 1.4;
+  color: var(--mermaid-ink);
+}
+
+/* 顶部细强调线，呼应站点链接色，不过分抢眼 */
+.mermaid::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--mermaid-accent) 35%,
+    #7a9eab 65%,
+    transparent 100%
+  );
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* SVG：居中、自适应、抗锯齿 */
 .mermaid svg {
+  display: block;
   max-width: 100% !important;
   height: auto !important;
-  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+  margin: 0 auto;
+  shape-rendering: geometricPrecision;
+  text-rendering: optimizeLegibility;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", Helvetica, Arial,
+    sans-serif !important;
 }
 
-/* 流程图样式 */
-.mermaid .flowchart {
-  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+/* 节点标签更易读 */
+.mermaid .nodeLabel,
+.mermaid .edgeLabel,
+.mermaid .label,
+.mermaid .actor,
+.mermaid .messageText,
+.mermaid .noteText,
+.mermaid .legend text,
+.mermaid .slice,
+.mermaid .titleText,
+.mermaid .sectionTitle {
+  font-family: inherit !important;
 }
 
-/* 序列图样式 */
-.mermaid .sequence {
-  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+.mermaid .edgeLabel foreignObject,
+.mermaid .nodeLabel,
+.mermaid .label {
+  color: var(--mermaid-ink);
 }
 
-/* 甘特图样式 */
-.mermaid .gantt {
-  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+/* 连接线与箭头略加重，提升层次 */
+.mermaid .edgePath .path,
+.mermaid .flowchart-link {
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-/* 类图样式 */
-.mermaid .classDiagram {
-  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+.mermaid marker path {
+  fill-opacity: 0.92;
 }
 
-/* 状态图样式 */
-.mermaid .stateDiagram {
-  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+/* 错误态：保留源码可读，避免整页空白 */
+.mermaid[data-processed="true"]:empty,
+.mermaid .error-icon,
+.mermaid .error-text {
+  color: #8a4a45;
 }
 
-/* 实体关系图样式 */
-.mermaid .erDiagram {
-  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+div.mermaid .error-text {
+  font-size: 0.9rem;
+  text-align: left;
+  white-space: pre-wrap;
 }
 
-/* 用户旅程图样式 */
-.mermaid .userJourney {
-  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+/* 横向滚动条：细、低调 */
+.mermaid::-webkit-scrollbar {
+  height: 6px;
 }
 
-/* Git图样式 */
-.mermaid .gitGraph {
-  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+.mermaid::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-/* 饼图样式 */
-.mermaid .pie {
-  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+.mermaid::-webkit-scrollbar-thumb {
+  background: #c5d0d8;
+  border-radius: 3px;
 }
 
-/* 需求图样式 */
-.mermaid .requirement {
-  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+.mermaid::-webkit-scrollbar-thumb:hover {
+  background: #8a9ba8;
 }
 
-/* 响应式设计 */
+/* 响应式：窄屏收紧内边距，避免字号被强制压扁导致糊字 */
 @media (max-width: 768px) {
   .mermaid {
-    margin: 15px 0;
-    padding: 10px;
+    margin: 1.35rem 0;
+    padding: 1.1rem 0.85rem 0.95rem;
+    border-radius: 10px;
   }
-  
-  .mermaid svg {
-    font-size: 12px !important;
+
+  .mermaid::before {
+    left: 8%;
+    right: 8%;
   }
 }
 
 @media (max-width: 480px) {
   .mermaid {
-    margin: 10px 0;
-    padding: 8px;
-  }
-  
-  .mermaid svg {
-    font-size: 10px !important;
+    margin: 1.1rem -0.25rem;
+    padding: 1rem 0.65rem 0.85rem;
+    border-radius: 8px;
   }
 }
 
-/* 深色主题支持 */
+/**
+ * 暗色系统偏好：仍使用浅色纸面卡片承载图表，
+ * 避免 filter:invert 导致色相翻转与边框发灰。
+ * 卡片略加深阴影，与深色正文区形成可读对比。
+ */
 @media (prefers-color-scheme: dark) {
   .mermaid {
-    background: #2d3748;
-    border-color: #4a5568;
-  }
-  
-  .mermaid svg {
-    filter: invert(1) hue-rotate(180deg);
+    --mermaid-card-bg: linear-gradient(165deg, #f7f9fb 0%, #eef3f6 100%);
+    --mermaid-card-border: #c5d0d8;
+    --mermaid-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.2),
+      0 10px 28px rgba(0, 0, 0, 0.18);
   }
 }
 
-/* 打印样式 */
+/* 打印：去阴影、白底、避免断页切开图 */
 @media print {
   .mermaid {
-    background: white;
+    background: #fff !important;
     border: 1px solid #ccc;
+    box-shadow: none;
     page-break-inside: avoid;
+    break-inside: avoid;
   }
-  
+
+  .mermaid::before {
+    display: none;
+  }
+
   .mermaid svg {
-    filter: none;
+    max-width: 100% !important;
   }
 }
-
-/* 确保Mermaid图表在所有主题下都能正确显示 */
-.mermaid * {
-  box-sizing: border-box;
-} 
